@@ -1,0 +1,400 @@
+# scoring_weights.yaml
+# Dimension definitions, scoring rules, and fact_key mappings.
+# This file is state-agnostic. All scoring logic lives here.
+# Weights are in scoring_presets.yaml.
+#
+# SCORING DIRECTION:
+#   "direct"   — higher raw value → higher score (e.g., favorable political climate)
+#   "inverse"  — lower raw value → higher score (e.g., lower proficiency = higher need)
+#   "custom"   — uses named rule function in s5_scoring.py
+#
+# THRESHOLDS:
+#   Ordered list of {max: value, score: N}.
+#   Python evaluates from top: first threshold where fact_value <= max returns score.
+#   Final entry with no max is the catch-all fallback.
+
+version: "1.0"
+
+dimensions:
+
+  # ── 1. ACADEMIC NEED ──────────────────────────────
+  academic_need:
+    description: >
+      Measures the urgency of academic intervention in the community.
+      Higher need = higher opportunity score under turnaround/growth frames.
+    scoring_rules:
+      primary_fact: "district_proficiency_ela_pct"
+      direction: inverse
+      thresholds:
+        - {max: 15, score: 10}
+        - {max: 25, score: 9}
+        - {max: 35, score: 8}
+        - {max: 45, score: 7}
+        - {max: 55, score: 6}
+        - {max: 65, score: 5}
+        - {max: 75, score: 4}
+        - {max: 85, score: 3}
+        - {score: 2}  # fallback: above 85%
+    secondary_facts:
+      - key: "chronic_absenteeism_rate_pct"
+        direction: inverse
+        weight: 0.25
+        thresholds:
+          - {max: 10, score: 2}
+          - {max: 20, score: 5}
+          - {max: 30, score: 7}
+          - {max: 40, score: 9}
+          - {score: 10}
+      - key: "graduation_rate_pct"
+        direction: inverse
+        weight: 0.20
+        thresholds:
+          - {max: 60, score: 10}
+          - {max: 70, score: 8}
+          - {max: 80, score: 6}
+          - {max: 90, score: 4}
+          - {score: 2}
+    aggregation: weighted_primary_with_secondaries
+    primary_weight: 0.55
+    fact_keys_required: ["district_proficiency_ela_pct"]
+    fact_keys_optional: ["chronic_absenteeism_rate_pct", "graduation_rate_pct",
+                         "district_proficiency_math_pct", "district_performance_tier"]
+    missing_data_behavior: degrade_confidence
+
+  # ── 2. CHARTER SATURATION ─────────────────────────
+  charter_saturation:
+    description: >
+      Measures how much of the K-12 market is already served by charters.
+      Lower saturation = higher opportunity. Flag oversaturation explicitly.
+    scoring_rules:
+      primary_fact: "charter_seat_share_pct"
+      direction: inverse
+      thresholds:
+        - {max: 5, score: 10}
+        - {max: 10, score: 8}
+        - {max: 15, score: 7}
+        - {max: 20, score: 6}
+        - {max: 30, score: 4}
+        - {max: 40, score: 2}
+        - {score: 1}
+    override_flag:
+      condition: "charter_seat_share_pct >= 30 AND enrollment_trend_charter == DECLINING"
+      flag: OVERSATURATED
+      tier_cap: WATCHLIST
+    secondary_facts:
+      - key: "num_charter_schools"
+        direction: inverse
+        weight: 0.20
+      - key: "charter_enrollment_trend_3yr"
+        direction: direct
+        weight: 0.20
+    fact_keys_required: ["charter_seat_share_pct"]
+    fact_keys_optional: ["num_charter_schools", "charter_enrollment_trend_3yr",
+                         "avg_charter_waitlist_depth"]
+    missing_data_behavior: degrade_confidence
+
+  # ── 3. POPULATION TRENDS ──────────────────────────
+  population_trends:
+    description: >
+      K-12 population trajectory and demographic growth.
+      Growing markets support new entry; declining markets signal saturation risk.
+    scoring_rules:
+      primary_fact: "k12_population_trend_5yr_pct"
+      direction: direct
+      thresholds:
+        - {max: -10, score: 1}
+        - {max: -5, score: 2}
+        - {max: 0, score: 4}
+        - {max: 5, score: 6}
+        - {max: 10, score: 8}
+        - {score: 10}
+    secondary_facts:
+      - key: "total_population_trend_5yr_pct"
+        weight: 0.30
+        direction: direct
+      - key: "school_age_cohort_share"
+        weight: 0.20
+        direction: direct
+    fact_keys_required: ["k12_population_trend_5yr_pct"]
+    fact_keys_optional: ["total_population_trend_5yr_pct", "school_age_cohort_share",
+                         "inmigration_rate", "housing_permit_trend"]
+    missing_data_behavior: degrade_confidence
+
+  # ── 4. POLITICAL CLIMATE ──────────────────────────
+  political_climate:
+    description: >
+      Local and state political environment for charter school operation.
+      Measured via proxy indicators; human review recommended for this dimension.
+    scoring_rules:
+      primary_fact: "political_climate_index"
+      direction: direct
+      thresholds:
+        - {max: 2, score: 1}   # Actively hostile
+        - {max: 4, score: 3}   # Resistant
+        - {max: 6, score: 5}   # Neutral / mixed
+        - {max: 8, score: 7}   # Supportive
+        - {score: 9}            # Strongly supportive
+      note: >
+        political_climate_index is extracted as a qualitative assessment
+        and converted to 1–10 by s3_fact_extraction.py using the
+        political_signal_rubric defined below.
+    political_signal_rubric:
+      # Maps qualitative signals to index values used in scoring
+      HOSTILE:           1
+      STRONGLY_RESISTANT: 2
+      RESISTANT:         3
+      MIXED_LEAN_HOSTILE: 4
+      NEUTRAL:           5
+      MIXED_LEAN_POSITIVE: 6
+      SUPPORTIVE:        7
+      STRONGLY_SUPPORTIVE: 8
+      CHAMPION:          9
+    override_flag:
+      condition: "political_climate_index <= 3"
+      flag: POLITICAL_RISK_HIGH
+      tier_cap: WATCHLIST
+    fact_keys_required: ["political_climate_index"]
+    fact_keys_optional: ["school_board_charter_orientation", "mayor_charter_stance",
+                         "recent_anti_charter_legislation", "union_strength_index"]
+    missing_data_behavior: degrade_confidence
+    human_review_recommended: true
+
+  # ── 5. AUTHORIZER FRIENDLINESS ────────────────────
+  authorizer_friendliness:
+    description: >
+      Quality and accessibility of available authorizers.
+    scoring_rules:
+      primary_fact: "authorizer_approval_rate_pct"
+      direction: direct
+      thresholds:
+        - {max: 10, score: 1}
+        - {max: 25, score: 3}
+        - {max: 40, score: 5}
+        - {max: 60, score: 7}
+        - {max: 80, score: 8}
+        - {score: 10}
+    override_flag:
+      condition: "num_accessible_authorizers == 0 OR authorizer_approval_rate_pct < 15"
+      flag: HOSTILE_AUTHORIZER
+      tier_cap: WATCHLIST
+    secondary_facts:
+      - key: "authorizer_portfolio_quality_score"
+        weight: 0.25
+        direction: direct
+      - key: "authorizer_renewal_posture"
+        weight: 0.20
+        direction: direct
+    fact_keys_required: ["num_accessible_authorizers"]
+    fact_keys_optional: ["authorizer_approval_rate_pct", "authorizer_portfolio_quality_score",
+                         "authorizer_renewal_posture", "authorizer_known_preferences"]
+    missing_data_behavior: degrade_confidence
+
+  # ── 6. FACILITIES FEASIBILITY ─────────────────────
+  facilities_feasibility:
+    description: >
+      Practical viability of securing suitable school facilities.
+    scoring_rules:
+      primary_fact: "facilities_feasibility_index"
+      direction: direct
+      thresholds:
+        - {max: 2, score: 1}
+        - {max: 4, score: 3}
+        - {max: 6, score: 5}
+        - {max: 8, score: 7}
+        - {score: 9}
+    override_flag:
+      condition: "facilities_feasibility_index <= 2 AND no_public_facility_access == true"
+      flag: FACILITIES_BOTTLENECK
+      tier_cap: MODERATE_OPPORTUNITY
+    facilities_feasibility_rubric:
+      # Maps qualitative signals to index
+      NO_VIABLE_PATH:          1
+      SEVERELY_CONSTRAINED:    2
+      CONSTRAINED:             3
+      MODERATELY_CONSTRAINED:  4
+      WORKABLE:                5
+      REASONABLE:              6
+      FAVORABLE:               7
+      STRONG:                  8
+      EXCEPTIONAL:             9
+    fact_keys_required: ["facilities_feasibility_index"]
+    fact_keys_optional: ["avg_commercial_lease_psf", "public_facility_access",
+                         "state_facilities_aid_available", "bond_access",
+                         "known_available_buildings"]
+    missing_data_behavior: degrade_confidence
+    human_review_recommended: true
+
+  # ── 7. REPLICATION FEASIBILITY ────────────────────
+  replication_feasibility:
+    description: >
+      Degree to which an existing model can be transplanted into this community.
+    scoring_rules:
+      primary_fact: "replication_readiness_index"
+      direction: direct
+      thresholds:
+        - {max: 2, score: 1}
+        - {max: 4, score: 3}
+        - {max: 6, score: 5}
+        - {max: 8, score: 7}
+        - {score: 9}
+    replication_readiness_rubric:
+      NO_OPERATORS_INTERESTED:   1
+      EARLY_EXPLORATION:         3
+      OPERATOR_INTEREST:         5
+      OPERATOR_COMMITTED:        7
+      PROVEN_LOCAL_OPERATOR:     9
+    secondary_facts:
+      - key: "talent_pipeline_strength"
+        weight: 0.30
+        direction: direct
+      - key: "existing_operator_footprint"
+        weight: 0.25
+        direction: direct
+    fact_keys_required: []
+    fact_keys_optional: ["replication_readiness_index", "talent_pipeline_strength",
+                         "existing_operator_footprint", "cmo_interest_signals",
+                         "teacher_pipeline_orgs_active"]
+    missing_data_behavior: default_to_midpoint  # 5 if no data
+
+  # ── 8. FUNDING ENVIRONMENT ────────────────────────
+  funding_environment:
+    description: >
+      Per-pupil funding adequacy, CSP availability, and philanthropic activity.
+    scoring_rules:
+      primary_fact: "per_pupil_revenue_vs_state_avg_pct"
+      direction: direct
+      thresholds:
+        - {max: -20, score: 2}
+        - {max: -10, score: 4}
+        - {max: 0,   score: 6}
+        - {max: 10,  score: 7}
+        - {max: 20,  score: 8}
+        - {score: 9}
+    secondary_facts:
+      - key: "csp_active_in_community"
+        weight: 0.20
+        direction: direct
+      - key: "philanthropic_activity_level"
+        weight: 0.20
+        direction: direct
+    fact_keys_required: []
+    fact_keys_optional: ["per_pupil_revenue_vs_state_avg_pct", "csp_active_in_community",
+                         "philanthropic_activity_level", "transportation_funding_available",
+                         "facilities_funding_mechanisms"]
+    missing_data_behavior: degrade_confidence
+
+  # ── 9. COMPETITIVE OPPORTUNITY ────────────────────
+  competitive_opportunity:
+    description: >
+      Gap between demonstrable demand and current charter supply.
+      Captures whitespace and unmet need.
+    scoring_rules:
+      primary_fact: "demand_supply_gap_index"
+      direction: direct
+      thresholds:
+        - {max: 2, score: 2}
+        - {max: 4, score: 4}
+        - {max: 6, score: 6}
+        - {max: 8, score: 8}
+        - {score: 10}
+    demand_supply_gap_rubric:
+      OVERSUPPLIED:            1
+      SUPPLY_EXCEEDS_DEMAND:   2
+      BALANCED:                4
+      UNMET_DEMAND_MODERATE:   6
+      UNMET_DEMAND_STRONG:     8
+      SIGNIFICANT_WHITESPACE:  9
+    secondary_facts:
+      - key: "grade_band_gaps"
+        weight: 0.20
+        direction: direct
+      - key: "geographic_whitespace"
+        weight: 0.20
+        direction: direct
+    fact_keys_required: []
+    fact_keys_optional: ["demand_supply_gap_index", "known_waitlist_data",
+                         "grade_band_gaps", "geographic_whitespace",
+                         "district_school_quality_rating"]
+    missing_data_behavior: default_to_midpoint
+
+  # ── 10. OPERATIONAL COMPLEXITY ────────────────────
+  operational_complexity:
+    description: >
+      Regulatory, logistical, and demographic demands on new operators.
+      Higher complexity = lower score (this is a cost, not an asset).
+    scoring_rules:
+      primary_fact: "operational_complexity_index"
+      direction: inverse
+      thresholds:
+        - {max: 2, score: 9}  # very simple environment
+        - {max: 4, score: 7}
+        - {max: 6, score: 5}
+        - {max: 8, score: 3}
+        - {score: 1}           # very complex
+    operational_complexity_rubric:
+      MINIMAL:         2
+      LOW:             3
+      MODERATE:        5
+      HIGH:            7
+      VERY_HIGH:       8
+      EXTREME:         9
+    fact_keys_required: []
+    fact_keys_optional: ["operational_complexity_index", "ell_pct",
+                         "iep_pct", "reporting_burden_level",
+                         "transportation_logistics", "labor_environment"]
+    missing_data_behavior: default_to_midpoint
+
+# ─────────────────────────────────────────────
+# COMPOSITE SCORE → TIER MAPPING
+# ─────────────────────────────────────────────
+# Applied AFTER override flags are checked.
+# Override flags can cap the tier downward but not upgrade it.
+
+tier_thresholds:
+  HIGH_PRIORITY:    {min: 8.5, label: "HIGH PRIORITY EXPANSION MARKET"}
+  STRONG:           {min: 7.0, label: "STRONG OPPORTUNITY"}
+  MODERATE:         {min: 5.5, label: "MODERATE OPPORTUNITY"}
+  WATCHLIST:        {min: 4.0, label: "WATCHLIST / MONITOR"}
+  AVOID:            {min: 0.0, label: "AVOID ENTRY"}
+
+# ─────────────────────────────────────────────
+# CONFIDENCE AGGREGATION RULE
+# ─────────────────────────────────────────────
+# Overall confidence = minimum confidence across the N highest-weighted dimensions.
+# This prevents a high-confidence composite that hides a critical uncertain dimension.
+
+confidence_aggregation:
+  method: minimum_of_top_n_weighted
+  n: 3
+
+# ─────────────────────────────────────────────
+# OVERRIDE FLAGS
+# ─────────────────────────────────────────────
+# Defined here as canonical reference; condition logic also embedded per-dimension above.
+
+override_flags:
+  OVERSATURATED:
+    description: "Charter market share exceeds threshold AND enrollment is flat/declining"
+    tier_cap: WATCHLIST
+    visual: "🔴"
+  HOSTILE_AUTHORIZER:
+    description: "No accessible authorizers, or approval rate critically low"
+    tier_cap: WATCHLIST
+    visual: "🔴"
+  FACILITIES_BOTTLENECK:
+    description: "No viable facility path identified"
+    tier_cap: MODERATE_OPPORTUNITY
+    visual: "🟠"
+  POLITICAL_RISK_HIGH:
+    description: "Active anti-charter political mobilization in this community"
+    tier_cap: WATCHLIST
+    visual: "🔴"
+  REPLICATION_FRIENDLY:
+    description: "Strong operator presence AND supportive authorizer"
+    tier_cap: null  # positive flag, no cap
+    tier_bonus: true
+    visual: "🟢"
+  STRONG_REENGAGEMENT:
+    description: "Prior charter closures in community with demonstrable unmet demand"
+    tier_cap: null
+    visual: "🟡"

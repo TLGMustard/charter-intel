@@ -1,0 +1,178 @@
+# states.yaml
+# State-specific configuration: data sources, authorizer registries,
+# PED contacts, known community overrides, and data format notes.
+# The pipeline reads this file at S1 (discovery) and S2 (state context).
+#
+# ADD A NEW STATE:
+#   Copy the template at the bottom of this file.
+#   Fill in data sources and community discovery method.
+#   Test with s1_discovery.py --state=XX --dry-run
+
+version: "1.0"
+
+# ─────────────────────────────────────────────
+# NEW MEXICO (NM) — PILOT STATE
+# ─────────────────────────────────────────────
+
+NM:
+  name: "New Mexico"
+  pilot: true
+  status: ACTIVE
+  community_unit: MUNICIPALITY  # default boundary type
+  
+  # Community boundary exceptions
+  # Some charter clusters span multiple municipalities or align with district lines
+  community_boundary_exceptions:
+    - community_id: "nm-albuquerque"
+      note: >
+        Use Albuquerque city limits + Bernalillo County overlap.
+        ABQ spans multiple zip codes and neighborhoods;
+        sub-community analysis may be warranted.
+    - community_id: "nm-rio-rancho"
+      note: "Separate municipality; distinct charter market from ABQ despite proximity."
+
+  # Primary state data sources
+  data_sources:
+    charter_roster:
+      source_class: PED_DATA
+      description: "NM PED list of active charter schools by authorizer"
+      url: "https://webed.ped.state.nm.us/sites/SBF/Lists/SBFCharterSchools/AllItems.aspx"
+      format: HTML_TABLE
+      refresh_cadence: ANNUAL
+      notes: "Download as CSV. Check for recently approved/revoked schools."
+
+    enrollment_data:
+      source_class: PED_DATA
+      description: "NM PED enrollment by school and district"
+      url: "https://webed.ped.state.nm.us"
+      format: EXCEL
+      refresh_cadence: ANNUAL
+      notes: "Released each October for prior year."
+
+    performance_data:
+      source_class: PED_DATA
+      description: "NM school grades and accountability data"
+      url: "https://webed.ped.state.nm.us"
+      format: EXCEL
+      refresh_cadence: ANNUAL
+      notes: "School report cards. Proficiency rates, attendance, graduation."
+
+    authorizer_registry:
+      source_class: PED_DATA
+      description: "List of NM charter authorizers"
+      url: "https://webed.ped.state.nm.us"
+      format: HTML
+      refresh_cadence: AS_NEEDED
+      known_authorizers:
+        - id: "nm-auth-pec"
+          name: "Public Education Commission (PEC)"
+          type: STATE_BOARD
+          jurisdiction: STATEWIDE
+          notes: "Primary statewide authorizer. Elected board."
+        - id: "nm-auth-aps"
+          name: "Albuquerque Public Schools (APS)"
+          type: LOCAL_DISTRICT
+          jurisdiction: MUNICIPAL
+          community_id: "nm-albuquerque"
+        - id: "nm-auth-sfps"
+          name: "Santa Fe Public Schools (SFPS)"
+          type: LOCAL_DISTRICT
+          jurisdiction: MUNICIPAL
+          community_id: "nm-santa-fe"
+        # TODO: verify additional local authorizers
+
+    csp_awards:
+      source_class: FEDERAL_DATA
+      description: "CSP grant awards to NM charter schools"
+      url: "https://oese.ed.gov/offices/office-of-discretionary-grants-support-services/charter-schools-program/"
+      format: SEARCHABLE_DB
+      refresh_cadence: ANNUAL
+
+    census:
+      source_class: FEDERAL_DATA
+      description: "ACS 5-year estimates for community demographics"
+      url: "https://data.census.gov"
+      format: API
+      table_ids: ["B01003", "B19013", "B15003", "S1401"]  # population, income, education, school enrollment
+      refresh_cadence: ANNUAL
+
+  # Legislative context
+  charter_law:
+    statute_citation: "NMSA 1978 § 22-8B"
+    cap_on_charters: false
+    funding_parity_provisions: true
+    facilities_provisions: limited
+    notes: "Verify current amendment status before citing. Law has been amended multiple times."
+    statute_url: "https://www.nmlegis.gov"  # TODO: find direct section URL
+
+  # NM-specific scoring adjustments
+  scoring_adjustments:
+    facilities_feasibility:
+      note: >
+        NM has limited state facilities funding for charters.
+        Downgrade baseline by 1 point before applying community-level scoring
+        to account for statewide constraint.
+      baseline_adjustment: -1
+
+  # Community discovery method
+  discovery:
+    method: PARSE_PED_ROSTER
+    group_by: MUNICIPALITY
+    deduplicate_by: city_field_in_ped_data
+    minimum_schools_to_qualify: 1
+    notes: >
+      PED roster includes a city/location field. Group schools by city.
+      For schools listed outside a city, use county seat or nearest urban center.
+
+# ─────────────────────────────────────────────
+# TEMPLATE — NEW STATE (copy to add)
+# ─────────────────────────────────────────────
+
+_TEMPLATE:
+  name: "STATE NAME"
+  pilot: false
+  status: DRAFT  # DRAFT | ACTIVE | PAUSED
+  community_unit: MUNICIPALITY
+
+  data_sources:
+    charter_roster:
+      source_class: PED_DATA
+      description: "TODO: State charter school list URL"
+      url: "TODO"
+      format: TODO
+      refresh_cadence: ANNUAL
+    enrollment_data:
+      source_class: PED_DATA
+      url: "TODO"
+      format: TODO
+    performance_data:
+      source_class: PED_DATA
+      url: "TODO"
+      format: TODO
+    authorizer_registry:
+      source_class: PED_DATA
+      url: "TODO"
+      known_authorizers: []
+    csp_awards:
+      source_class: FEDERAL_DATA
+      url: "https://oese.ed.gov"
+      format: SEARCHABLE_DB
+    census:
+      source_class: FEDERAL_DATA
+      url: "https://data.census.gov"
+
+  charter_law:
+    statute_citation: "TODO"
+    cap_on_charters: null  # true | false | unknown
+    funding_parity_provisions: null
+    facilities_provisions: null
+    notes: "TODO"
+    statute_url: "TODO"
+
+  scoring_adjustments: {}
+
+  discovery:
+    method: PARSE_STATE_ROSTER
+    group_by: MUNICIPALITY
+    minimum_schools_to_qualify: 1
+    notes: "TODO: describe discovery method for this state"

@@ -1,0 +1,84 @@
+# scoring_presets.yaml
+# Three operator-profile weight presets for the 10-dimension community scorecard.
+# All presets use the same dimensions and scoring rules.
+# Only the weights change.
+#
+# HOW TO USE:
+#   Pass preset name to s5_scoring.py via --preset flag or pipeline config.
+#   Default is "growth" unless overridden.
+#
+# HOW TO CUSTOMIZE:
+#   Add a new preset block below.
+#   Weights must sum to 1.0 within each preset.
+#   Run tests/test_scoring.py to validate.
+
+version: "1.0"
+
+# ─────────────────────────────────────────────
+# PRESET 1: GROWTH-FOCUSED OPERATOR
+# ─────────────────────────────────────────────
+# Profile: Established operator seeking net-new school openings.
+# Priorities: unmet demand, favorable authorizer, population growth.
+# Less sensitive to academic urgency; more sensitive to facilities and saturation.
+
+growth:
+  description: >
+    Optimized for operators evaluating markets for new school openings.
+    Prioritizes demand signals, authorizer access, and growth-friendly conditions.
+  dimensions:
+    academic_need:         0.10
+    charter_saturation:    0.14
+    population_trends:     0.12
+    political_climate:     0.09
+    authorizer_friendliness: 0.12
+    facilities_feasibility: 0.11
+    replication_feasibility: 0.07
+    funding_environment:   0.08
+    competitive_opportunity: 0.12
+    operational_complexity: 0.05
+
+# ─────────────────────────────────────────────
+# PRESET 2: REPLICATION-FOCUSED OPERATOR
+# ─────────────────────────────────────────────
+# Profile: High-performing CMO or network evaluating where to replicate a proven model.
+# Priorities: model fit with population, operator infrastructure, talent pipeline.
+# More sensitive to operational complexity and political conditions.
+
+replication:
+  description: >
+    Optimized for CMOs and networks evaluating where a proven model can be transplanted.
+    Prioritizes talent availability, authorizer relationships, and operational readiness.
+  dimensions:
+    academic_need:         0.12
+    charter_saturation:    0.08
+    population_trends:     0.09
+    political_climate:     0.10
+    authorizer_friendliness: 0.13
+    facilities_feasibility: 0.09
+    replication_feasibility: 0.16
+    funding_environment:   0.09
+    competitive_opportunity: 0.08
+    operational_complexity: 0.06
+
+# ─────────────────────────────────────────────
+# PRESET 3: TURNAROUND / INTERVENTION-FOCUSED
+# ─────────────────────────────────────────────
+# Profile: Operator specializing in takeovers, conversions, or replacing failing schools.
+# Priorities: high academic need, vulnerable incumbents, political will for change.
+# Less sensitive to saturation (they replace, not add to supply).
+
+turnaround:
+  description: >
+    Optimized for operators focused on converting, replacing, or intervening
+    in underperforming schools. Prioritizes academic urgency and political conditions.
+  dimensions:
+    academic_need:         0.22
+    charter_saturation:    0.04
+    population_trends:     0.06
+    political_climate:     0.14
+    authorizer_friendliness: 0.12
+    facilities_feasibility: 0.08
+    replication_feasibility: 0.10
+    funding_environment:   0.09
+    competitive_opportunity: 0.05
+    operational_complexity: 0.10

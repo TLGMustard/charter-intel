@@ -1,0 +1,491 @@
+"""
+pipeline/s5_scoring.py
+Stage 5: Community Scoring
+
+PURPOSE:
+  Compute weighted dimension scores and composite score from verified facts.
+  This stage is DETERMINISTIC — no LLM calls. All logic is explicit Python.
+  If you find yourself adding a model call here, that's a design error.
+
+INPUT:
+  - data/cache/community/{state}/{community_id}/s4_verified.json
+  - config/scoring_weights.yaml
+  - config/scoring_presets.yaml
+
+OUTPUT:
+  - data/cache/community/{state}/{community_id}/s5_scorecard.json
+  - Validated against schemas/scorecard.schema.json
+
+DESIGN PRINCIPLES:
+  - Every score is traceable to specific fact IDs
+  - When facts are missing, confidence degrades (score uses default; not inflated)
+  - Override flags are checked AFTER composite is computed; they cap the tier
+  - Humans should be able to reproduce any score manually from the fact bundle
+"""
+
+from __future__ import annotations
+import json
+import os
+from typing import Any, Optional
+
+import yaml
+
+from pipeline import (
+    Confidence, OperatorPreset, OutputMode, PipelineConfig,
+    StageResult, StageStatus, ValidationResult, timestamp_now
+)
+from pipeline.utils.cache import CacheManager
+from pipeline.utils.schema_validator import validate_against_schema
+
+
+STAGE_ID = "s5_scoring"
+
+# ─────────────────────────────────────────────
+# CONFIG LOADING
+# ─────────────────────────────────────────────
+
+def load_scoring_config() -> tuple[dict, dict]:
+    """Load scoring_weights.yaml and scoring_presets.yaml."""
+    with open("config/scoring_weights.yaml") as f:
+        weights_cfg = yaml.safe_load(f)
+    with open("config/scoring_presets.yaml") as f:
+        presets_cfg = yaml.safe_load(f)
+    return weights_cfg, presets_cfg
+
+
+# ─────────────────────────────────────────────
+# MAIN STAGE FUNCTION
+# ─────────────────────────────────────────────
+
+def run(
+    community_id: str,
+    state: str,
+    config: PipelineConfig,
+    previous_result: Optional[StageResult] = None,
+    **kwargs
+) -> StageResult:
+    """
+    Compute the community scorecard from verified facts.
+    Reads S4 output; writes scorecard JSON.
+    """
+    import time
+    start = time.time()
+
+    # --- Load verified facts ---
+    if previous_result and previous_result.output_data:
+        verified_bundle = previous_result.output_data
+    else:
+        facts_path = _facts_path(state, community_id)
+        if not os.path.exists(facts_path):
+            return StageResult(
+                stage_id=STAGE_ID, community_id=community_id, state=state,
+                status=StageStatus.ERROR,
+                errors=[f"Verified facts not found at {facts_path}. Run S4 first."]
+            )
+        with open(facts_path) as f:
+            verified_bundle = json.load(f)
+
+    weights_cfg, presets_cfg = load_scoring_config()
+    preset = config.preset.value
+
+    # --- Score each dimension ---
+    dimensions_out = {}
+    facts_used = []
+    missing_dimensions = []
+    warnings = []
+
+    preset_weights = presets_cfg[preset]["dimensions"]
+    dimension_defs = weights_cfg["dimensions"]
+
+    for dim_name, dim_def in dimension_defs.items():
+        weight = preset_weights.get(dim_name, 0.0)
+        result = score_dimension(
+            dim_name=dim_name,
+            dim_def=dim_def,
+            verified_bundle=verified_bundle,
+            weight=weight
+        )
+        dimensions_out[dim_name] = result
+        facts_used.extend(result.get("supporting_fact_ids", []))
+
+        if result.get("used_default"):
+            missing_dimensions.append(dim_name)
+            warnings.append(f"Dimension '{dim_name}': no relevant facts found; used default score 5.")
+
+    # --- Compute composite ---
+    composite = sum(
+        d["score"] * d["weight"]
+        for d in dimensions_out.values()
+    )
+    composite = round(composite, 2)
+
+    # --- Check override flags ---
+    override_flags = check_override_flags(verified_bundle, dimensions_out)
+
+    # --- Compute tier ---
+    tier, tier_label = compute_tier(composite, override_flags, weights_cfg)
+
+    # --- Compute overall confidence ---
+    top_3_dims = sorted(
+        dimensions_out.items(),
+        key=lambda x: x[1]["weight"],
+        reverse=True
+    )[:3]
+    confidence_levels = [Confidence(d["confidence"]) for _, d in top_3_dims]
+    overall_confidence = Confidence.minimum(confidence_levels)
+
+    # --- Build scorecard ---
+    scorecard = {
+        "scorecard_id": f"sc_{community_id}_{preset}_{_today()}",
+        "community_id": community_id,
+        "state": state,
+        "preset": preset,
+        "dimensions": dimensions_out,
+        "composite_score": composite,
+        "composite_score_rounded": round(composite, 1),
+        "tier": tier,
+        "tier_display_label": tier_label,
+        "override_flags": override_flags,
+        "confidence_overall": overall_confidence.value,
+        "confidence_by_dimension": {
+            k: v["confidence"] for k, v in dimensions_out.items()
+        },
+        "facts_used": list(set(facts_used)),
+        "dimensions_with_missing_data": missing_dimensions,
+        "scored_at": timestamp_now(),
+        "scoring_version": weights_cfg.get("version", "1.0")
+    }
+
+    # --- Validate schema ---
+    validation = validate_against_schema(scorecard, "schemas/scorecard.schema.json")
+    if not validation:
+        return StageResult(
+            stage_id=STAGE_ID, community_id=community_id, state=state,
+            status=StageStatus.ERROR,
+            errors=[f"Scorecard failed schema validation: {validation.errors}"]
+        )
+
+    # --- Write output ---
+    out_path = _output_path(state, community_id)
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    with open(out_path, "w") as f:
+        json.dump(scorecard, f, indent=2)
+
+    return StageResult(
+        stage_id=STAGE_ID,
+        community_id=community_id,
+        state=state,
+        status=StageStatus.SUCCESS,
+        output_path=out_path,
+        output_data=scorecard,
+        warnings=warnings,
+        duration_seconds=round(time.time() - start, 2)
+    )
+
+
+# ─────────────────────────────────────────────
+# DIMENSION SCORING
+# ─────────────────────────────────────────────
+
+def score_dimension(
+    dim_name: str,
+    dim_def: dict,
+    verified_bundle: dict,
+    weight: float
+) -> dict:
+    """
+    Score a single dimension against the verified fact bundle.
+    Returns a dict matching the scorecard dimension_score schema.
+    """
+    scoring_rules = dim_def.get("scoring_rules", {})
+    primary_fact_key = scoring_rules.get("primary_fact")
+    fact_keys_required = dim_def.get("fact_keys_required", [])
+    fact_keys_optional = dim_def.get("fact_keys_optional", [])
+    missing_behavior = dim_def.get("missing_data_behavior", "degrade_confidence")
+
+    # Find relevant facts from the verified bundle
+    relevant_facts = extract_facts_for_dimension(dim_name, verified_bundle)
+    supporting_ids = [f["datapoint_id"] for f in relevant_facts]
+
+    # Check if primary fact is available
+    primary_value = _get_fact_value(primary_fact_key, relevant_facts)
+
+    if primary_value is None and missing_behavior == "default_to_midpoint":
+        return {
+            "score": 5.0,
+            "weight": weight,
+            "weighted_contribution": round(5.0 * weight, 4),
+            "confidence": Confidence.LOW.value,
+            "primary_driver": "Insufficient data — default score used",
+            "supporting_fact_ids": supporting_ids,
+            "used_default": True
+        }
+
+    if primary_value is None and missing_behavior == "degrade_confidence":
+        # Try to compute from optional facts; mark LOW confidence
+        score = 5.0  # neutral default
+        confidence = Confidence.LOW.value
+        driver = "Key fact unavailable — score estimated from limited data"
+        used_default = True
+    else:
+        # Compute score from primary + secondary facts
+        score, driver = apply_scoring_rules(primary_value, primary_fact_key, scoring_rules, dim_def)
+        score = apply_secondary_adjustments(score, relevant_facts, dim_def)
+        confidence = _aggregate_fact_confidence(relevant_facts)
+        used_default = False
+
+    return {
+        "score": round(score, 2),
+        "weight": weight,
+        "weighted_contribution": round(score * weight, 4),
+        "confidence": confidence,
+        "primary_driver": driver,
+        "supporting_fact_ids": supporting_ids,
+        "used_default": used_default
+    }
+
+
+def apply_scoring_rules(
+    value: Any,
+    fact_key: str,
+    scoring_rules: dict,
+    dim_def: dict
+) -> tuple[float, str]:
+    """
+    Translate a raw fact value into a 1–10 score using threshold rules.
+    Returns (score, one_line_driver).
+    """
+    direction = scoring_rules.get("direction", "direct")
+    thresholds = scoring_rules.get("thresholds", [])
+
+    if not thresholds or not isinstance(value, (int, float)):
+        return 5.0, f"Value '{value}' — no numeric threshold rule; midpoint used"
+
+    for threshold in thresholds:
+        max_val = threshold.get("max")
+        if max_val is None or value <= max_val:
+            raw_score = float(threshold["score"])
+            # For inverse dimensions, score is already inverted in the thresholds
+            driver = _build_driver(fact_key, value, raw_score, direction)
+            return raw_score, driver
+
+    return 5.0, f"Value '{value}' matched no threshold; midpoint used"
+
+
+def apply_secondary_adjustments(
+    primary_score: float,
+    relevant_facts: list[dict],
+    dim_def: dict
+) -> float:
+    """
+    Blend secondary facts into the primary score using weighted averaging.
+    Primary weight is defined in dim_def.primary_weight (default 0.55).
+    """
+    scoring_rules = dim_def.get("scoring_rules", {})
+    primary_weight = dim_def.get("primary_weight", 0.55)
+    secondary_defs = dim_def.get("secondary_facts", [])
+
+    if not secondary_defs:
+        return primary_score
+
+    total_weight = primary_weight
+    weighted_sum = primary_score * primary_weight
+
+    for sec_def in secondary_defs:
+        key = sec_def["key"]
+        w = sec_def.get("weight", 0.15)
+        val = _get_fact_value(key, relevant_facts)
+        if val is not None:
+            sec_score, _ = apply_scoring_rules(
+                val, key,
+                {"direction": sec_def.get("direction", "direct"),
+                 "thresholds": sec_def.get("thresholds", [])},
+                {}
+            )
+            weighted_sum += sec_score * w
+            total_weight += w
+
+    if total_weight == 0:
+        return primary_score
+    return round(weighted_sum / total_weight, 2)
+
+
+# ─────────────────────────────────────────────
+# OVERRIDE FLAG CHECKING
+# ─────────────────────────────────────────────
+
+def check_override_flags(
+    verified_bundle: dict,
+    dimensions_out: dict
+) -> list[dict]:
+    """
+    Check all override flag conditions. Returns list of triggered flags.
+    Conditions are checked against specific fact values in the verified bundle.
+    """
+    flags = []
+    fact_index = _build_fact_index(verified_bundle)
+
+    # OVERSATURATED
+    share = fact_index.get("charter_seat_share_pct")
+    trend = fact_index.get("charter_enrollment_trend_3yr")
+    if share is not None and float(share) >= 30 and trend in ("DECLINING", "FLAT"):
+        flags.append({
+            "flag": "OVERSATURATED",
+            "triggered_by": f"Charter seat share {share}% with {trend} enrollment trend",
+            "tier_effect": "Capped at WATCHLIST",
+            "visual": "🔴"
+        })
+
+    # HOSTILE_AUTHORIZER
+    num_auth = fact_index.get("num_accessible_authorizers")
+    approval_rate = fact_index.get("authorizer_approval_rate_pct")
+    if (num_auth is not None and int(num_auth) == 0) or \
+       (approval_rate is not None and float(approval_rate) < 15):
+        flags.append({
+            "flag": "HOSTILE_AUTHORIZER",
+            "triggered_by": f"Authorizer approval rate: {approval_rate}%; accessible authorizers: {num_auth}",
+            "tier_effect": "Capped at WATCHLIST",
+            "visual": "🔴"
+        })
+
+    # FACILITIES_BOTTLENECK
+    fac_index = fact_index.get("facilities_feasibility_index")
+    no_public = fact_index.get("no_public_facility_access")
+    if fac_index is not None and float(fac_index) <= 2 and no_public is True:
+        flags.append({
+            "flag": "FACILITIES_BOTTLENECK",
+            "triggered_by": "Facilities feasibility critically low with no public facility access",
+            "tier_effect": "Capped at MODERATE_OPPORTUNITY",
+            "visual": "🟠"
+        })
+
+    # POLITICAL_RISK_HIGH
+    pol_index = fact_index.get("political_climate_index")
+    if pol_index is not None and float(pol_index) <= 3:
+        flags.append({
+            "flag": "POLITICAL_RISK_HIGH",
+            "triggered_by": f"Political climate index {pol_index} (RESISTANT or HOSTILE)",
+            "tier_effect": "Capped at WATCHLIST",
+            "visual": "🔴"
+        })
+
+    # REPLICATION_FRIENDLY (positive)
+    rep_index = fact_index.get("replication_readiness_index")
+    auth_score = dimensions_out.get("authorizer_friendliness", {}).get("score", 0)
+    if rep_index is not None and float(rep_index) >= 7 and auth_score >= 7:
+        flags.append({
+            "flag": "REPLICATION_FRIENDLY",
+            "triggered_by": "Strong replication readiness AND favorable authorizer",
+            "tier_effect": "No tier cap — positive signal",
+            "visual": "🟢"
+        })
+
+    return flags
+
+
+def compute_tier(
+    composite: float,
+    override_flags: list[dict],
+    weights_cfg: dict
+) -> tuple[str, str]:
+    """
+    Assign tier from composite score, then apply override flag caps.
+    Returns (tier_key, tier_display_label).
+    """
+    thresholds = weights_cfg["tier_thresholds"]
+
+    # Find raw tier from composite
+    tier_key = "AVOID"
+    tier_label = thresholds["AVOID"]["label"]
+    for key in ["HIGH_PRIORITY", "STRONG", "MODERATE", "WATCHLIST", "AVOID"]:
+        if composite >= thresholds[key]["min"]:
+            tier_key = key
+            tier_label = thresholds[key]["label"]
+            break
+
+    # Apply flag caps (flags can only cap downward)
+    cap_map = {
+        "OVERSATURATED":      "WATCHLIST",
+        "HOSTILE_AUTHORIZER": "WATCHLIST",
+        "POLITICAL_RISK_HIGH": "WATCHLIST",
+        "FACILITIES_BOTTLENECK": "MODERATE",
+    }
+    tier_order = ["HIGH_PRIORITY", "STRONG", "MODERATE", "WATCHLIST", "AVOID"]
+
+    for flag_entry in override_flags:
+        cap = cap_map.get(flag_entry["flag"])
+        if cap and tier_order.index(tier_key) < tier_order.index(cap):
+            tier_key = cap
+            tier_label = thresholds[cap]["label"]
+
+    return tier_key, tier_label
+
+
+# ─────────────────────────────────────────────
+# INTERNAL HELPERS
+# ─────────────────────────────────────────────
+
+def extract_facts_for_dimension(
+    dim_name: str,
+    verified_bundle: dict
+) -> list[dict]:
+    """Filter the verified fact bundle to those tagged for this dimension."""
+    all_facts = verified_bundle.get("facts", [])
+    return [
+        f for f in all_facts
+        if f.get("dimension") == dim_name and f.get("in_main_analysis", False)
+    ]
+
+
+def _get_fact_value(fact_key: Optional[str], facts: list[dict]) -> Any:
+    """Find a fact by its fact_key and return its value, or None."""
+    if not fact_key:
+        return None
+    for f in facts:
+        if f.get("fact_key") == fact_key:
+            return f.get("value")
+    return None
+
+
+def _build_fact_index(verified_bundle: dict) -> dict:
+    """Build a flat {fact_key: value} index for quick flag checking."""
+    index = {}
+    for f in verified_bundle.get("facts", []):
+        key = f.get("fact_key")
+        if key:
+            index[key] = f.get("value")
+    return index
+
+
+def _aggregate_fact_confidence(facts: list[dict]) -> str:
+    """Return the minimum confidence across a set of facts."""
+    if not facts:
+        return Confidence.LOW.value
+    levels = [Confidence(f.get("confidence", "LOW")) for f in facts]
+    return Confidence.minimum(levels).value
+
+
+def _build_driver(fact_key: str, value: Any, score: float, direction: str) -> str:
+    """Generate a one-line driver explanation."""
+    key_labels = {
+        "district_proficiency_ela_pct": "District ELA proficiency",
+        "charter_seat_share_pct": "Charter seat share",
+        "k12_population_trend_5yr_pct": "K-12 population trend (5yr)",
+        "authorizer_approval_rate_pct": "Authorizer approval rate",
+        "per_pupil_revenue_vs_state_avg_pct": "Per-pupil revenue vs. state avg",
+    }
+    label = key_labels.get(fact_key, fact_key.replace("_", " "))
+    return f"{label}: {value} → score {score:.1f}"
+
+
+def _today() -> str:
+    import datetime
+    return datetime.date.today().isoformat()
+
+
+def _facts_path(state: str, community_id: str) -> str:
+    return f"data/cache/community/{state.lower()}/{community_id}/s4_verified.json"
+
+
+def _output_path(state: str, community_id: str) -> str:
+    return f"data/cache/community/{state.lower()}/{community_id}/s5_scorecard.json"

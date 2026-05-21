@@ -1,0 +1,136 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "community.schema.json",
+  "title": "Community",
+  "description": "The primary unit of analysis. Represents a municipality or defined geographic area containing charter schools.",
+  "type": "object",
+  "required": ["community_id", "name", "state", "community_type", "created_at"],
+  "properties": {
+    "community_id": {
+      "type": "string",
+      "description": "Stable identifier. Format: {state_lower}-{city-slug}",
+      "pattern": "^[a-z]{2}-[a-z0-9-]+$",
+      "example": "nm-albuquerque"
+    },
+    "name": {
+      "type": "string",
+      "example": "Albuquerque"
+    },
+    "state": {
+      "type": "string",
+      "pattern": "^[A-Z]{2}$"
+    },
+    "community_type": {
+      "type": "string",
+      "enum": ["METROPOLITAN", "MID_SIZE_CITY", "SMALL_CITY", "RURAL", "SUBURBAN"],
+      "description": "Community type classification."
+    },
+    "boundary_type": {
+      "type": "string",
+      "enum": ["MUNICIPALITY", "COUNTY", "SCHOOL_DISTRICT", "CUSTOM"],
+      "description": "How the community boundary is defined. MUNICIPALITY is default."
+    },
+    "boundary_notes": {
+      "type": ["string", "null"],
+      "description": "Any exceptions or clarifications to the standard boundary type."
+    },
+    "county": {
+      "type": ["string", "null"],
+      "example": "Bernalillo County"
+    },
+    "parent_district": {
+      "type": ["string", "null"],
+      "description": "Primary public school district serving this community",
+      "example": "Albuquerque Public Schools"
+    },
+    "population": {
+      "$ref": "#/definitions/sourced_integer",
+      "description": "Total municipal population (most recent Census/ACS)"
+    },
+    "k12_enrollment_total": {
+      "$ref": "#/definitions/sourced_integer",
+      "description": "Total K-12 enrollment across all school types"
+    },
+    "k12_enrollment_public": {
+      "$ref": "#/definitions/sourced_integer",
+      "description": "Public school K-12 enrollment"
+    },
+    "charter_schools": {
+      "type": "array",
+      "description": "List of charter school IDs in this community",
+      "items": {"type": "string"},
+      "example": ["nm-aps-school-001"]
+    },
+    "num_charter_schools": {
+      "type": ["integer", "null"],
+      "description": "Count of active charter schools in community"
+    },
+    "authorizers_active": {
+      "type": "array",
+      "description": "Authorizer IDs with jurisdiction in this community",
+      "items": {"type": "string"}
+    },
+    "operators_active": {
+      "type": "array",
+      "description": "Operator/network IDs present in this community",
+      "items": {"type": "string"}
+    },
+    "classification": {
+      "type": ["string", "null"],
+      "description": "Strategic classification. Populated by recommendation engine after scoring.",
+      "enum": [
+        "HIGH_PRIORITY_EXPANSION_MARKET",
+        "STRONG_OPPORTUNITY",
+        "MODERATE_OPPORTUNITY",
+        "WATCHLIST",
+        "AVOID_ENTRY",
+        null
+      ]
+    },
+    "override_flags": {
+      "type": "array",
+      "description": "Active override flags from scoring_weights.yaml",
+      "items": {
+        "type": "string",
+        "enum": [
+          "OVERSATURATED",
+          "HOSTILE_AUTHORIZER",
+          "FACILITIES_BOTTLENECK",
+          "POLITICAL_RISK_HIGH",
+          "REPLICATION_FRIENDLY",
+          "STRONG_REENGAGEMENT"
+        ]
+      }
+    },
+    "data_through": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "Most recent data date across all sourced facts for this community."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "fact_ids": {
+      "type": "array",
+      "description": "All DataPoint IDs associated with this community",
+      "items": {"type": "string"}
+    }
+  },
+  "definitions": {
+    "sourced_integer": {
+      "type": "object",
+      "required": ["value"],
+      "properties": {
+        "value": {"type": ["integer", "null"]},
+        "source_id": {"type": ["string", "null"]},
+        "data_year": {"type": ["integer", "null"]}
+      }
+    }
+  },
+  "additionalProperties": false
+}

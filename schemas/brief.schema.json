@@ -1,0 +1,233 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "brief.schema.json",
+  "title": "CommunityBrief",
+  "description": "Output of s6_synthesis.py. Structured intelligence brief ready for S7 template rendering. Every text field may only reference claims present in the input fact bundle.",
+  "type": "object",
+  "required": [
+    "brief_id", "community_id", "state", "preset", "mode",
+    "executive_snapshot", "scorecard_summary",
+    "needs_verification", "sources", "audit_passed", "generated_at"
+  ],
+  "properties": {
+    "brief_id": {
+      "type": "string",
+      "example": "br_nm-albuquerque_growth_mode2_2026-05-21"
+    },
+    "community_id": {"type": "string"},
+    "community_name": {"type": "string"},
+    "state": {"type": "string"},
+    "preset": {"type": "string", "enum": ["growth", "replication", "turnaround"]},
+    "mode": {"type": "integer", "enum": [1, 2, 3]},
+    "mode_label": {"type": "string", "example": "Strategic Brief"},
+    "classification": {
+      "type": "string",
+      "description": "Final strategic classification. Copied from scorecard."
+    },
+    "composite_score": {"type": "number"},
+    "confidence_overall": {"type": "string"},
+    "data_through": {"type": "string", "format": "date"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "generated_by": {"type": "string", "description": "Model that generated this brief"},
+
+    "executive_snapshot": {
+      "type": "string",
+      "description": "2-4 sentence synthesis. Grounded only in verified facts. No new claims.",
+      "maxLength": 600
+    },
+
+    "scorecard_summary": {
+      "type": "object",
+      "description": "Condensed scorecard for brief display",
+      "required": ["composite_score", "tier_display_label", "top_drivers", "override_flags"],
+      "properties": {
+        "composite_score": {"type": "number"},
+        "tier_display_label": {"type": "string"},
+        "override_flags": {"type": "array", "items": {"type": "object"}},
+        "top_drivers": {
+          "type": "array",
+          "maxItems": 3,
+          "description": "Top 3 dimensions driving the composite score, with one-line driver text",
+          "items": {
+            "type": "object",
+            "required": ["dimension", "score", "driver"],
+            "properties": {
+              "dimension": {"type": "string"},
+              "score": {"type": "number"},
+              "driver": {"type": "string", "maxLength": 120}
+            }
+          }
+        },
+        "dimension_table": {
+          "type": "array",
+          "description": "All 10 dimensions for full scorecard display",
+          "items": {"$ref": "#/definitions/dimension_display_row"}
+        }
+      }
+    },
+
+    "recommendations": {
+      "type": "array",
+      "description": "1-3 strategic recommendations. Mode 1: max 1. Mode 2: max 3. Mode 3: max 5.",
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": ["action", "rationale", "confidence", "supporting_fact_ids"],
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "Concise action statement",
+            "maxLength": 150
+          },
+          "rationale": {
+            "type": "string",
+            "description": "Why this recommendation. Only references verified facts.",
+            "maxLength": 400
+          },
+          "evidence_summary": {
+            "type": "string",
+            "description": "1-2 sentences of supporting evidence",
+            "maxLength": 200
+          },
+          "primary_risk": {
+            "type": "string",
+            "description": "Main risk to this recommendation",
+            "maxLength": 150
+          },
+          "confidence": {"type": "string", "enum": ["HIGH", "MODERATE", "LOW"]},
+          "supporting_fact_ids": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "DataPoint IDs supporting this recommendation. Required for audit."
+          }
+        }
+      }
+    },
+
+    "quick_reads": {
+      "type": "object",
+      "description": "Mode 2 quick-read sections. One paragraph each.",
+      "properties": {
+        "facilities": {
+          "type": ["string", "null"],
+          "maxLength": 300
+        },
+        "political": {
+          "type": ["string", "null"],
+          "maxLength": 300
+        },
+        "authorizer": {
+          "type": ["string", "null"],
+          "maxLength": 300
+        }
+      }
+    },
+
+    "schools_to_watch": {
+      "type": "array",
+      "description": "Top 3 schools flagged for strategic reasons. Mode 2+.",
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["school_name", "flag_type", "reason"],
+        "properties": {
+          "school_id": {"type": ["string", "null"]},
+          "school_name": {"type": "string"},
+          "flag_type": {
+            "type": "string",
+            "enum": [
+              "REPLICATION_CANDIDATE",
+              "RENEWAL_RISK",
+              "CLOSURE_RISK",
+              "PARTNERSHIP_OPPORTUNITY",
+              "TURNAROUND_CANDIDATE",
+              "HIGH_PERFORMER"
+            ]
+          },
+          "reason": {"type": "string", "maxLength": 200}
+        }
+      }
+    },
+
+    "needs_verification": {
+      "type": "array",
+      "description": "All claims that could not be verified. Always present. May be empty.",
+      "items": {
+        "type": "object",
+        "required": ["claim", "reason", "resolution_path"],
+        "properties": {
+          "claim": {"type": "string"},
+          "reason": {
+            "type": "string",
+            "description": "Why verification failed"
+          },
+          "source_class_attempted": {"type": ["string", "null"]},
+          "resolution_path": {
+            "type": "string",
+            "description": "What source or action would resolve this"
+          },
+          "impact_if_wrong": {
+            "type": "string",
+            "enum": ["HIGH", "MODERATE", "LOW"],
+            "description": "How much this claim affects the overall analysis"
+          }
+        }
+      }
+    },
+
+    "sources": {
+      "type": "array",
+      "description": "Numbered source list. All citations in brief body use [N] references to this array.",
+      "items": {
+        "type": "object",
+        "required": ["ref_num", "source_class", "title"],
+        "properties": {
+          "ref_num": {"type": "integer"},
+          "source_class": {"type": "string"},
+          "title": {"type": "string"},
+          "url": {"type": ["string", "null"]},
+          "date": {"type": ["string", "null"]},
+          "confidence": {"type": "string"}
+        }
+      }
+    },
+
+    "audit_passed": {
+      "type": "boolean",
+      "description": "True if s6_audit found no unfounded claims. False means audit_flags is non-empty and those claims were stripped."
+    },
+    "audit_flags": {
+      "type": "array",
+      "description": "Claims stripped by audit. Present only when audit_passed is false.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "claim_text": {"type": "string"},
+          "reason": {"type": "string"},
+          "moved_to": {"type": "string", "enum": ["needs_verification", "removed"]}
+        }
+      }
+    },
+    "disclosure": {
+      "type": "string",
+      "description": "AI usage disclosure for this document. Required on all external deliverables.",
+      "example": "Generated with Claude assistance (s3 extraction, s6 synthesis). Facts sourced from public data as noted. Human review required before external use."
+    }
+  },
+
+  "definitions": {
+    "dimension_display_row": {
+      "type": "object",
+      "required": ["dimension", "display_name", "score", "weight", "confidence", "driver"],
+      "properties": {
+        "dimension": {"type": "string"},
+        "display_name": {"type": "string"},
+        "score": {"type": "number"},
+        "weight": {"type": "number"},
+        "confidence": {"type": "string"},
+        "driver": {"type": "string", "maxLength": 100}
+      }
+    }
+  },
+  "additionalProperties": false
+}

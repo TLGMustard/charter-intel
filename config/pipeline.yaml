@@ -1,0 +1,189 @@
+# pipeline.yaml
+# Runtime configuration for the charter intelligence pipeline.
+# Controls model selection, cache behavior, output modes, and quality gates.
+#
+# OVERRIDES:
+#   CLI flags override these defaults.
+#   e.g., --preset=turnaround --mode=3 --no-cache
+
+version: "1.0"
+
+# ─────────────────────────────────────────────
+# MODEL ROUTING
+# ─────────────────────────────────────────────
+# Each stage specifies which model to use and why.
+# Update when Anthropic releases new models.
+# Verify current model strings at https://docs.anthropic.com
+
+models:
+  opus:   "claude-opus-4-5"
+  sonnet: "claude-sonnet-4-5"
+  haiku:  "claude-haiku-4-5-20251001"
+
+stage_model_routing:
+  s1_discovery:
+    model: null           # deterministic script; no LLM
+    note: "PED roster parsing — no model needed"
+  
+  s2_state_context:
+    model: opus
+    max_tokens: 4000
+    temperature: 0.1
+    cache_ttl_days: 90    # regenerate quarterly
+    note: >
+      Run rarely. Benefits from Opus synthesis quality.
+      State-level context is expensive but reused across all communities.
+  
+  s3_fact_extraction:
+    model: sonnet
+    max_tokens: 2000
+    temperature: 0.0     # zero temperature for extraction
+    cache_ttl_days: 90
+    note: "Structured extraction. Temperature 0 for consistency and verification."
+  
+  s4_verification:
+    model: haiku
+    max_tokens: 1000
+    temperature: 0.0
+    cache_ttl_days: 90    # same as fact cache
+    note: >
+      Source classification is a cheap tagging task.
+      Haiku is adequate; URL pattern matching handles most cases first.
+  
+  s5_scoring:
+    model: null           # pure Python — no LLM
+    cache_ttl_days: 90    # tied to fact cache
+    note: "Deterministic scoring. Must never invoke a model."
+  
+  s6_synthesis:
+    mode_1:
+      model: sonnet
+      max_tokens: 600
+      temperature: 0.2
+    mode_2:
+      model: sonnet
+      max_tokens: 2000
+      temperature: 0.2
+      note: "Default mode. Sonnet provides good synthesis at cost."
+    mode_3:
+      model: opus
+      max_tokens: 6000
+      temperature: 0.3
+      note: "Deep dive only. Justify usage with explicit --mode=3 flag."
+    cache_ttl_days: 7      # briefs are regenerated more frequently
+  
+  s6_audit:
+    model: sonnet
+    max_tokens: 1000
+    temperature: 0.0
+    note: "Claim-grounding audit. Runs after every synthesis pass."
+  
+  s7_render:
+    model: null           # template engine — no LLM
+    note: "Jinja2 rendering. No model."
+
+# ─────────────────────────────────────────────
+# DEFAULT SETTINGS
+# ─────────────────────────────────────────────
+
+defaults:
+  preset: growth              # growth | replication | turnaround
+  output_mode: 2              # 1 | 2 | 3
+  state: NM
+  output_format: markdown     # markdown | pdf
+  language: en
+
+# ─────────────────────────────────────────────
+# CACHE BEHAVIOR
+# ─────────────────────────────────────────────
+
+cache:
+  enabled: true
+  base_path: "data/cache"
+  
+  # Cache key structure: {tier}/{state_code}/{community_id}/{stage}_{data_through}.json
+  key_format: "{tier}/{state}/{community_id}/{stage}_{data_date}.json"
+  
+  tiers:
+    state:
+      path: "data/cache/state"
+      invalidate_on: MANUAL_OR_LEGISLATIVE_EVENT
+    community:
+      path: "data/cache/community"
+      invalidate_on: QUARTERLY_OR_PED_RELEASE
+    synthesis:
+      path: "data/cache/synthesis"
+      invalidate_on: COMMUNITY_CACHE_UPDATE
+
+  # When cache is stale or missing, behavior:
+  on_miss: GENERATE           # GENERATE | ERROR | WARN_AND_GENERATE
+  on_stale: WARN_AND_USE      # WARN_AND_USE | REGENERATE | ERROR
+
+# ─────────────────────────────────────────────
+# OUTPUT CONFIGURATION
+# ─────────────────────────────────────────────
+
+output:
+  base_path: "outputs"
+  by_community_path: "outputs/by_community"
+  comparisons_path: "outputs/comparisons"
+  
+  filename_format: "{community_id}_{mode}_{date}.md"
+  
+  modes:
+    1:
+      label: "Executive Snapshot"
+      target_words: 200
+      includes: [executive_snapshot, scorecard_summary, top_recommendation, top_risk]
+    2:
+      label: "Strategic Brief"
+      target_pages: 2
+      includes: [executive_snapshot, full_scorecard, recommendations, override_flags,
+                 facilities_read, political_read, authorizer_read, schools_to_watch,
+                 needs_verification, sources]
+    3:
+      label: "Deep Dive"
+      target_pages: 8
+      includes: [all_mode_2, school_profiles, operator_analysis,
+                 geographic_analysis, full_bibliography]
+
+# ─────────────────────────────────────────────
+# QUALITY GATES
+# ─────────────────────────────────────────────
+# Pipeline halts or warns when these conditions are triggered.
+
+quality_gates:
+  schema_validation:
+    enabled: true
+    on_failure: HALT            # HALT | WARN | SKIP
+  
+  confidence_floor:
+    enabled: true
+    minimum_confidence_for_publish: MODERATE
+    on_low_confidence: WARN_AND_FLAG   # Never silently publish LOW confidence briefs
+  
+  hallucination_audit:
+    enabled: true
+    on_unfounded_claims: STRIP_AND_FLAG   # Remove from brief, add to needs_verification
+    audit_stage: post_s6
+  
+  source_freshness:
+    enabled: true
+    max_data_age_months: 18
+    on_stale_data: WARN_AND_FLAG
+  
+  required_facts_minimum:
+    enabled: true
+    minimum_high_confidence_facts: 3    # Must have at least 3 verified facts to publish
+    on_insufficient: HALT_WITH_PARTIAL_FLAG
+
+# ─────────────────────────────────────────────
+# LOGGING
+# ─────────────────────────────────────────────
+
+logging:
+  level: INFO           # DEBUG | INFO | WARNING | ERROR
+  log_token_usage: true
+  log_cache_hits: true
+  log_confidence_downgrades: true
+  output_path: "data/logs"

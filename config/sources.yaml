@@ -1,0 +1,192 @@
+# sources.yaml
+# Source class definitions, confidence tiers, and URL pattern matching rules
+# This file is state-agnostic. State-specific source URLs live in states.yaml.
+
+version: "1.0"
+
+# ─────────────────────────────────────────────
+# SOURCE CLASSES
+# ─────────────────────────────────────────────
+# Each source class has:
+#   confidence_default  — assigned unless overridden by a specific check
+#   allows_in_main      — whether claims from this source appear in main analysis
+#   requires_url        — whether a URL is required (enforced at extraction)
+#   bias_flag           — whether bias direction should be tagged
+#   description         — human-readable note
+
+source_classes:
+
+  STATUTE:
+    confidence_default: HIGH
+    allows_in_main: true
+    requires_url: true
+    bias_flag: false
+    description: >
+      Codified state law — constitution, statutes, administrative code.
+      Only applicable to active, current law. Always verify amendment status.
+
+  PED_DATA:
+    confidence_default: HIGH
+    allows_in_main: true
+    requires_url: true
+    bias_flag: false
+    description: >
+      State Public Education Department official data releases, dashboards,
+      enrollment counts, performance reports, and authorizer registries.
+
+  FEDERAL_DATA:
+    confidence_default: HIGH
+    allows_in_main: true
+    requires_url: true
+    bias_flag: false
+    description: >
+      NCES, Census/ACS, CRDC, ESSA reports, CSP award databases.
+      Verify data year — federal releases often lag 12–18 months.
+
+  AUTHORIZER_DOC:
+    confidence_default: HIGH
+    allows_in_main: true
+    requires_url: true
+    bias_flag: false
+    description: >
+      Official authorizer documents: contracts, renewal reports, annual reports,
+      accountability frameworks, NACSA-published profiles.
+
+  PRIMARY_GOVT:
+    confidence_default: HIGH
+    allows_in_main: true
+    requires_url: true
+    bias_flag: false
+    description: >
+      Municipal, county, or school district official sources — budgets,
+      board minutes, planning documents, demographic reports.
+
+  THINK_TANK:
+    confidence_default: MODERATE
+    allows_in_main: true
+    requires_url: true
+    bias_flag: true
+    description: >
+      Established research organizations — CREDO, Bellwether, NCRECE, Fordham.
+      Tag ideological orientation. Prefer peer-reviewed over advocacy pieces.
+
+  ADVOCACY:
+    confidence_default: LOW
+    allows_in_main: false
+    requires_url: true
+    bias_flag: true
+    description: >
+      Charter advocacy orgs, union groups, reform coalitions. May contain
+      accurate data but self-interest is present. Verify all statistics
+      against primary sources before use. Routed to Needs Verification.
+
+  MEDIA:
+    confidence_default: MODERATE
+    allows_in_main: true
+    requires_url: true
+    bias_flag: true
+    description: >
+      Journalism. Tier A (major outlets, established local investigative) = MODERATE.
+      Tier B (community blogs, advocacy adjacent press) = LOW.
+      Never primary for statistics or legal claims.
+
+  SELF_REPORTED:
+    confidence_default: LOW
+    allows_in_main: false
+    requires_url: false
+    bias_flag: true
+    description: >
+      School websites, operator materials, community newsletters.
+      Useful for qualitative signals, not quantitative claims.
+      Always routed to Needs Verification.
+
+  UNVERIFIED:
+    confidence_default: NONE
+    allows_in_main: false
+    requires_url: false
+    bias_flag: false
+    description: >
+      Claims that could not be sourced. Quarantined from main output.
+      Must appear in needs_verification section only.
+
+# ─────────────────────────────────────────────
+# CONFIDENCE LEVELS
+# ─────────────────────────────────────────────
+# Ordered hierarchy. Used in aggregation logic.
+
+confidence_levels:
+  - HIGH       # strong primary source, recently verified
+  - MODERATE   # credible secondary or older primary
+  - LOW        # single source, self-reported, or aged data
+  - NONE       # unverified; blocked from main analysis
+
+# Maximum age in months before a source is automatically downgraded
+confidence_age_thresholds:
+  HIGH:
+    max_age_months: 18
+    downgrade_to: MODERATE
+  MODERATE:
+    max_age_months: 36
+    downgrade_to: LOW
+
+# ─────────────────────────────────────────────
+# URL PATTERN → SOURCE CLASS INFERENCE
+# ─────────────────────────────────────────────
+# Used by s4_verification.py to auto-classify extracted URLs
+# before LLM confidence tagging. Match is first-wins.
+
+url_patterns:
+  - pattern: "legislature.state"
+    source_class: STATUTE
+  - pattern: "nmlegis.gov"
+    source_class: STATUTE
+  - pattern: "ped.state.nm.us"
+    source_class: PED_DATA
+  - pattern: "nmpec.org"
+    source_class: AUTHORIZER_DOC
+  - pattern: "nacsa.org"
+    source_class: AUTHORIZER_DOC
+  - pattern: "nces.ed.gov"
+    source_class: FEDERAL_DATA
+  - pattern: "census.gov"
+    source_class: FEDERAL_DATA
+  - pattern: "data.ed.gov"
+    source_class: FEDERAL_DATA
+  - pattern: "grantee.ed.gov"
+    source_class: FEDERAL_DATA
+  - pattern: "bellwethereducation.org"
+    source_class: THINK_TANK
+  - pattern: "edreform.com"
+    source_class: ADVOCACY
+    bias_direction: PRO_CHARTER
+  - pattern: "nepc.colorado.edu"
+    source_class: THINK_TANK
+  - pattern: "albuquerquejournal.com"
+    source_class: MEDIA
+    media_tier: A
+  - pattern: "santafenewmexican.com"
+    source_class: MEDIA
+    media_tier: A
+
+# ─────────────────────────────────────────────
+# CONFLICT RESOLUTION RULES
+# ─────────────────────────────────────────────
+# When two sources produce conflicting values for the same claim:
+
+conflict_resolution:
+  default_priority_order:
+    - STATUTE
+    - PED_DATA
+    - FEDERAL_DATA
+    - AUTHORIZER_DOC
+    - PRIMARY_GOVT
+    - THINK_TANK
+    - MEDIA
+    - ADVOCACY
+    - SELF_REPORTED
+
+  when_conflict_unresolvable:
+    action: FLAG_DISPUTED
+    output_behavior: >
+      Include both values in needs_verification. Do NOT present either as fact
+      in the main analysis. Use ⚠️ DISPUTED indicator.

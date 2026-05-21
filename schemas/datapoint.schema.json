@@ -1,0 +1,173 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "datapoint.schema.json",
+  "title": "DataPoint",
+  "description": "The atomic unit of verified intelligence. Every factual claim in the system is a DataPoint with full provenance. No claim may appear in a brief without a corresponding DataPoint.",
+  "type": "object",
+  "required": ["datapoint_id", "community_id", "state", "claim", "source_class", "confidence", "verification_status", "extracted_at"],
+  "properties": {
+    "datapoint_id": {
+      "type": "string",
+      "description": "UUID. Format: dp_{community_id}_{dimension}_{seq}",
+      "pattern": "^dp_[a-z]{2}-[a-z0-9-]+_[a-z_]+_[0-9]+$",
+      "example": "dp_nm-albuquerque_academic_need_001"
+    },
+    "fact_key": {
+      "type": "string",
+      "description": "Stable identifier used to link facts across S3 → S4 → S5 stages (e.g. 'district_proficiency_ela_pct')."
+    },
+    "community_id": {
+      "type": "string",
+      "description": "Parent community. Foreign key to community.schema.json",
+      "pattern": "^[a-z]{2}-[a-z0-9-]+$",
+      "example": "nm-albuquerque"
+    },
+    "state": {
+      "type": "string",
+      "description": "Two-letter state code",
+      "pattern": "^[A-Z]{2}$"
+    },
+    "dimension": {
+      "type": "string",
+      "description": "Which scoring dimension this datapoint feeds",
+      "enum": [
+        "academic_need",
+        "charter_saturation",
+        "population_trends",
+        "political_climate",
+        "authorizer_friendliness",
+        "facilities_feasibility",
+        "replication_feasibility",
+        "funding_environment",
+        "competitive_opportunity",
+        "operational_complexity",
+        "state_context",
+        "school_profile",
+        "authorizer_profile",
+        "general"
+      ]
+    },
+    "claim": {
+      "type": "string",
+      "description": "The specific factual claim this datapoint represents. Write as a complete, standalone sentence.",
+      "minLength": 10,
+      "maxLength": 500,
+      "example": "Albuquerque Public Schools served 73,850 K-12 students in 2023-24."
+    },
+    "value": {
+      "description": "Machine-readable version of the claim value, if numeric or categorical",
+      "oneOf": [
+        {"type": "number"},
+        {"type": "string"},
+        {"type": "boolean"},
+        {"type": "null"}
+      ],
+      "example": 73850
+    },
+    "value_unit": {
+      "type": ["string", "null"],
+      "description": "Unit of the value field if numeric",
+      "example": "students"
+    },
+    "value_year": {
+      "type": ["integer", "null"],
+      "description": "Year the value applies to",
+      "example": 2024
+    },
+    "source_class": {
+      "type": "string",
+      "description": "Source classification from sources.yaml",
+      "enum": [
+        "STATUTE",
+        "PED_DATA",
+        "FEDERAL_DATA",
+        "AUTHORIZER_DOC",
+        "PRIMARY_GOVT",
+        "THINK_TANK",
+        "ADVOCACY",
+        "MEDIA",
+        "SELF_REPORTED",
+        "UNVERIFIED"
+      ]
+    },
+    "source_url": {
+      "type": ["string", "null"],
+      "format": "uri",
+      "description": "Direct URL to the source. Required for all classes except SELF_REPORTED and UNVERIFIED. If unavailable, set to null and explain in source_notes.",
+      "example": "https://webed.ped.state.nm.us"
+    },
+    "source_title": {
+      "type": ["string", "null"],
+      "description": "Human-readable source title",
+      "example": "NM PED 2023-24 Enrollment Report"
+    },
+    "source_date": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "Publication or retrieval date of the source",
+      "example": "2024-10-15"
+    },
+    "source_notes": {
+      "type": ["string", "null"],
+      "description": "Any caveats about the source — e.g., lag in data, format notes, pending verification"
+    },
+    "confidence": {
+      "type": "string",
+      "description": "Confidence level per sources.yaml hierarchy",
+      "enum": ["HIGH", "MODERATE", "LOW", "NONE"]
+    },
+    "confidence_rationale": {
+      "type": ["string", "null"],
+      "description": "Why this confidence level was assigned. Required when not HIGH.",
+      "example": "Single source; could not cross-check with independent source."
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": ["VERIFIED", "PROVISIONAL", "DISPUTED", "UNVERIFIED", "NOT_FOUND"],
+      "description": "VERIFIED = confirmed by source_url. PROVISIONAL = plausible but not directly confirmed. DISPUTED = conflicting sources. NOT_FOUND = searched but no data available."
+    },
+    "conflicting_sources": {
+      "type": "array",
+      "description": "If DISPUTED, list the conflicting values and their sources",
+      "items": {
+        "type": "object",
+        "required": ["claim", "source_url", "source_class"],
+        "properties": {
+          "claim": {"type": "string"},
+          "source_url": {"type": ["string", "null"]},
+          "source_class": {"type": "string"}
+        }
+      }
+    },
+    "bias_flag": {
+      "type": ["string", "null"],
+      "description": "PRO_CHARTER | ANTI_CHARTER | NEUTRAL. Required when source_class is ADVOCACY.",
+      "enum": ["PRO_CHARTER", "ANTI_CHARTER", "NEUTRAL", null]
+    },
+    "extracted_by": {
+      "type": "string",
+      "description": "Model or process that extracted this datapoint",
+      "example": "claude-sonnet-4-5"
+    },
+    "extracted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of extraction"
+    },
+    "stage": {
+      "type": "string",
+      "description": "Pipeline stage that created this datapoint",
+      "enum": ["s2_state_context", "s3_fact_extraction", "s3_school_profile",
+               "s3_authorizer_profile", "manual_entry"]
+    },
+    "in_main_analysis": {
+      "type": "boolean",
+      "description": "Computed by s4_verification. True only if allows_in_main is true per sources.yaml AND confidence >= MODERATE."
+    },
+    "needs_verification_reason": {
+      "type": ["string", "null"],
+      "description": "If in_main_analysis is false, explain why this was routed to needs_verification."
+    }
+  },
+  "additionalProperties": false
+}

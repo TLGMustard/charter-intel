@@ -1,0 +1,158 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "scorecard.schema.json",
+  "title": "CommunityScorecard",
+  "description": "Output of s5_scoring.py. Contains dimension scores, composite, tier, override flags, and confidence. This object is the sole input to s6_synthesis.py along with verified facts.",
+  "type": "object",
+  "required": ["scorecard_id", "community_id", "state", "preset", "dimensions", "composite_score", "tier", "confidence_overall", "scored_at"],
+  "properties": {
+    "scorecard_id": {
+      "type": "string",
+      "description": "Format: sc_{community_id}_{preset}_{date}",
+      "example": "sc_nm-albuquerque_growth_2026-05-21"
+    },
+    "community_id": {"type": "string"},
+    "state": {"type": "string", "pattern": "^[A-Z]{2}$"},
+    "preset": {
+      "type": "string",
+      "enum": ["growth", "replication", "turnaround"],
+      "description": "Operator preset used for weighting"
+    },
+    "dimensions": {
+      "type": "object",
+      "description": "One entry per scoring dimension",
+      "required": [
+        "academic_need", "charter_saturation", "population_trends",
+        "political_climate", "authorizer_friendliness", "facilities_feasibility",
+        "replication_feasibility", "funding_environment",
+        "competitive_opportunity", "operational_complexity"
+      ],
+      "additionalProperties": {
+        "$ref": "#/definitions/dimension_score"
+      }
+    },
+    "composite_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "Weighted sum of all dimension scores × weights. Computed by s5_scoring.py."
+    },
+    "composite_score_rounded": {
+      "type": "number",
+      "description": "Composite rounded to 1 decimal place for display"
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "HIGH_PRIORITY_EXPANSION_MARKET",
+        "STRONG_OPPORTUNITY",
+        "MODERATE_OPPORTUNITY",
+        "WATCHLIST",
+        "AVOID_ENTRY"
+      ],
+      "description": "Tier from scoring_weights.yaml thresholds, modified by override flags"
+    },
+    "tier_display_label": {
+      "type": "string",
+      "description": "Human-readable label from tier_thresholds in scoring_weights.yaml",
+      "example": "STRONG OPPORTUNITY"
+    },
+    "override_flags": {
+      "type": "array",
+      "description": "Active override flags. Each can cap or modify the tier.",
+      "items": {
+        "type": "object",
+        "required": ["flag", "triggered_by", "tier_effect"],
+        "properties": {
+          "flag": {"type": "string"},
+          "triggered_by": {
+            "type": "string",
+            "description": "The fact or condition that triggered this flag"
+          },
+          "tier_effect": {
+            "type": "string",
+            "description": "How this flag changed the tier, if at all"
+          },
+          "visual": {"type": "string", "example": "🔴"}
+        }
+      }
+    },
+    "confidence_overall": {
+      "type": "string",
+      "enum": ["HIGH", "MODERATE", "LOW", "NONE"],
+      "description": "Minimum confidence across the 3 highest-weighted dimensions per scoring_weights.yaml aggregation rule."
+    },
+    "confidence_by_dimension": {
+      "type": "object",
+      "description": "Confidence per dimension for transparency",
+      "additionalProperties": {
+        "type": "string",
+        "enum": ["HIGH", "MODERATE", "LOW", "NONE"]
+      }
+    },
+    "facts_used": {
+      "type": "array",
+      "description": "DataPoint IDs that fed into scoring. Enables traceability.",
+      "items": {"type": "string"}
+    },
+    "dimensions_with_missing_data": {
+      "type": "array",
+      "description": "Dimensions where key facts were unavailable. Confidence downgraded.",
+      "items": {"type": "string"}
+    },
+    "scoring_notes": {
+      "type": ["string", "null"],
+      "description": "Any analyst notes about unusual scoring conditions"
+    },
+    "scored_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "scoring_version": {
+      "type": "string",
+      "description": "Version of scoring_weights.yaml used",
+      "example": "1.0"
+    }
+  },
+  "definitions": {
+    "dimension_score": {
+      "type": "object",
+      "required": ["score", "weight", "confidence", "supporting_fact_ids"],
+      "properties": {
+        "score": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "weight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Weight applied from preset. Will sum to 1.0 across all dimensions."
+        },
+        "weighted_contribution": {
+          "type": "number",
+          "description": "score × weight. Sums to composite_score across all dimensions."
+        },
+        "confidence": {
+          "type": "string",
+          "enum": ["HIGH", "MODERATE", "LOW", "NONE"]
+        },
+        "primary_driver": {
+          "type": ["string", "null"],
+          "description": "One-line explanation of what drove this score"
+        },
+        "supporting_fact_ids": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "DataPoint IDs used to compute this dimension score"
+        },
+        "used_default": {
+          "type": "boolean",
+          "description": "True if no relevant facts were available and default/midpoint was used"
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}
