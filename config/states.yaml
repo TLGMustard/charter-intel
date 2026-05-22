@@ -96,8 +96,8 @@ NM:
     nm-564-gallup: GALLUP
     nm-66-edgewood: MORIARTY-EDGEWOOD
     nm-albuquerque: ALBUQUERQUE
-    nm-angel-fire: null
-    nm-arbolera-española: ESPANOLA
+    nm-angel-fire: CIMARRON
+    nm-arbolera-espanola: ESPANOLA
     nm-aztec: AZTEC
     nm-bld.-2b-albuquerque: ALBUQUERQUE
     nm-bldg.-2-albuquerque: ALBUQUERQUE
@@ -117,12 +117,13 @@ NM:
     nm-red-river: QUESTA
     nm-rio-rancho: RIO RANCHO
     nm-roswell: ROSWELL
-    nm-sandia-park: null
+    nm-sandia-park: MORIARTY-EDGEWOOD
     nm-santa-fe: SANTA FE
     nm-silver-city: SILVER CITY
     nm-socorro: SOCORRO
     nm-ste-c-albuquerque: ALBUQUERQUE
     nm-taos: TAOS
+    nm-truth-or-consequences: T OR C
     nm-us-70-alamogordo: ALAMOGORDO
     nm-w-taos: TAOS
   pilot: true
