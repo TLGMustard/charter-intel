@@ -27,6 +27,8 @@ from pipeline.utils.api_client import call_claude, load_prompt
 from pipeline.utils.cache import CacheManager
 from pipeline.utils.schema_validator import validate_against_schema
 from pipeline.utils.ped_fetcher import get_district_data
+from pipeline.utils.nces_fetcher import get_district_data as get_nces_district_data
+from pipeline.utils.acs_fetcher  import get_district_data as get_acs_district_data
 
 STAGE_ID = "s3_fact_extraction"
 
@@ -135,6 +137,39 @@ def run(
     else:
         verified_ped_data = "(No verified PED proficiency data available for this community)"
 
+    # Load verified NCES district finance + FRL data for prompt injection
+    nces_data = get_nces_district_data(community_id, state)
+    if nces_data:
+        ppr_vs_avg = nces_data.get("per_pupil_revenue_vs_state_avg_pct")
+        ppe        = nces_data.get("per_pupil_expenditure")
+        fed_pct    = nces_data.get("revenue_federal_pct")
+        state_pct  = nces_data.get("revenue_state_pct")
+        loc_pct    = nces_data.get("revenue_local_pct")
+        frl_pct    = nces_data.get("frl_pct")
+        verified_nces_data = (
+            f"VERIFIED NCES DATA (FY {nces_data['fiscal_year']}) — treat as ground truth:\n"
+            + (f"- Per-pupil revenue vs. NM state avg: {ppr_vs_avg:+.1f}%\n" if ppr_vs_avg is not None else "")
+            + (f"- Per-pupil expenditure: ${ppe:,.0f}\n" if ppe is not None else "")
+            + (f"- Revenue mix: {fed_pct}% federal / {state_pct}% state / {loc_pct}% local\n"
+               if all(v is not None for v in (fed_pct, state_pct, loc_pct)) else "")
+            + (f"- FRL%: {frl_pct}% of students qualify for free/reduced-price lunch\n"
+               if frl_pct is not None else "")
+            + f"- Source: {nces_data['source_url']}"
+        )
+    else:
+        verified_nces_data = "(No verified NCES district finance data available for this community)"
+
+    # Load verified ACS ELL data for prompt injection
+    acs_data = get_acs_district_data(community_id, state)
+    if acs_data:
+        verified_acs_data = (
+            f"VERIFIED CENSUS ACS DATA ({acs_data['data_year']}) — treat as ground truth:\n"
+            f"- ELL%: {acs_data['ell_pct']}% of students ages 5–17 speak English less than very well\n"
+            f"- Source: {acs_data['source_url']}"
+        )
+    else:
+        verified_acs_data = "(No verified Census ACS ELL data available — CENSUS_API_KEY not set or no district mapping)"
+
     community_name = community_id.split("-", 1)[1].replace("-", " ").title()
 
     # Condense state context to reduce tokens (only governance + law + ecosystem)
@@ -157,6 +192,8 @@ def run(
         "KNOWN_SCHOOLS": json.dumps(known_schools, indent=2),
         "VERIFIED_ROSTER": verified_roster,
         "VERIFIED_PED_DATA": verified_ped_data,
+        "VERIFIED_NCES_DATA": verified_nces_data,
+        "VERIFIED_ACS_DATA": verified_acs_data,
     })
 
     result = call_claude(
@@ -590,6 +627,15 @@ def run(
         facts_output.get("facts", []),
         has_roster=bool(verified_roster_rows),
     )
+
+    # ── Inject NCES fact datapoints (funding_environment + frl_pct) ──────────
+    # These are pre-computed from federal government files and are more
+    # authoritative than anything Claude could extract.  Runs after the roster
+    # upgrade so it has the final facts list to deduplicate against.
+    _inject_nces_facts(facts_output, nces_data, community_id, state, config)
+
+    # ── Inject ACS fact datapoints (ell_pct → operational_complexity) ────────
+    _inject_acs_facts(facts_output, acs_data, community_id, state)
     # ─────────────────────────────────────────────────────────────────────────
 
     out_path = f"data/cache/community/{state.lower()}/{community_id}/s3_facts_raw.json"
@@ -605,6 +651,164 @@ def run(
         output_data=facts_output, tokens_used=result.total_tokens,
         duration_seconds=round(time.time() - start, 2)
     )
+
+
+# Maps NCES result keys → (scoring dimension, value_unit)
+# Only keys that appear in scoring_weights.yaml fact_keys or are useful context.
+_NCES_FACT_KEY_MAP: dict[str, tuple[str, str]] = {
+    "per_pupil_revenue_vs_state_avg_pct": ("funding_environment",    "percent"),
+    "per_pupil_expenditure":             ("funding_environment",    "USD"),
+    "revenue_federal_pct":               ("funding_environment",    "percent"),
+    "revenue_state_pct":                 ("funding_environment",    "percent"),
+    "revenue_local_pct":                 ("funding_environment",    "percent"),
+    "frl_pct":                           ("operational_complexity", "percent"),
+    # Derived from frl_pct in nces_fetcher — provides a FEDERAL_DATA-sourced
+    # primary_fact for s5_scoring so S4's UNVERIFIED block cannot suppress it.
+    "operational_complexity_index":      ("operational_complexity", "index_1_9"),
+}
+# Metadata keys in the nces_data dict — not fact values, skip them
+_NCES_META_KEYS: frozenset = frozenset({"fiscal_year", "source_url", "source_title", "confidence"})
+
+
+def _inject_nces_facts(
+    facts_output: dict,
+    nces_data: Optional[dict],
+    community_id: str,
+    state: str,
+    config: PipelineConfig,
+) -> None:
+    """Append NCES CCD fact datapoints to facts_output.
+
+    Iterates over confirmed NCES keys and appends a pre-formed DataPoint for
+    each one that is NOT already present in the facts array with source_class
+    FEDERAL_DATA.  This guarantees funding_environment and frl_pct land in
+    the facts bundle regardless of what Claude extracted.
+
+    Called after _upgrade_roster_derived_facts so the final facts list is
+    available for deduplication.
+    """
+    if not nces_data:
+        return
+
+    facts: list[dict] = facts_output.setdefault("facts", [])
+
+    # Collect fact_keys already represented by a FEDERAL_DATA datapoint
+    existing_federal_keys: set[str] = {
+        f.get("fact_key", "")
+        for f in facts
+        if f.get("source_class") == "FEDERAL_DATA"
+    }
+
+    injected = 0
+    for fact_key, value in nces_data.items():
+        if fact_key in _NCES_META_KEYS or fact_key not in _NCES_FACT_KEY_MAP:
+            continue
+        if fact_key in existing_federal_keys:
+            continue  # already present — defer to the existing entry
+
+        dimension, unit = _NCES_FACT_KEY_MAP[fact_key]
+        facts.append({
+            "datapoint_id":         f"dp_{community_id}_nces_{fact_key}",
+            "community_id":         community_id,
+            "state":                state,
+            "dimension":            dimension,
+            "fact_key":             fact_key,
+            "claim":                f"{fact_key}: {value} (NCES CCD FY2023)",
+            "value":                value,
+            "value_unit":           unit,
+            "value_year":           2023,
+            "source_class":         "FEDERAL_DATA",
+            "source_url":           nces_data.get("source_url"),
+            "source_title":         nces_data.get("source_title"),
+            "source_date":          None,
+            "confidence":           "HIGH",
+            "confidence_rationale": "Directly computed from NCES CCD federal finance/lunch files",
+            "verification_status":  "VERIFIED",
+            "bias_flag":            None,
+            "extracted_by":         "nces_fetcher",
+            "extracted_at":         today_str(),
+            "stage":                STAGE_ID,
+            "in_main_analysis":     True,
+            "needs_verification_reason": None,
+        })
+        injected += 1
+
+    if injected:
+        logger.info(
+            "[%s] Injected %d NCES fact datapoints (funding_environment + operational_complexity)",
+            community_id, injected,
+        )
+
+
+# Maps ACS result keys → (scoring dimension, value_unit)
+_ACS_FACT_KEY_MAP: dict[str, tuple[str, str]] = {
+    "ell_pct": ("operational_complexity", "percent"),
+}
+_ACS_META_KEYS: frozenset = frozenset({"data_year", "source_url", "source_title", "confidence"})
+
+
+def _inject_acs_facts(
+    facts_output: dict,
+    acs_data: Optional[dict],
+    community_id: str,
+    state: str,
+) -> None:
+    """Append Census ACS fact datapoints to facts_output.
+
+    Injects ell_pct as a FEDERAL_DATA-class fact so S4's deterministic rules
+    pass it through to S5 for operational_complexity scoring.  Skips injection
+    if acs_data is None (key not set, no district mapping, or API failure).
+    """
+    if not acs_data:
+        return
+
+    facts: list[dict] = facts_output.setdefault("facts", [])
+
+    existing_federal_keys: set[str] = {
+        f.get("fact_key", "")
+        for f in facts
+        if f.get("source_class") == "FEDERAL_DATA"
+    }
+
+    injected = 0
+    for fact_key, value in acs_data.items():
+        if fact_key in _ACS_META_KEYS or fact_key not in _ACS_FACT_KEY_MAP:
+            continue
+        if fact_key in existing_federal_keys:
+            continue  # already present — defer to existing entry
+
+        dimension, unit = _ACS_FACT_KEY_MAP[fact_key]
+        facts.append({
+            "datapoint_id":         f"dp_{community_id}_acs_{fact_key}",
+            "community_id":         community_id,
+            "state":                state,
+            "dimension":            dimension,
+            "fact_key":             fact_key,
+            "claim":                f"{fact_key}: {value} (Census ACS 5-year, ages 5–17)",
+            "value":                value,
+            "value_unit":           unit,
+            "value_year":           2023,
+            "source_class":         "FEDERAL_DATA",
+            "source_url":           acs_data.get("source_url"),
+            "source_title":         acs_data.get("source_title"),
+            "source_date":          None,
+            "confidence":           "MODERATE",
+            "confidence_rationale": "Census ACS 5-year estimate — subject to sampling error",
+            "verification_status":  "VERIFIED",
+            "bias_flag":            None,
+            "extracted_by":         "acs_fetcher",
+            "extracted_at":         today_str(),
+            "stage":                STAGE_ID,
+            "in_main_analysis":     True,
+            "needs_verification_reason": None,
+        })
+        injected += 1
+
+    if injected:
+        logger.info(
+            "[%s] Injected %d ACS fact datapoints (ell_pct → operational_complexity)",
+            community_id, injected,
+        )
 
 
 def _upgrade_roster_derived_facts(facts: list[dict], has_roster: bool) -> list[dict]:

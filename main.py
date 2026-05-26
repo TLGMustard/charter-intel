@@ -60,6 +60,19 @@ STAGE_MODULES = {
 }
 
 
+def _render_progress(community_id: str, stage_num: int, total: int, stage_id: str) -> None:
+    """Write an in-place ASCII progress bar to stderr (carriage-return, no newline).
+
+    Example output (stage 3 of 7):
+        [nm-santa-fe] [████████░░░░░░░░░░░░] 3/7 — s3_fact_extraction
+    """
+    bar_width = 20
+    filled = int(bar_width * stage_num / total)
+    bar = "█" * filled + "░" * (bar_width - filled)
+    sys.stderr.write(f"\r[{community_id}] [{bar}] {stage_num}/{total} — {stage_id}")
+    sys.stderr.flush()
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Charter Community Intelligence Platform"
@@ -152,13 +165,18 @@ def run_community_pipeline(
     """Run the full pipeline for one community. Returns stage_id → StageResult."""
     results = {}
     previous = None
+    total_stages = len(stages_to_run)
 
-    for stage_id in stages_to_run:
+    if total_stages == 0:
+        return results
+
+    for i, stage_id in enumerate(stages_to_run, 1):
         module = STAGE_MODULES.get(stage_id)
         if not module:
             logger.warning(f"Unknown stage '{stage_id}' — skipping")
             continue
 
+        _render_progress(community_id, i, total_stages, stage_id)
         logger.info(f"[{community_id}] Running {stage_id}...")
         start = time.time()
 
@@ -201,6 +219,10 @@ def run_community_pipeline(
             )
 
         previous = result
+
+    # Close the progress bar line — runs whether the loop completes or breaks on error
+    sys.stderr.write("\n")
+    sys.stderr.flush()
 
     return results
 

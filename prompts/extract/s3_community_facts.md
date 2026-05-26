@@ -58,7 +58,19 @@ The following values are pulled directly from official NM PED state assessment d
 
 {{VERIFIED_ROSTER}}
 
-The following schools are verified from the official state charter roster. Treat these as confirmed facts. Do not contradict, omit, or add schools to this list from your training knowledge. Use this as the ground truth for charter_saturation, competitive_opportunity, and authorizer_friendliness dimensions.
+The following schools are verified from the official state charter roster.
+
+**VERIFIED NCES DISTRICT FINANCE DATA — federal CCD data (FY2023). Treat as ground truth.**
+
+{{VERIFIED_NCES_DATA}}
+
+These values are computed directly from the NCES Common Core of Data and will be injected as verified fact datapoints automatically. You do NOT need to emit `per_pupil_revenue_vs_state_avg_pct`, `per_pupil_expenditure`, `revenue_federal_pct`, `revenue_state_pct`, `revenue_local_pct`, or `frl_pct` as DataPoints — they are pre-supplied. Use this data for context when assessing funding_environment and operational_complexity, and when deciding philanthropic_activity_level or other derived assessments. Treat these as confirmed facts. Do not contradict, omit, or add schools to this list from your training knowledge. Use this as the ground truth for charter_saturation, competitive_opportunity, and authorizer_friendliness dimensions.
+
+**VERIFIED CENSUS ACS DATA — federal demographic data. Treat as ground truth.**
+
+{{VERIFIED_ACS_DATA}}
+
+This value is computed directly from the Census ACS 5-year estimates and will be injected as a verified fact datapoint automatically. You do NOT need to emit `ell_pct` as a DataPoint — it is pre-supplied. Use this data for context when assessing operational_complexity.
 
 **State context (for reference — do not repeat these as community-level facts):**
 {{STATE_CONTEXT_JSON}}

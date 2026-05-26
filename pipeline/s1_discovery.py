@@ -279,6 +279,12 @@ _STREET_SUFFIXES: frozenset = frozenset({
     "ne", "nw", "se", "sw",
     # Additional common tokens
     "path", "row",
+    # NM Spanish address tokens — street-name words that appear immediately
+    # before the city name in NM PED roster addresses. "Arbolera" is the
+    # street name in "515 Calle Arbolera Española" (McCurdy Charter School);
+    # without this entry the fallback heuristic produces "Arbolera Española"
+    # instead of "Española".
+    "arbolera",
 })
 
 
@@ -292,12 +298,13 @@ def _city_from_address(address: str) -> str:
     'St.' match correctly.
 
     Examples:
-        '4300 Cutler Ave NE Albuquerque, NM 87110' → 'Albuquerque'
-        '74 A Van Nu Po Road Santa Fe, NM 87508'   → 'Santa Fe'
-        '123 Main St Las Cruces, NM 88001'          → 'Las Cruces'
-        '456 Rio Rancho Blvd Rio Rancho, NM 87124'  → 'Rio Rancho'
-        '850 N. Telshor Blvd, Las Cruces, NM 88011' → 'Las Cruces'
+        '4300 Cutler Ave NE Albuquerque, NM 87110'    → 'Albuquerque'
+        '74 A Van Nu Po Road Santa Fe, NM 87508'      → 'Santa Fe'
+        '123 Main St Las Cruces, NM 88001'             → 'Las Cruces'
+        '456 Rio Rancho Blvd Rio Rancho, NM 87124'    → 'Rio Rancho'
+        '850 N. Telshor Blvd, Las Cruces, NM 88011'  → 'Las Cruces'
         '7300 Old Santa Fe Trail, Santa Fe, NM 87505' → 'Santa Fe'
+        '515 Calle Arbolera Española, NM 87532'       → 'Española'
     """
     parts = re.split(r",\s*NM\b", address, maxsplit=1)
     if len(parts) < 2:
