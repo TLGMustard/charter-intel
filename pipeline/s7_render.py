@@ -170,8 +170,15 @@ def _render_fallback(brief: dict) -> str:
     # Top Charter Schools
     schools = brief.get("top_charter_schools", [])
     if schools:
+        n = len(schools)
+        if n == 1:
+            schools_header = "## Top Charter School in Market"
+        elif n < 5:
+            schools_header = f"## Top {n} Charter Schools in Market"
+        else:
+            schools_header = "## Top 5 Charter Schools in Market"
         lines += [
-            "## Top 5 Charter Schools in Market",
+            schools_header,
             "",
             "> ⚠️ Contact information requires human verification before external use.",
             "",

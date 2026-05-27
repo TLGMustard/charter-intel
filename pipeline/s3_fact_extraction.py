@@ -34,6 +34,30 @@ from pipeline.utils.authorizers_fetcher     import get_community_authorizers
 
 STAGE_ID = "s3_fact_extraction"
 
+# Charter intel: only pass the top N schools to the prompt (CSV already sorted
+# by ELA proficiency descending). Claude selects 5 from this set. Passing all
+# 58 Albuquerque schools inflates the base prompt to ~10k tokens.
+_MAX_CHARTER_INTEL_SCHOOLS = 10
+
+# Web result truncation — caps content/snippet fields in any list-of-dicts
+# payload before it's serialized into a prompt string.
+_WEB_RESULT_MAX_CHARS = 600
+
+
+def _truncate_web_results(results: list[dict]) -> list[dict]:
+    """Truncate each web result's content field to reduce prompt bloat.
+    Preserves url and title in full — only content/snippet/text/body is capped."""
+    truncated = []
+    for r in results:
+        r = dict(r)
+        for field in ("content", "snippet", "text", "body"):
+            if field in r and isinstance(r[field], str):
+                if len(r[field]) > _WEB_RESULT_MAX_CHARS:
+                    r[field] = r[field][:_WEB_RESULT_MAX_CHARS] + "…"
+        truncated.append(r)
+    return truncated
+
+
 class _DepthSkip(Exception):
     """Raised inside a web-search try block to skip it based on --depth."""
 
@@ -779,6 +803,7 @@ def _inject_acs_facts(
     if acs_data is None (key not set, no district mapping, or API failure).
     """
     if not acs_data:
+        facts_output["ell_data_suppressed"] = True
         return
 
     facts: list[dict] = facts_output.setdefault("facts", [])
@@ -871,12 +896,16 @@ def _fetch_charter_intel(
         )
 
     try:
+        # Cap schools passed to the prompt. CSV is already sorted by ELA
+        # proficiency descending, so the first N are the best candidates.
+        prompt_schools = _truncate_web_results(csv_schools[:_MAX_CHARTER_INTEL_SCHOOLS])
+
         prompt_text = load_prompt("prompts/extract/s3_charter_intel.md", {
             "COMMUNITY_NAME":      community_name,
             "STATE_NAME":          state_name,
             "STATE_CODE":          state,
             "TODAY_DATE":          today_str(),
-            "CSV_SCHOOLS_JSON":    json.dumps(csv_schools,     indent=2),
+            "CSV_SCHOOLS_JSON":    json.dumps(prompt_schools,   indent=2),
             "CSV_AUTHORIZERS_JSON": json.dumps(csv_authorizers, indent=2),
             "DEPTH_INSTRUCTION":   depth_instruction,
         })

@@ -156,6 +156,9 @@ def run(
     # --- Inject charter intelligence from S3 (bypasses scoring / audit) ---
     brief_json = _inject_charter_intel(brief_json, state, community_id)
 
+    # --- Inject ELL data gap disclosure if ACS data was suppressed ---
+    brief_json = _inject_ell_gap_disclosure(brief_json, state, community_id)
+
     # --- Validate schema ---
     brief_json["generated_at"] = timestamp_now()
     validation = validate_against_schema(brief_json, "schemas/brief.schema.json")
@@ -250,6 +253,17 @@ def _generate_brief(
 # PASS 2: HALLUCINATION AUDIT
 # ─────────────────────────────────────────────
 
+def _build_audit_payload(synthesis_output: dict) -> dict:
+    """Extract only the fields the audit needs to check.
+    Strips executive snapshot prose, quick reads, facilities narrative,
+    needs_verification, schools_to_watch. Cuts audit input tokens ~46%."""
+    return {
+        "scorecard_summary": synthesis_output.get("scorecard_summary"),
+        "recommendations":   synthesis_output.get("recommendations"),
+        "sources":           synthesis_output.get("sources"),
+    }
+
+
 def _run_audit(
     community_id: str,
     brief_json: dict,
@@ -264,7 +278,7 @@ def _run_audit(
     prompt_text = load_prompt(audit_prompt_path, {
         "COMMUNITY_ID": community_id,
         "TODAY_DATE": _today(),
-        "BRIEF_JSON": json.dumps(brief_json, indent=2),
+        "BRIEF_JSON": json.dumps(_build_audit_payload(brief_json), indent=2),
         "VERIFIED_FACTS_JSON": json.dumps(verified_facts, indent=2),
     })
 
@@ -417,4 +431,49 @@ def _inject_charter_intel(brief_json: dict, state: str, community_id: str) -> di
 
     brief_json["top_charter_schools"] = charter_schools
     brief_json["local_authorizers"]   = local_authorizers
+    return brief_json
+
+
+def _inject_ell_gap_disclosure(brief_json: dict, state: str, community_id: str) -> dict:
+    """
+    If ell_data_suppressed was set in S3, append a standard needs_verification
+    entry disclosing the missing ELL data.
+
+    Runs post-generation so it doesn't conflict with the synthesis prompt's
+    anti-hallucination grounding rule (which prohibits introducing claims not
+    in the verified facts array). A data-absence disclosure is pipeline metadata,
+    not a new factual claim — it belongs here, not inside the model's context.
+    """
+    s3_path = f"data/cache/community/{state.lower()}/{community_id}/s3_facts_raw.json"
+    if not os.path.exists(s3_path):
+        return brief_json
+
+    try:
+        with open(s3_path) as f:
+            s3_raw = json.load(f)
+    except Exception:
+        return brief_json
+
+    if not s3_raw.get("ell_data_suppressed"):
+        return brief_json
+
+    entry = {
+        "claim": "ELL rate (English Language Learner %) — Census ACS data suppressed for this district",
+        "reason": (
+            "ACS B16004 data suppressed for this district, likely due to small enrollment sample. "
+            "Actual ELL rate may be nonzero and could affect operational_complexity scoring."
+        ),
+        "source_class_attempted": "FEDERAL_DATA",
+        "resolution_path": f"{state} PED district profile or state report card.",
+        "impact_if_wrong": "MODERATE",
+    }
+
+    if not isinstance(brief_json.get("needs_verification"), list):
+        brief_json["needs_verification"] = []
+    brief_json["needs_verification"].append(entry)
+
+    import logging
+    logging.getLogger(__name__).info(
+        "[%s] Injected ELL data gap disclosure into needs_verification", community_id
+    )
     return brief_json

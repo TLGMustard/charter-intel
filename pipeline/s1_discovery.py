@@ -275,6 +275,57 @@ def _clean_city(city: str) -> str:
     return city
 
 
+def _strip_address_artifacts(city: str) -> str:
+    """Remove leading address artifacts from a parsed city string.
+
+    The NM PED address parser sometimes leaves behind street numbers,
+    highway identifiers, or building/suite codes between a recognized
+    street suffix and the true city name.  This pass strips those tokens
+    so the community_id resolves correctly.
+
+    Examples (before → after):
+        "344 Edgewood"          → "Edgewood"
+        "4386 Shiprock"         → "Shiprock"
+        "156 Navajo"            → "Navajo"
+        "US-70 Alamogordo"      → "Alamogordo"
+        "NM Hwy 564 Gallup"     → "Gallup"
+        "NM 602 Gallup"         → "Gallup"
+        "Bld. 2B Albuquerque"   → "Albuquerque"
+        "Bldg. 2 Albuquerque"   → "Albuquerque"
+        "Ste C, Albuquerque"    → "Albuquerque"
+        "2B Albuquerque"        → "Albuquerque"
+        "4 Jemez Pueblo"        → "Jemez Pueblo"
+    """
+    # 1. Strip leading building / suite codes — must run before number strip.
+    #    Pattern: keyword (Bld., Bldg., Ste., Suite, Apt., Unit) followed by
+    #    a code token (e.g., "2B", "C,", "100") and optional trailing comma.
+    city = re.sub(
+        r"(?i)^\s*(?:Bld\.?|Bldg\.?|Ste\.?|Suite|Apt\.?|Unit)\s+\S+\s*,?\s*",
+        "", city,
+    )
+
+    # 2. Strip leading highway / route identifiers.
+    #    Covers: "US-70", "NM Hwy 564", "NM 602", "State Hwy 9", "Hwy 344"
+    city = re.sub(
+        r"(?i)^\s*(?:US|NM|State)\s*-?\s*(?:Hwy\.?|Highway|Route|Rte\.?)?\s*\d+\s*",
+        "", city,
+    )
+    city = re.sub(
+        r"(?i)^\s*(?:Hwy\.?|Highway|Route|Rte\.?)\s*\d+\s*",
+        "", city,
+    )
+
+    # 3. Strip leading numbers or number+letter codes (e.g., "344", "4386", "2B").
+    #    One digit-sequence with an optional trailing letter, then whitespace.
+    city = re.sub(r"^\s*\d+[A-Za-z]?\s*,?\s*", "", city)
+
+    # 4. Strip lone single-letter suite code left after prior passes
+    #    (e.g., "C, Albuquerque" → "Albuquerque").
+    city = re.sub(r"^\s*[A-Za-z]\s*,\s*", "", city)
+
+    return city.strip()
+
+
 # Word-level set used by _city_from_address() — compared after stripping
 # all non-alpha characters so punctuated tokens like "Blvd," or "St." match.
 _STREET_SUFFIXES: frozenset = frozenset({
@@ -328,12 +379,13 @@ def _city_from_address(address: str) -> str:
         if token in _STREET_SUFFIXES:
             city_words = words[i + 1:]
             if city_words:
-                return _clean_city(" ".join(city_words))
+                return _clean_city(_strip_address_artifacts(" ".join(city_words)))
             break  # suffix at tail with nothing after — fall through
 
     # Fallback: no recognizable suffix found.
     # Last two words are the best heuristic for NM cities (most are 1–2 words).
-    return _clean_city(" ".join(words[-2:])) if len(words) >= 2 else _clean_city(pre_state)
+    raw = " ".join(words[-2:]) if len(words) >= 2 else pre_state
+    return _clean_city(_strip_address_artifacts(raw))
 
 
 def _roster_path(state: str) -> str:

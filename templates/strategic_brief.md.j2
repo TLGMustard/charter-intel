@@ -40,11 +40,18 @@
 No override flags triggered.
 {% endif %}
 
+{% if brief.top_charter_schools %}
 ---
 
+{% set _sc = brief.top_charter_schools | length %}
+{% if _sc == 1 %}
+## Top Charter School in Market
+{% elif _sc < 5 %}
+## Top {{ _sc }} Charter Schools in Market
+{% else %}
 ## Top 5 Charter Schools in Market
+{% endif %}
 
-{% if brief.top_charter_schools %}
 > ⚠️ **Contact information requires human verification before external use.**
 
 {% for school in brief.top_charter_schools %}
@@ -66,8 +73,6 @@ No override flags triggered.
 *Confidence: {{ school.confidence }} · Source: {{ school.source_class }}*
 
 {% endfor %}
-{% else %}
-*No charter school data available for this community.*
 {% endif %}
 
 ---
