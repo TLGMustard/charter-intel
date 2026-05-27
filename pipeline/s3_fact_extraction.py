@@ -90,11 +90,20 @@ def run(
     if config.cache_enabled and not config.force_refresh:
         cached = cache.get(cache_key)
         if cached:
-            return StageResult(
-                stage_id=STAGE_ID, community_id=community_id, state=state,
-                status=StageStatus.SUCCESS, output_data=cached,
-                cache_hit=True, duration_seconds=round(time.time() - start, 2)
-            )
+            # source_mode absent on pre-existing cache files → treat as mode 2 (full data)
+            source_mode = cached.get("source_mode", 2)
+            if config.mode == OutputMode.STRATEGIC_BRIEF and source_mode == 1:
+                logger.info(
+                    "[%s] s3_cache: invalidating mode 1 cache for mode 2 run — re-fetching",
+                    community_id,
+                )
+                # Fall through to full re-run
+            else:
+                return StageResult(
+                    stage_id=STAGE_ID, community_id=community_id, state=state,
+                    status=StageStatus.SUCCESS, output_data=cached,
+                    cache_hit=True, duration_seconds=round(time.time() - start, 2)
+                )
 
     if config.dry_run:
         return StageResult(
@@ -707,6 +716,8 @@ def run(
         facts_output["charter_schools"]  = charter_intel.get("top_charter_schools", csv_schools)
         facts_output["local_authorizers"] = charter_intel.get("local_authorizers", csv_authorizers)
     # ─────────────────────────────────────────────────────────────────────────
+
+    facts_output["source_mode"] = config.mode.value
 
     out_path = f"data/cache/community/{state.lower()}/{community_id}/s3_facts_raw.json"
     os.makedirs(os.path.dirname(out_path), exist_ok=True)

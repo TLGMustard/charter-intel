@@ -30,6 +30,7 @@ from __future__ import annotations
 import csv
 import logging
 import os
+import subprocess
 from typing import Optional
 
 import yaml
@@ -42,12 +43,16 @@ STATES_YAML = "config/states.yaml"
 
 # (year_key, file_path) — year_key is the label used in enrollment_by_year dict.
 # Files are named by data-collection year; 2021 is absent by design.
-_MEMBERSHIP_FILES: list[tuple[int, str]] = [
+# Exported as NCES_SOURCE_FILES so build_nces_cache.py can import them without
+# duplicating paths. These are the national files — build_nces_cache.py filters
+# to a specific state and writes data/processed/{state}/nces_membership_{state}.parquet.
+NCES_SOURCE_FILES: list[tuple[int, str]] = [
     (2020, "data/raw/nm/nces_lea_membership_2020.csv"),
     (2022, "data/raw/nm/nces_lea_membership_2022.csv"),
     (2023, "data/raw/nm/nces_lea_membership_2023.csv"),
     (2024, "data/raw/nm/nces_lea_membership_2024.csv"),
 ]
+_MEMBERSHIP_FILES = NCES_SOURCE_FILES  # internal alias kept for _SCHOOL_MEMBERSHIP_FILES below
 
 SOURCE_URL   = "https://nces.ed.gov/ccd/files.asp"
 SOURCE_TITLE = "NCES CCD LEA Membership Data"
@@ -62,6 +67,75 @@ _SCHOOL_MEMBERSHIP_FILES: list[tuple[int, str]] = [
 # Trend thresholds: pct_change outside ±3% → growing/declining; within → stable
 _GROWING_THRESHOLD  =  3.0
 _DECLINING_THRESHOLD = -3.0
+
+
+# ── Parquet cache helpers ─────────────────────────────────────────────────────
+
+def _parquet_path(state_lower: str) -> str:
+    return f"data/processed/{state_lower}/nces_membership_{state_lower}.parquet"
+
+
+def _ensure_parquet(state: str) -> None:
+    """Build the state parquet cache if it does not exist.
+
+    Calls scripts/build_nces_cache.py as a subprocess so the build logic and
+    its pandas dependency stay out of the module-level import graph.
+    Blocks until the build completes. Does not raise — if the build fails,
+    the subsequent pd.read_parquet call will fail with a clear FileNotFoundError.
+    """
+    state_lower = state.lower()
+    path = _parquet_path(state_lower)
+    if os.path.exists(path):
+        return
+    log.info(
+        "nces_cache: not found for %s — building now (one-time, ~2 min)", state.upper()
+    )
+    try:
+        subprocess.run(
+            ["python3", "scripts/build_nces_cache.py", state.upper()],
+            check=True,
+        )
+        log.info(
+            "nces_cache: built and cached for %s — future runs will be instant",
+            state.upper(),
+        )
+    except subprocess.CalledProcessError as exc:
+        log.error(
+            "nces_cache: build failed for %s (exit %d) — population_trends unavailable",
+            state.upper(), exc.returncode,
+        )
+
+
+def _enrollment_from_parquet(leaid: str, df: "pd.DataFrame") -> dict[int, int]:  # type: ignore[name-defined]
+    """Return {year: enrollment_count} from the pre-filtered state parquet dataframe.
+
+    Applies the same filter criteria as the CSV reader:
+      TOTAL_INDICATOR == "Education Unit Total"
+      DMS_FLAG        == "Reported"
+      LEAID           == leaid
+    Then sums STUDENT_COUNT per year.
+    """
+    import pandas as pd
+
+    mask = (
+        (df["LEAID"].str.strip() == leaid)
+        & (df["TOTAL_INDICATOR"].str.strip() == "Education Unit Total")
+        & (df["DMS_FLAG"].str.strip() == "Reported")
+    )
+    filtered = df[mask].copy()
+    if filtered.empty:
+        return {}
+
+    filtered["_count"] = pd.to_numeric(filtered["STUDENT_COUNT"], errors="coerce")
+    valid = filtered.dropna(subset=["_count"])
+
+    result: dict[int, int] = {}
+    for year_str, group in valid.groupby("_year"):
+        total = int(group["_count"].sum())
+        if total > 0:
+            result[int(year_str)] = total
+
+    return result
 
 
 # ── Config loader ─────────────────────────────────────────────────────────────
@@ -173,18 +247,24 @@ def get_population_trends(community_id: str, state: str) -> Optional[dict]:
         )
         return None
 
-    # ── Collect enrollment by year ────────────────────────────────────────────
-    enrollment_by_year: dict[int, int] = {}
+    # ── Parquet fast path — build on first run if absent ─────────────────────
+    state_lower = state.lower()
+    pq_path = _parquet_path(state_lower)
+    _ensure_parquet(state)
 
-    for year_key, file_path in _MEMBERSHIP_FILES:
-        count = _read_enrollment(leaid, file_path)
-        if count is None:
-            log.info(
-                "population_trends_fetcher: no data for %s in year %d — skipping year",
-                community_id, year_key,
-            )
-            continue
-        enrollment_by_year[year_key] = count
+    if not os.path.exists(pq_path):
+        log.warning(
+            "population_trends_fetcher: parquet unavailable for %s — skipping trend data",
+            state.upper(),
+        )
+        return None
+
+    import pandas as pd
+    log.info("nces_cache: reading from filtered parquet (%s)", state.upper())
+    df = pd.read_parquet(pq_path)
+
+    # ── Collect enrollment by year ────────────────────────────────────────────
+    enrollment_by_year: dict[int, int] = _enrollment_from_parquet(leaid, df)
 
     years_available = sorted(enrollment_by_year.keys())
 
