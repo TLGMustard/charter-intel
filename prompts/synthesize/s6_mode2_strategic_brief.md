@@ -98,6 +98,7 @@ Generate a brief JSON object with this exact structure:
   "scorecard_summary": {
     "composite_score": <number>,
     "tier_display_label": "<string>",
+    "excluded_dimensions": [<copy from scorecard.excluded_dimensions — list of dimension names excluded from composite because used_default is true; [] if none>],
     "override_flags": [<copy from scorecard>],
     "top_drivers": [
       {
@@ -113,6 +114,7 @@ Generate a brief JSON object with this exact structure:
         "score": <number>,
         "weight": <number>,
         "confidence": "<HIGH|MODERATE|LOW>",
+        "used_default": <boolean — copy from scorecard.dimensions[dimension_name].used_default; true means this dimension was excluded from the composite>,
         "driver": "<one-sentence strategic implication — what this score means for a charter operator making an entry decision. Do not echo the formula or raw number>"
       }
     ]

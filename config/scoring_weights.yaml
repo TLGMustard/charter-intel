@@ -134,6 +134,7 @@ dimensions:
     scoring_rules:
       primary_fact: "political_climate_index"
       direction: direct
+      score_is_index: true   # index is already calibrated 1–9; use value directly as score
       thresholds:
         - {max: 2, score: 1}   # Actively hostile
         - {max: 4, score: 3}   # Resistant
@@ -144,6 +145,8 @@ dimensions:
         political_climate_index is extracted as a qualitative assessment
         and converted to 1–10 by s3_fact_extraction.py using the
         political_signal_rubric defined below.
+        score_is_index=true bypasses threshold translation; the index
+        value IS the score when web-search data is present.
     political_signal_rubric:
       # Maps qualitative signals to index values used in scoring
       HOSTILE:           1
@@ -200,6 +203,7 @@ dimensions:
     scoring_rules:
       primary_fact: "facilities_feasibility_index"
       direction: direct
+      score_is_index: true   # index is already calibrated 1–9; use value directly as score
       thresholds:
         - {max: 2, score: 1}
         - {max: 4, score: 3}

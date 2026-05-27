@@ -61,6 +61,10 @@ def run(
         with open(brief_path) as f:
             brief = json.load(f)
 
+    # Fix 1: LLM sometimes zeroes weights for excluded dimensions in dimension_table.
+    # Restore original weights from the S5 scorecard so the table is accurate.
+    _patch_excluded_weights(brief, state, community_id)
+
     # Shared Jinja environment
     env = Environment(
         loader=FileSystemLoader("templates"),
@@ -117,6 +121,36 @@ def run(
     )
 
 
+def _patch_excluded_weights(brief: dict, state: str, community_id: str) -> None:
+    """Restore original weights for excluded dimension rows in dimension_table.
+
+    The LLM sometimes sets weight=0 for excluded dimensions (those where
+    used_default is True) because it interprets 'excluded from composite' as
+    'weight = 0'.  The display should show the original design weight so readers
+    can see what the dimension *would have* been worth — the footnote already
+    explains that it is redistributed away.
+
+    Silently no-ops when the scorecard file is absent (e.g. unit tests, dry runs).
+    """
+    dim_table = (brief.get("scorecard_summary") or {}).get("dimension_table")
+    if not dim_table:
+        return
+
+    sc_path = f"data/cache/community/{state.lower()}/{community_id}/s5_scorecard.json"
+    if not os.path.exists(sc_path):
+        return
+
+    with open(sc_path) as f:
+        sc_dims = json.load(f).get("dimensions", {})
+
+    for row in dim_table:
+        if row.get("used_default") and row.get("weight") == 0:
+            dim_name = row.get("dimension")
+            original = sc_dims.get(dim_name, {}).get("weight")
+            if original is not None:
+                row["weight"] = original
+
+
 def _render_fallback(brief: dict) -> str:
     """
     Minimal fallback renderer when no Jinja template exists.
@@ -148,11 +182,17 @@ def _render_fallback(brief: dict) -> str:
             "|---|---|---|---|---|",
         ]
         for row in scorecard.get("dimension_table", []):
+            if row.get("used_default"):
+                score_cell = f"{row.get('score', '5.0')}*"
+                conf_cell = "(excluded — no data)"
+            else:
+                score_cell = str(row.get("score", "—"))
+                conf_cell = row.get("confidence", "—")
             lines.append(
                 f"| {row.get('display_name', row.get('dimension'))} "
-                f"| {row.get('score', '—')} "
+                f"| {score_cell} "
                 f"| {int(row.get('weight', 0) * 100)}% "
-                f"| {row.get('confidence', '—')} "
+                f"| {conf_cell} "
                 f"| {row.get('driver', '—')} |"
             )
         # Override flags

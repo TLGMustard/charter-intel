@@ -75,6 +75,15 @@
   </thead>
   <tbody>
     {% for row in brief.scorecard_summary.dimension_table %}
+    {% if row.used_default %}
+    <tr style="color: #888;">
+      <td>{{ row.display_name }}</td>
+      <td>{{ row.score }}*</td>
+      <td>{{ (row.weight * 100) | int }}%</td>
+      <td><em>(excluded — no data)</em></td>
+      <td>{{ row.driver }}</td>
+    </tr>
+    {% else %}
     <tr>
       <td>{{ row.display_name }}</td>
       <td>{{ row.score }}</td>
@@ -82,9 +91,18 @@
       <td>{{ row.confidence }}</td>
       <td>{{ row.driver }}</td>
     </tr>
+    {% endif %}
     {% endfor %}
   </tbody>
 </table>
+{% if brief.scorecard_summary.excluded_dimensions %}
+<p style="font-size: 0.85em; color: #888;">
+  * Score shown for reference only. Dimensions marked <em>(excluded — no data)</em>
+  default to 5.0 and are excluded from the composite; their weight is redistributed
+  proportionally across scored dimensions.
+  Excluded: {{ brief.scorecard_summary.excluded_dimensions | join(", ") }}.
+</p>
+{% endif %}
 
 {% if brief.scorecard_summary.top_drivers %}
 <p><strong>Top drivers:</strong></p>

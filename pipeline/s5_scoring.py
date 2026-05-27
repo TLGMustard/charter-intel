@@ -112,12 +112,33 @@ def run(
             missing_dimensions.append(dim_name)
             warnings.append(f"Dimension '{dim_name}': no relevant facts found; used default score 5.")
 
-    # --- Compute composite ---
-    composite = sum(
-        d["score"] * d["weight"]
-        for d in dimensions_out.values()
-    )
-    composite = round(composite, 2)
+    # --- Compute composite (excluding defaulted dimensions) ---
+    # Dimensions where used_default is True carry no real data; including them
+    # would silently pull the composite toward 5.0.  We exclude them and
+    # redistribute their weight proportionally across the remaining dimensions.
+    excluded_dimensions = [
+        name for name, d in dimensions_out.items()
+        if d.get("used_default")
+    ]
+    included = {
+        name: d for name, d in dimensions_out.items()
+        if not d.get("used_default")
+    }
+    weight_sum = sum(d["weight"] for d in included.values())
+
+    if weight_sum > 0:
+        effective_weights = {
+            name: round(d["weight"] / weight_sum, 6)
+            for name, d in included.items()
+        }
+        composite = round(sum(
+            d["score"] * effective_weights[name]
+            for name, d in included.items()
+        ), 2)
+    else:
+        # All dimensions defaulted — no real data at all; fall back to midpoint
+        effective_weights = {}
+        composite = 5.0
 
     # --- Check override flags ---
     override_flags = check_override_flags(verified_bundle, dimensions_out)
@@ -152,6 +173,8 @@ def run(
         },
         "facts_used": list(set(facts_used)),
         "dimensions_with_missing_data": missing_dimensions,
+        "excluded_dimensions": excluded_dimensions,
+        "effective_weights": effective_weights,
         "scored_at": timestamp_now(),
         "scoring_version": weights_cfg.get("version", "1.0")
     }
@@ -216,6 +239,32 @@ def score_dimension(
         enrollment_result = _score_population_trends(relevant_facts, weight)
         if enrollment_result is not None:
             return enrollment_result
+
+    # Special case: web-search-derived index dimensions (score_is_index: true in YAML).
+    # The index value is already calibrated to the 1–9 reporting scale; passing it
+    # through apply_scoring_rules would double-translate (e.g. index=6 → score=5).
+    # When the primary fact is present and score_is_index is set, use the raw value
+    # directly, clamped to [1.0, 10.0].  Falls through to normal path when no data.
+    if scoring_rules.get("score_is_index") and primary_value is not None:
+        try:
+            raw = float(primary_value)
+            score = round(max(1.0, min(10.0, raw)), 2)
+            confidence = _aggregate_fact_confidence(relevant_facts)
+            driver = (
+                f"{primary_fact_key.replace('_', ' ')}: "
+                f"{primary_value} → direct index score {score:.1f}"
+            )
+            return {
+                "score": score,
+                "weight": weight,
+                "weighted_contribution": round(score * weight, 4),
+                "confidence": confidence,
+                "primary_driver": driver,
+                "supporting_fact_ids": supporting_ids,
+                "used_default": False,
+            }
+        except (TypeError, ValueError):
+            pass  # non-numeric value — fall through to threshold path
 
     if primary_value is None and missing_behavior == "default_to_midpoint":
         return {
