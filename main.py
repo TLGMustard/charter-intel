@@ -34,6 +34,7 @@ import json
 import logging
 import os
 import sys
+import threading
 import time
 
 from dotenv import load_dotenv
@@ -65,17 +66,45 @@ STAGE_MODULES = {
 }
 
 
-def _render_progress(community_id: str, stage_num: int, total: int, stage_id: str) -> None:
-    """Write an in-place ASCII progress bar to stderr (carriage-return, no newline).
+_SPINNER_CHARS = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
 
-    Example output (stage 3 of 7):
-        [nm-santa-fe] [████████░░░░░░░░░░░░] 3/7 — s3_fact_extraction
-    """
-    bar_width = 20
-    filled = int(bar_width * stage_num / total)
-    bar = "█" * filled + "░" * (bar_width - filled)
-    sys.stderr.write(f"\r[{community_id}] [{bar}] {stage_num}/{total} — {stage_id}")
-    sys.stderr.flush()
+
+class _StageSpinner:
+    def __init__(self, community_id: str, stage_num: int, total: int, stage_id: str) -> None:
+        bar_width = 20
+        filled = int(bar_width * stage_num / total)
+        bar = "█" * filled + "░" * (bar_width - filled)
+        self._prefix = f"[{community_id}] [{bar}] {stage_num}/{total} — {stage_id}"
+        self._start = time.time()
+        self._stop_event = threading.Event()
+        self._thread: threading.Thread | None = None
+        self._tty = sys.stderr.isatty()
+
+    def start(self) -> None:
+        if not self._tty:
+            sys.stderr.write(f"\r{self._prefix}")
+            sys.stderr.flush()
+            return
+        self._thread = threading.Thread(target=self._spin, daemon=True)
+        self._thread.start()
+
+    def _spin(self) -> None:
+        idx = 0
+        while not self._stop_event.is_set():
+            ch = _SPINNER_CHARS[idx % len(_SPINNER_CHARS)]
+            elapsed = time.time() - self._start
+            sys.stderr.write(f"\r{self._prefix} {ch} {elapsed:.1f}s")
+            sys.stderr.flush()
+            idx += 1
+            self._stop_event.wait(0.1)
+
+    def stop(self, elapsed: float, error: bool = False) -> None:
+        self._stop_event.set()
+        if self._thread is not None:
+            self._thread.join()
+        mark = "✗" if error else "✓"
+        sys.stderr.write(f"\r{self._prefix} {mark} {elapsed:.1f}s")
+        sys.stderr.flush()
 
 
 def parse_args() -> argparse.Namespace:
@@ -181,7 +210,8 @@ def run_community_pipeline(
             logger.warning(f"Unknown stage '{stage_id}' — skipping")
             continue
 
-        _render_progress(community_id, i, total_stages, stage_id)
+        spinner = _StageSpinner(community_id, i, total_stages, stage_id)
+        spinner.start()
         logger.info(f"[{community_id}] Running {stage_id}...")
         start = time.time()
 
@@ -203,6 +233,9 @@ def run_community_pipeline(
             logger.exception(f"[{community_id}] {stage_id} raised exception")
 
         elapsed = round(time.time() - start, 2)
+        spinner.stop(elapsed, error=result.status == StageStatus.ERROR)
+        sys.stderr.write("\n")
+        sys.stderr.flush()
         results[stage_id] = result
 
         if result.warnings:
@@ -224,10 +257,6 @@ def run_community_pipeline(
             )
 
         previous = result
-
-    # Close the progress bar line — runs whether the loop completes or breaks on error
-    sys.stderr.write("\n")
-    sys.stderr.flush()
 
     return results
 
