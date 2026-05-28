@@ -11,12 +11,15 @@ OUTPUT: data/cache/community/{state}/{community_id}/s4_verified.json
 """
 from __future__ import annotations
 import json
+import logging
 import os
 import re
 import time
 from typing import Optional
 
 import yaml
+
+logger = logging.getLogger(__name__)
 
 from pipeline import PipelineConfig, StageResult, StageStatus, today_str
 from pipeline.utils.api_client import call_claude, load_prompt
@@ -43,11 +46,24 @@ def run(
     if config.cache_enabled and not config.force_refresh:
         cached = cache.get(cache_key)
         if cached:
-            return StageResult(
-                stage_id=STAGE_ID, community_id=community_id, state=state,
-                status=StageStatus.SUCCESS, output_data=cached,
-                cache_hit=True, duration_seconds=round(time.time() - start, 2)
-            )
+            s3_path = f"data/cache/community/{state.lower()}/{community_id}/s3_facts_raw.json"
+            s4_path = f"data/cache/community/{state.lower()}/{community_id}/s4_verified.json"
+            if (
+                os.path.exists(s3_path)
+                and os.path.exists(s4_path)
+                and os.path.getmtime(s3_path) > os.path.getmtime(s4_path)
+            ):
+                logger.info(
+                    "[%s] S4 cache predates S3 output — invalidating to propagate fresh facts",
+                    community_id,
+                )
+                # Fall through to full re-run
+            else:
+                return StageResult(
+                    stage_id=STAGE_ID, community_id=community_id, state=state,
+                    status=StageStatus.SUCCESS, output_data=cached,
+                    cache_hit=True, duration_seconds=round(time.time() - start, 2)
+                )
 
     # Load S3 output
     if previous_result and previous_result.output_data:

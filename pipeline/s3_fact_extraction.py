@@ -99,11 +99,24 @@ def run(
                 )
                 # Fall through to full re-run
             else:
-                return StageResult(
-                    stage_id=STAGE_ID, community_id=community_id, state=state,
-                    status=StageStatus.SUCCESS, output_data=cached,
-                    cache_hit=True, duration_seconds=round(time.time() - start, 2)
-                )
+                parquet_path = f"data/processed/{state.lower()}/nces_membership_{state.lower()}.parquet"
+                s3_cache_path = f"data/cache/community/{state.lower()}/{community_id}/s3_facts_raw.json"
+                if (
+                    os.path.exists(parquet_path)
+                    and os.path.exists(s3_cache_path)
+                    and os.path.getmtime(parquet_path) > os.path.getmtime(s3_cache_path)
+                ):
+                    logger.info(
+                        "[%s] S3 cache predates NCES parquet — invalidating to inject pct_change_total",
+                        community_id,
+                    )
+                    # Fall through to full re-run
+                else:
+                    return StageResult(
+                        stage_id=STAGE_ID, community_id=community_id, state=state,
+                        status=StageStatus.SUCCESS, output_data=cached,
+                        cache_hit=True, duration_seconds=round(time.time() - start, 2)
+                    )
 
     if config.dry_run:
         return StageResult(
