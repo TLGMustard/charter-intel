@@ -1,5 +1,6 @@
 data/cache/
 data/raw/
+data/raw/national/
 outputs/
 __pycache__/
 *.pyc

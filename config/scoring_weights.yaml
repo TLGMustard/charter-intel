@@ -433,3 +433,8 @@ zip_preset:
   school_age_population:  0.20
   income_concentration:   0.20
   ell_concentration:      0.20
+
+# ZIP Drill v2 — neighbor radius stub.
+# null = topological (shared-border) neighbor detection (current default).
+# Set to a number (miles) to switch to radius-based detection in a future build.
+zip_drill_neighbor_radius_miles: null

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ city_name }} ZIP Drill v2 — Charter Opportunity by Zip Code</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      color: #1a1a1a;
+      background: #f8f8f8;
+      padding: 24px;
+    }
+
+    h1 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    h2 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+    .meta {
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 20px;
+    }
+    .v2-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 1px 6px;
+      border-radius: 4px;
+      vertical-align: middle;
+      margin-left: 6px;
+    }
+    .section { margin-bottom: 28px; }
+
+    /* ── Map ── */
+    .map-section {
+      margin-bottom: 28px;
+    }
+    .map-section svg {
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      background: #f9fafb;
+    }
+
+    /* ── Table ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+
+    thead th {
+      background: #1e293b;
+      color: #e2e8f0;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      padding: 9px 10px;
+      text-align: left;
+      white-space: nowrap;
+    }
+    thead th.right  { text-align: right; }
+    thead th.center { text-align: center; }
+
+    tbody tr { border-bottom: 1px solid #e5e7eb; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #f0f9ff; }
+
+    td {
+      padding: 8px 10px;
+      vertical-align: middle;
+    }
+    td.right  { text-align: right; }
+    td.center { text-align: center; }
+    td.rank   { font-weight: 700; color: #64748b; width: 32px; }
+    td.zip    { font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; width: 60px; }
+    td.score  { font-weight: 700; font-size: 15px; color: #1e293b; width: 48px; }
+
+    /* Score row tints — same as v1 */
+    tr.score-high { background: #f0fdf4; }
+    tr.score-mid  { background: #eff6ff; }
+    tr.score-low  { background: #fefce8; }
+
+    /* Dimension score chips */
+    .dim-score {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: #f1f5f9;
+      color: #334155;
+      min-width: 28px;
+      text-align: center;
+    }
+    .dim-high { background: #dcfce7; color: #166534; }
+    .dim-mid  { background: #dbeafe; color: #1e40af; }
+    .dim-low  { background: #fef9c3; color: #854d0e; }
+
+    /* Charter presence */
+    .charter-zero  { font-weight: 600; color: #16a34a; }
+    .charter-some  { font-weight: 600; color: #92400e; }
+    .charter-names { font-size: 10px; color: #6b7280; margin-top: 2px; }
+
+    /* Transit cells */
+    .transit-count {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+    .transit-na {
+      font-size: 10px;
+      color: #9ca3af;
+      font-style: italic;
+    }
+
+    /* Neighbor context cell */
+    .nbr-context {
+      font-size: 11px;
+      color: #374151;
+      line-height: 1.5;
+    }
+    .nbr-none {
+      font-size: 10px;
+      color: #9ca3af;
+      font-style: italic;
+    }
+    .nbr-pill {
+      display: inline-block;
+      font-size: 10px;
+      background: #f1f5f9;
+      color: #475569;
+      padding: 1px 5px;
+      border-radius: 3px;
+      margin-top: 3px;
+      margin-right: 2px;
+    }
+
+    /* Insufficient data table */
+    .insufficient-note {
+      font-size: 11px;
+      color: #92400e;
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
+      border-radius: 4px;
+      padding: 6px 10px;
+      margin-bottom: 10px;
+    }
+    .insufficient-table tbody tr { background: #f9fafb; }
+
+    /* N/A badge */
+    .na-badge {
+      font-size: 10px;
+      color: #9ca3af;
+      font-style: italic;
+    }
+
+    footer {
+      margin-top: 20px;
+      font-size: 11px;
+      color: #9ca3af;
+      border-top: 1px solid #e5e7eb;
+      padding-top: 12px;
+    }
+
+    @media print {
+      body { background: #fff; padding: 0; font-size: 11px; }
+      table { box-shadow: none; }
+      thead th { background: #1e293b !important;
+                 -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      tr.score-high, tr.score-mid, tr.score-low {
+        -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>{{ city_name }} — ZIP Drill Charter Opportunity <span class="v2-badge">v2</span></h1>
+  <p class="meta">
+    {{ zip_count }} zip codes · ranked by composite opportunity score · generated {{ generated_at }}
+    · TIGER 2023 shapefiles · Transitland GTFS · Census ACS 2023 · topological neighbor analysis
+  </p>
+
+  {# ── SVG map ── #}
+  <div class="map-section section">
+    <h2>ZIP Code Map — Score by Tier</h2>
+    {{ svg_map | safe }}
+  </div>
+
+  {# ── Main ranked table ── #}
+  <div class="section">
+    <table>
+      <thead>
+        <tr>
+          <th class="center">Rank</th>
+          <th>Zip</th>
+          <th class="right">Score</th>
+          <th class="center">Academic Need</th>
+          <th>Charter Presence</th>
+          <th class="right">School-Age Pop</th>
+          <th class="right">Poverty Rate</th>
+          <th class="right">ELL%</th>
+          <th class="right">Transit Stops</th>
+          <th class="right">Transit Routes</th>
+          <th>Neighbor Context</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in ranked %}
+          {# Row tier class #}
+          {% if s.base.composite >= 7 %}
+            {% set row_class = "score-high" %}
+          {% elif s.base.composite >= 5 %}
+            {% set row_class = "score-mid" %}
+          {% else %}
+            {% set row_class = "score-low" %}
+          {% endif %}
+
+          {# Academic need chip tier #}
+          {% if s.base.academic_need >= 7 %}
+            {% set an_class = "dim-high" %}
+          {% elif s.base.academic_need >= 5 %}
+            {% set an_class = "dim-mid" %}
+          {% else %}
+            {% set an_class = "dim-low" %}
+          {% endif %}
+
+        <tr class="{{ row_class }}">
+
+          <td class="rank center">{{ s.base.rank }}</td>
+
+          <td class="zip">{{ s.base.zip_code }}</td>
+
+          <td class="score right">{{ "%.1f"|format(s.base.composite) }}</td>
+
+          {# Academic need: chip + raw ELA% sublabel #}
+          <td class="center">
+            <span class="dim-score {{ an_class }}">{{ "%.1f"|format(s.base.academic_need) }}</span>
+            {% if s.base.ela_proficiency_pct is not none %}
+              <br><span style="font-size:10px;color:#6b7280;">
+                {{ "%.0f"|format(s.base.ela_proficiency_pct) }}% ELA prof.
+              </span>
+            {% endif %}
+          </td>
+
+          {# Charter presence #}
+          <td>
+            {% if s.base.charter_count == 0 %}
+              <span class="charter-zero">0 charters</span>
+            {% else %}
+              <span class="charter-some">{{ s.base.charter_count }}
+                {{ "charter" if s.base.charter_count == 1 else "charters" }}</span>
+              {% if s.base.charter_names %}
+                <div class="charter-names">
+                  {{ s.base.charter_names[:3] | join(", ") }}
+                  {% if s.base.charter_names | length > 3 %}
+                    +{{ s.base.charter_names | length - 3 }} more
+                  {% endif %}
+                </div>
+              {% endif %}
+            {% endif %}
+            <div style="font-size:10px;color:#9ca3af;">{{ s.base.total_schools }} total schools</div>
+          </td>
+
+          {# School-age population #}
+          <td class="right">
+            {% if s.base.school_age_pop is not none %}
+              {{ "{:,}".format(s.base.school_age_pop) }}
+            {% else %}
+              <span class="na-badge">N/A</span>
+            {% endif %}
+          </td>
+
+          {# Poverty rate #}
+          <td class="right">
+            {% if s.base.poverty_rate_pct is not none %}
+              {{ "%.1f"|format(s.base.poverty_rate_pct) }}%
+            {% else %}
+              <span class="na-badge">N/A</span>
+            {% endif %}
+          </td>
+
+          {# ELL% #}
+          <td class="right">
+            {% if s.base.ell_pct_display is not none %}
+              {{ "%.1f"|format(s.base.ell_pct_display) }}%
+            {% else %}
+              <span class="na-badge">N/A</span>
+            {% endif %}
+          </td>
+
+          {# Transit stops (v2) #}
+          <td class="right">
+            {% if s.transit.transit_stop_count is not none %}
+              <span class="transit-count">{{ s.transit.transit_stop_count }}</span>
+            {% else %}
+              <span class="transit-na">N/A</span>
+            {% endif %}
+          </td>
+
+          {# Transit routes (v2) #}
+          <td class="right">
+            {% if s.transit.transit_route_count is not none %}
+              <span class="transit-count">{{ s.transit.transit_route_count }}</span>
+            {% else %}
+              <span class="transit-na">N/A</span>
+            {% endif %}
+          </td>
+
+          {# Neighbor context (v2) #}
+          <td>
+            {% set nc = s.neighbor_context %}
+            {% if nc and nc.neighboring_zips %}
+              <div class="nbr-context">
+                {{ nc.neighboring_zips | length }} adj. ZIPs
+                {%- if nc.avg_poverty_rate_pct is not none %}
+                  · avg poverty {{ "%.0f"|format(nc.avg_poverty_rate_pct) }}%
+                {%- endif %}
+                · {{ nc.total_neighbor_charters }} charters nearby
+              </div>
+              <div style="margin-top:3px;">
+                {% for z in nc.neighboring_zips %}
+                  <span class="nbr-pill">{{ z }}</span>
+                {% endfor %}
+              </div>
+            {% else %}
+              <span class="nbr-none">no neighbors detected</span>
+            {% endif %}
+          </td>
+
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {# ── Insufficient data section ── #}
+  {% if excluded %}
+  <div class="section">
+    <h2>Zip Codes — Insufficient Data</h2>
+    <p class="insufficient-note">
+      No Census population data returned. Likely non-residential (military, PO Box, industrial).
+      Excluded from ranking.
+    </p>
+    <table class="insufficient-table">
+      <thead>
+        <tr>
+          <th>Zip Code</th>
+          <th>Total Schools</th>
+          <th>Charter Count</th>
+          <th class="right">Transit Stops</th>
+          <th class="right">Transit Routes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in excluded %}
+        <tr>
+          <td style="font-weight:600;">{{ s.base.zip_code }}</td>
+          <td>{{ s.base.total_schools }}</td>
+          <td>{{ s.base.charter_count }}</td>
+          <td class="right">
+            {% if s.transit.transit_stop_count is not none %}
+              {{ s.transit.transit_stop_count }}
+            {% else %}
+              <span class="transit-na">N/A</span>
+            {% endif %}
+          </td>
+          <td class="right">
+            {% if s.transit.transit_route_count is not none %}
+              {{ s.transit.transit_route_count }}
+            {% else %}
+              <span class="transit-na">N/A</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <footer>
+    ZIP Drill v2 — 5 dimensions, equal weights, uncalibrated. v2 addendum adds: TIGER/Line 2023
+    ZCTA shapefiles (geographic context + SVG map), Transitland v2 GTFS transit stop/route counts
+    (0.5-mile radius from ZCTA centroid), topological neighbor analysis (Census ACS 2023 demand
+    signals for adjacent ZCTAs). Neighbor context is display-only and does not affect scores.
+    Political, authorizer, and facilities signals not available at zip level.
+    Proof of concept — do not use for real strategic decisions.
+  </footer>
+
+</body>
+</html>

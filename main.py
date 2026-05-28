@@ -138,7 +138,7 @@ def parse_args() -> argparse.Namespace:
                         choices=["growth", "replication", "turnaround", "maturity_adjusted"])
     parser.add_argument(
         "--mode", default="2",
-        help="1 | 2 | 3 (output depth) or 'zip' for ZIP Drill mode"
+        help="1 | 2 | 3 (output depth) or 'zip' for ZIP Drill v1 or 'zip_v2' for ZIP Drill v2"
     )
     parser.add_argument("--force-refresh", action="store_true")
     parser.add_argument("--no-cache", action="store_true")
@@ -315,6 +315,20 @@ def main():
         from pipeline import zip_drill
         out_path = zip_drill.run(city, state=args.state)
         print(f"\n  ZIP Drill: {out_path}\n")
+        return
+
+    # ── ZIP Drill v2 mode ─────────────────────────────────────────────────────
+    if args.mode == "zip_v2":
+        city = args.community_pos or args.community
+        if not city:
+            logger.error(
+                "--mode zip_v2 requires a city name. "
+                "Example: python main.py 'Albuquerque' --mode zip_v2"
+            )
+            sys.exit(1)
+        from pipeline import zip_drill_v2
+        out_path = zip_drill_v2.run_v2(city, state=args.state)
+        print(f"\n  ZIP Drill v2: {out_path}\n")
         return
 
     # Cast mode to int for existing pipeline
