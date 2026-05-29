@@ -130,7 +130,31 @@ def _should_run_political_climate_search(
 
     Never suppresses the political_climate dimension — a state-baseline datapoint
     is always injected if the gate blocks.
+
+    Depth routing (checked first, before any model call or rule evaluation):
+      --depth deep     → bypass gate entirely, return YES unconditionally
+      --depth fast     → depth-skip is handled upstream; gate should never be reached
+                         at fast depth, but return NO defensively if called
+      --depth standard → two-tier gate logic below
     """
+    # ── Depth bypass — evaluated before any rule or model call ──────────────
+    if config.depth == "deep":
+        logger.info(
+            "[%s] Political climate: depth=deep — gate bypassed, running Sonnet search",
+            community_id,
+        )
+        return (True, "")
+
+    if config.depth == "fast":
+        # Depth=fast should have been caught upstream by _DepthSkip, but be defensive
+        logger.info(
+            "[%s] Political climate: depth=fast — gate short-circuit NO",
+            community_id,
+        )
+        return (False, "fast depth: web search disabled")
+
+    # config.depth == "standard" — fall through to two-tier gate below
+
     # ── Derive enrollment from pop_data.enrollment_by_year (latest year) ─────
     enrollment: Optional[int] = None
     if pop_data:
