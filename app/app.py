@@ -78,47 +78,75 @@ _password_gate()
 # ─────────────────────────────────────────────────────────────────────────────
 # Views
 # ─────────────────────────────────────────────────────────────────────────────
+# Plain-English strategy labels mapped to the real --preset flag values.
+_PRESET_LABELS = {
+    "Growth": "growth",
+    "Replication": "replication",
+    "Turnaround": "turnaround",
+    "Maturity Adjusted": "maturity_adjusted",
+}
+
+
 def view_new_scan() -> None:
     st.header("New Scan")
-    st.caption("Launches `main.py` as a detached subprocess. The CLI + filesystem "
-               "are the only contract — no pipeline code is imported.")
 
     with st.form("new_scan"):
+        # ── Simple view (always visible) ────────────────────────────────────
         col1, col2 = st.columns(2)
         with col1:
-            target = st.text_input(
-                "Target (city name or community_id)",
-                placeholder="Santa Fe   |   nm-santa-fe",
-                help="Leave blank only if using --all.",
-            )
-            state = st.text_input("State", value=config.STATE_DEFAULT)
-            depth = st.selectbox("Depth (--depth)", config.DEPTH_CHOICES,
-                                 index=config.DEPTH_CHOICES.index(config.DEPTH_DEFAULT))
+            target = st.text_input("City", placeholder="Santa Fe")
         with col2:
-            preset = st.selectbox("Preset (--preset)", config.PRESET_CHOICES,
-                                  index=config.PRESET_CHOICES.index(config.PRESET_DEFAULT))
-            mode = st.selectbox("Mode (--mode)", config.MODE_CHOICES,
-                                index=config.MODE_CHOICES.index(config.MODE_DEFAULT))
+            state = st.text_input("State", value=config.STATE_DEFAULT)
 
-        st.markdown("**Toggles**")
-        t1, t2, t3 = st.columns(3)
-        with t1:
+        preset_labels = list(_PRESET_LABELS.keys())
+        preset_values = list(_PRESET_LABELS.values())
+        default_preset_idx = (
+            preset_values.index(config.PRESET_DEFAULT)
+            if config.PRESET_DEFAULT in preset_values else 0
+        )
+        strategy_label = st.selectbox("Strategy", preset_labels, index=default_preset_idx)
+        preset = _PRESET_LABELS[strategy_label]
+
+        # ── Advanced settings (collapsed by default) ────────────────────────
+        with st.expander("Advanced settings", expanded=False):
+            depth = st.selectbox(
+                "Scan depth", config.DEPTH_CHOICES,
+                index=config.DEPTH_CHOICES.index(config.DEPTH_DEFAULT),
+            )
+            mode = st.selectbox(
+                "Output mode", config.MODE_CHOICES,
+                index=config.MODE_CHOICES.index(config.MODE_DEFAULT),
+            )
+
             run_all = st.toggle("All communities (--all)")
-            dry_run = st.toggle("Dry run (--dry-run)", value=True)
-        with t2:
-            mock = st.toggle("Mock fixtures (--mock)")
-            batch = st.toggle("Batch API (--batch)")
-        with t3:
-            no_cache = st.toggle("No cache (--no-cache)")
+            mock = st.toggle("Use mock fixtures (--mock)")
+            batch = st.toggle("Batch mode (--batch)")
+            no_cache = st.toggle("Skip cache (--no-cache)")
             force_refresh = st.toggle("Force refresh (--force-refresh)")
 
-        extra_args = st.text_input(
-            "Extra args (appended verbatim)",
-            placeholder="--stages s5,s6,s7",
-            help="Anything not covered above, e.g. --stages, --record, --interactive.",
-        )
+            extra_args = st.text_input(
+                "Extra args (appended verbatim)",
+                placeholder="--stages s5,s6,s7",
+                help="Anything not covered above, e.g. --stages, --record, --interactive.",
+            )
 
-        submitted = st.form_submit_button("Launch scan", type="primary")
+        # ── Dry run (prominent, directly above the Run Scan button) ─────────
+        st.markdown(
+            """
+            <div style="border:2px solid #d93025; border-radius:8px;
+                        padding:10px 14px; margin:4px 0 2px 0;
+                        background-color:rgba(217,48,37,0.06);">
+              <span style="color:#d93025; font-weight:700;">
+                ⚠ Dry run (no API calls)
+              </span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        dry_run = st.toggle("Dry run (no API calls)", value=False)
+        st.caption("Turn on to estimate cost without running a real scan")
+
+        submitted = st.form_submit_button("Run Scan", type="primary")
 
     if submitted:
         if not target and not run_all:
