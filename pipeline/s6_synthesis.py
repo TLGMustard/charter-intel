@@ -102,6 +102,14 @@ def run(
                 cache_hit=True
             )
 
+    # --- Dry-run guard: no live API calls ---
+    if config.dry_run:
+        return StageResult(
+            stage_id=STAGE_ID, community_id=community_id, state=state,
+            status=StageStatus.SKIPPED,
+            warnings=["Dry run — skipping Haiku API calls for S6"]
+        )
+
     # --- Prepare fact sets ---
     verified_facts = [f for f in verified_bundle.get("facts", [])
                       if f.get("in_main_analysis", False)]
@@ -441,6 +449,14 @@ def _run_scan_synthesis(
                 status=StageStatus.SUCCESS, output_data=cached,
                 cache_hit=True
             )
+
+    # --- Dry-run guard: no live API calls ---
+    if config.dry_run:
+        return StageResult(
+            stage_id=STAGE_ID, community_id=community_id, state=state,
+            status=StageStatus.SKIPPED,
+            warnings=["Dry run — skipping Haiku API call for S6 scan synthesis"]
+        )
 
     community_name = community_id.split("-", 1)[1].replace("-", " ").title()
 
