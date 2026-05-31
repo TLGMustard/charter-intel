@@ -171,6 +171,10 @@
         "used_default": {
           "type": "boolean",
           "description": "True if no relevant facts were available and default/midpoint was used"
+        },
+        "unscored_reason": {
+          "type": ["string", "null"],
+          "description": "Why the dimension kept its neutral default instead of a computed score (e.g. source unavailable). Makes a defaulted 5 transparent and distinguishable from a real, scored 5."
         }
       }
     }

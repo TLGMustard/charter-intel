@@ -57,6 +57,74 @@ _COMPETITIVE_DEMAND_SIGNAL_KEYS = frozenset({
 })
 
 # ─────────────────────────────────────────────
+# FACILITIES & REPLICATION FEASIBILITY THRESHOLDS
+# ─────────────────────────────────────────────
+# PROVISIONAL — NEEDS CALIBRATION. These thresholds translate free federal-data
+# counts into 1–10 dimension scores for the two dimensions that previously always
+# defaulted to a neutral 5. They are starting-point estimates, not validated
+# breakpoints; tune them here (single source of truth) once operator profiles and
+# real outcomes are available. See [[feedback-clip-standing-rules]].
+#
+# Fact keys these functions read (injected by s3_fact_extraction.py from the
+# free federal fetchers):
+#   facilities_closed_schools_count  — CCD closed/temporarily-closed schools,
+#                                       district+county deduped (ccd_closures_fetcher)
+#   csp_distinct_operators           — distinct CSP (CFDA 84.282) operators with
+#                                       place-of-performance IN the community's
+#                                       county (usaspending_csp_fetcher;
+#                                       community-specific)
+#   cip13_completers                 — IPEDS CIP-13 (education) completers, statewide
+#                                       (ipeds_completers_fetcher)
+#
+# A closed-school count of 0 (or 0 operators / 0 completers) is a VALID scored
+# value — a real signal of constraint — NOT missing data. Missing data is the
+# absence of the fact entirely (fetcher returned None), which keeps the neutral
+# default and tags the dimension with an unscored_reason.
+
+FACILITIES_CLOSED_SCHOOLS_FACT_KEY = "facilities_closed_schools_count"
+CSP_OPERATORS_FACT_KEY = "csp_distinct_operators"
+CIP13_COMPLETERS_FACT_KEY = "cip13_completers"
+
+# facilities_feasibility: more recently-closed schools => more candidate real
+# estate => higher feasibility. CAPPED AT 8 (never 9–10): a closed school is only
+# a *signal* of availability, not confirmed-available real estate, so the count
+# alone cannot justify a top-band score.
+def _facilities_score_from_closed_count(c: int) -> float:
+    if c <= 0:
+        return 3.0
+    if c == 1:
+        return 5.0
+    if c <= 3:
+        return 6.0
+    if c <= 6:
+        return 7.0
+    return 8.0  # c >= 7, capped at 8
+
+# replication_feasibility operator sub-signal: distinct regional CSP operators.
+def _replication_operator_score(operators: int) -> float:
+    if operators <= 0:
+        return 3.0
+    if operators <= 2:
+        return 5.0
+    if operators <= 5:
+        return 6.0
+    if operators <= 10:
+        return 7.0
+    return 8.0  # > 10
+
+# replication_feasibility pipeline sub-signal: statewide CIP-13 completers.
+def _replication_pipeline_score(completers: int) -> float:
+    if completers < 200:
+        return 3.0
+    if completers < 500:
+        return 5.0
+    if completers < 1000:
+        return 6.0
+    if completers < 2000:
+        return 7.0
+    return 8.0  # >= 2000
+
+# ─────────────────────────────────────────────
 # CONFIG LOADING
 # ─────────────────────────────────────────────
 
@@ -284,6 +352,16 @@ def score_dimension(
         enrollment_result = _score_population_trends(relevant_facts, weight)
         if enrollment_result is not None:
             return enrollment_result
+
+    # Special case: facilities_feasibility and replication_feasibility are scored
+    # from free federal-data counts (see threshold constants above). These own
+    # their dimensions entirely — they always return a complete score dict,
+    # either a real value or a neutral default tagged with an unscored_reason
+    # when the source was unavailable. No other dimension's behavior changes.
+    if dim_name == "facilities_feasibility":
+        return _score_facilities_feasibility(relevant_facts, weight)
+    if dim_name == "replication_feasibility":
+        return _score_replication_feasibility(relevant_facts, weight)
 
     # Special case: web-search-derived index dimensions (score_is_index: true in YAML).
     # The index value is already calibrated to the 1–9 reporting scale; passing it
@@ -682,6 +760,105 @@ def _score_population_trends(facts: list[dict], weight: float) -> Optional[dict]
         "primary_driver":         driver,
         "supporting_fact_ids":    supporting_ids,
         "used_default":           False,
+    }
+
+
+def _default_dimension_with_tag(
+    weight: float,
+    supporting_ids: list[str],
+    unscored_reason: str,
+) -> dict:
+    """Neutral default (5.0) tagged with an unscored_reason.
+
+    used_default=True so the composite excludes it (same as any defaulted
+    dimension). The unscored_reason makes "source unavailable" transparent and
+    distinguishable from a real, scored 5.
+    """
+    return {
+        "score": 5.0,
+        "weight": weight,
+        "weighted_contribution": round(5.0 * weight, 4),
+        "confidence": Confidence.LOW.value,
+        "primary_driver": "Insufficient data — neutral default used",
+        "supporting_fact_ids": supporting_ids,
+        "used_default": True,
+        "unscored_reason": unscored_reason,
+    }
+
+
+def _score_facilities_feasibility(facts: list[dict], weight: float) -> dict:
+    """Score facilities_feasibility from the CCD closed-school count.
+
+    A present count (including 0) is scored via the provisional threshold table
+    (capped at 8). An absent fact (fetcher returned None) keeps the neutral
+    default and is tagged unscored.
+    """
+    supporting_ids = [f["datapoint_id"] for f in facts]
+    closed = _get_fact_value(FACILITIES_CLOSED_SCHOOLS_FACT_KEY, facts)
+
+    if closed is None or not isinstance(closed, (int, float)):
+        return _default_dimension_with_tag(
+            weight, supporting_ids,
+            "closed-school data unavailable (CCD fetcher returned no data)",
+        )
+
+    c = int(closed)
+    score = _facilities_score_from_closed_count(c)
+    driver = (
+        f"{c} closed/temporarily-closed school(s) in district+county (last 6 "
+        f"CCD years) → facilities score {score:.1f} (closed≠confirmed-available)"
+    )
+    return {
+        "score": round(score, 2),
+        "weight": weight,
+        "weighted_contribution": round(score * weight, 4),
+        "confidence": Confidence.MODERATE.value,
+        "primary_driver": driver,
+        "supporting_fact_ids": supporting_ids,
+        "used_default": False,
+    }
+
+
+def _score_replication_feasibility(facts: list[dict], weight: float) -> dict:
+    """Score replication_feasibility as the mean of two federal sub-signals:
+    distinct regional CSP operators and statewide CIP-13 completers.
+
+    If one sub-signal is missing, the other is used alone. If both are missing,
+    the neutral default is kept and tagged unscored.
+    """
+    supporting_ids = [f["datapoint_id"] for f in facts]
+    operators = _get_fact_value(CSP_OPERATORS_FACT_KEY, facts)
+    completers = _get_fact_value(CIP13_COMPLETERS_FACT_KEY, facts)
+
+    sub_scores: list[float] = []
+    parts: list[str] = []
+    if isinstance(operators, (int, float)):
+        op_score = _replication_operator_score(int(operators))
+        sub_scores.append(op_score)
+        parts.append(f"{int(operators)} CSP operators→{op_score:.0f}")
+    if isinstance(completers, (int, float)):
+        pipe_score = _replication_pipeline_score(int(completers))
+        sub_scores.append(pipe_score)
+        parts.append(f"{int(completers)} CIP-13 completers→{pipe_score:.0f}")
+
+    if not sub_scores:
+        return _default_dimension_with_tag(
+            weight, supporting_ids,
+            "operator and pipeline signals unavailable (USAspending + IPEDS "
+            "fetchers returned no data)",
+        )
+
+    score = round(sum(sub_scores) / len(sub_scores))
+    score = float(max(1.0, min(10.0, score)))
+    driver = f"replication = mean({', '.join(parts)}) → {score:.1f}"
+    return {
+        "score": score,
+        "weight": weight,
+        "weighted_contribution": round(score * weight, 4),
+        "confidence": Confidence.MODERATE.value,
+        "primary_driver": driver,
+        "supporting_fact_ids": supporting_ids,
+        "used_default": False,
     }
 
 

@@ -33,6 +33,9 @@ from pipeline.utils.population_trends_fetcher import get_population_trends
 from pipeline.utils.saipe_fetcher import get_poverty_data as get_saipe_poverty_data
 from pipeline.utils.charter_schools_fetcher import get_community_charter_schools
 from pipeline.utils.authorizers_fetcher     import get_community_authorizers
+from pipeline.utils.usaspending_csp_fetcher import get_csp_awards
+from pipeline.utils.ccd_closures_fetcher    import get_closed_schools
+from pipeline.utils.ipeds_completers_fetcher import get_completers
 
 STAGE_ID = "s3_fact_extraction"
 
@@ -1037,6 +1040,44 @@ def run(
     saipe_data = get_saipe_poverty_data(saipe_leaid) if saipe_leaid else None
     _inject_saipe_facts(facts_output, saipe_data, community_id, state)
 
+    # ── Inject federal facilities + replication signals (free, keyless APIs) ──
+    # state FIPS is derived from the district LEAID (first two digits). When the
+    # community has no NCES mapping, CCD (needs LEAID) and IPEDS (needs FIPS) are
+    # skipped; the USAspending state-code signal still runs.
+    _state_fips = saipe_leaid[:2] if saipe_leaid else None
+
+    # CCD closed schools → facilities_feasibility
+    ccd_data = (
+        get_closed_schools(saipe_leaid, _state_fips)
+        if (saipe_leaid and _state_fips) else None
+    )
+    _inject_ccd_closures_facts(facts_output, ccd_data, community_id, state)
+
+    # USAspending CSP awards:
+    #  - county place-of-performance → SCORED replication operator signal
+    #    (discriminates by community; re-scoped from regional recipient at
+    #    operator request 2026-05-30).
+    #  - state place-of-performance → funding_environment evidence (non-scoring).
+    #  - regional recipient (state+adjacent) → non-scoring ecosystem context.
+    # The 3-digit county FIPS is the county portion of the CCD 5-digit county_code.
+    _county5 = ccd_data.get("county_fips") if ccd_data else None
+    _county3 = _county5[-3:] if _county5 else None
+
+    csp_county = (
+        get_csp_awards(state.upper(), scope="place_of_performance_county", county_fips=_county3)
+        if _county3 else None
+    )
+    csp_place    = get_csp_awards(state.upper(), scope="place_of_performance")
+    csp_regional = get_csp_awards(state.upper(), scope="recipient")
+
+    # IPEDS CIP-13 (education) completers → replication_feasibility pipeline signal
+    ipeds_data = get_completers(_state_fips) if _state_fips else None
+
+    _inject_replication_facts(
+        facts_output, csp_county, ipeds_data, community_id, state, csp_regional=csp_regional
+    )
+    _inject_funding_csp_evidence(facts_output, csp_place, community_id, state)
+
     # ── Inject NCES enrollment trend facts (population_trends dimension) ──────
     _inject_population_trends_facts(facts_output, pop_data, community_id, state)
 
@@ -1352,6 +1393,254 @@ def _inject_saipe_facts(
             saipe_data.get("poverty_rate_pct", float("nan")),
             saipe_data.get("data_year"),
         )
+
+
+def _inject_ccd_closures_facts(
+    facts_output: dict,
+    ccd_data: Optional[dict],
+    community_id: str,
+    state: str,
+) -> None:
+    """Append the CCD closed-school count as a facilities_feasibility datapoint.
+
+    Skips silently when ccd_data is None (no LEAID, no directory year, or API
+    failure) — S5 then keeps the neutral default and tags it unscored. A genuine
+    zero closures is injected as value=0 (a valid scored signal). The closed≠
+    available real-estate caveat travels in both the claim and source_notes.
+    """
+    if not ccd_data:
+        return
+
+    facts: list[dict] = facts_output.setdefault("facts", [])
+    if any(f.get("fact_key") == "facilities_closed_schools_count" for f in facts):
+        return
+
+    c = ccd_data.get("closed_count_total", 0)
+    years = ccd_data.get("years_queried", [])
+    facts.append({
+        "datapoint_id":         f"dp_{community_id}_facilities_feasibility_001",
+        "community_id":         community_id,
+        "state":                state,
+        "dimension":            "facilities_feasibility",
+        "fact_key":             "facilities_closed_schools_count",
+        "claim": (
+            f"{c} public school(s) were closed or temporarily closed in the "
+            f"district and county over CCD years {years}. {ccd_data.get('caveat', '')}"
+        ),
+        "value":                c,
+        "value_unit":           "count",
+        "value_year":           max(years) if years else None,
+        "source_class":         "FEDERAL_DATA",
+        "source_url":           ccd_data.get("source_url"),
+        "source_title":         ccd_data.get("source_title"),
+        "source_date":          None,
+        "source_notes":         ccd_data.get("caveat"),
+        "confidence":           "MODERATE",
+        "confidence_rationale": (
+            "Directly counted from NCES CCD directory; closed-school count is a "
+            "facilities-availability signal, not a verified real-estate inventory"
+        ),
+        "verification_status":  "VERIFIED",
+        "bias_flag":            None,
+        "extracted_by":         "ccd_closures_fetcher",
+        "extracted_at":         today_str(),
+        "stage":                STAGE_ID,
+        "in_main_analysis":     True,
+        "needs_verification_reason": None,
+    })
+    logger.info(
+        "[%s] Injected CCD facilities datapoint (closed_count_total=%s, "
+        "district=%s county=%s)",
+        community_id, c, ccd_data.get("district_closed_count"),
+        ccd_data.get("county_closed_count"),
+    )
+
+
+def _inject_replication_facts(
+    facts_output: dict,
+    csp_county: Optional[dict],
+    ipeds_data: Optional[dict],
+    community_id: str,
+    state: str,
+    csp_regional: Optional[dict] = None,
+) -> None:
+    """Append the replication_feasibility sub-signals when available.
+
+    SCORED:
+      csp_distinct_operators — distinct CSP operators that have performed funded
+        work IN the community's county (county place-of-performance). This is
+        community-specific (re-scoped from the regional view 2026-05-30).
+      cip13_completers — statewide IPEDS education completers (pipeline proxy).
+    NON-SCORING context:
+      csp_regional_operators — distinct CSP operators across the state + adjacent
+        states (ecosystem maturity), surfaced for synthesis only.
+
+    Each is injected independently; if a fetcher returned None its datapoint is
+    skipped, and S5 scores from whichever scored sub-signal is present (or keeps
+    the tagged default if both are absent). A zero operator/county count is a
+    VALID scored value (no CSP operator has worked in-county), not missing data.
+    """
+    facts: list[dict] = facts_output.setdefault("facts", [])
+    existing_keys = {f.get("fact_key") for f in facts}
+
+    if csp_county and "csp_distinct_operators" not in existing_keys:
+        ops = csp_county.get("distinct_operators", 0)
+        facts.append({
+            "datapoint_id":         f"dp_{community_id}_replication_feasibility_001",
+            "community_id":         community_id,
+            "state":                state,
+            "dimension":            "replication_feasibility",
+            "fact_key":             "csp_distinct_operators",
+            "claim": (
+                f"{ops} distinct charter operator(s) performed federally CSP-funded "
+                f"(CFDA {','.join(csp_county.get('matched_cfda_numbers', [])) or '84.282'}) "
+                f"work in {state.upper()} county {csp_county.get('county_fips')} "
+                f"over the last 10 years."
+            ),
+            "value":                ops,
+            "value_unit":           "count",
+            "value_year":           None,
+            "source_class":         "FEDERAL_DATA",
+            "source_url":           csp_county.get("source_url"),
+            "source_title":         csp_county.get("source_title"),
+            "source_date":          None,
+            "source_notes":         "County place-of-performance scope; community-specific.",
+            "confidence":           "MODERATE",
+            "confidence_rationale": "Counted from USAspending federal award records",
+            "verification_status":  "VERIFIED",
+            "bias_flag":            None,
+            "extracted_by":         "usaspending_csp_fetcher",
+            "extracted_at":         today_str(),
+            "stage":                STAGE_ID,
+            "in_main_analysis":     True,
+            "needs_verification_reason": None,
+        })
+
+    # Non-scoring regional ecosystem context (state + adjacent).
+    if csp_regional and "csp_regional_operators" not in existing_keys:
+        facts.append({
+            "datapoint_id":         f"dp_{community_id}_replication_feasibility_003",
+            "community_id":         community_id,
+            "state":                state,
+            "dimension":            "replication_feasibility",
+            "fact_key":             "csp_regional_operators",
+            "claim": (
+                f"{csp_regional.get('distinct_operators', 0)} distinct charter operators "
+                f"received CSP awards across {state.upper()} and adjacent states "
+                f"({', '.join(csp_regional.get('states_queried', []))}) in the last 10 years."
+            ),
+            "value":                csp_regional.get("distinct_operators", 0),
+            "value_unit":           "count",
+            "value_year":           None,
+            "source_class":         "FEDERAL_DATA",
+            "source_url":           csp_regional.get("source_url"),
+            "source_title":         csp_regional.get("source_title"),
+            "source_date":          None,
+            "source_notes":         "Regional ecosystem context (state + adjacent); not scored.",
+            "confidence":           "MODERATE",
+            "confidence_rationale": "Counted from USAspending federal award records",
+            "verification_status":  "VERIFIED",
+            "bias_flag":            None,
+            "extracted_by":         "usaspending_csp_fetcher",
+            "extracted_at":         today_str(),
+            "stage":                STAGE_ID,
+            "in_main_analysis":     False,
+            "needs_verification_reason": "Regional context only — intentionally excluded from scoring",
+        })
+
+    if ipeds_data and "cip13_completers" not in existing_keys:
+        comp = ipeds_data.get("completers", 0)
+        facts.append({
+            "datapoint_id":         f"dp_{community_id}_replication_feasibility_002",
+            "community_id":         community_id,
+            "state":                state,
+            "dimension":            "replication_feasibility",
+            "fact_key":             "cip13_completers",
+            "claim": (
+                f"{comp} education-program (CIP 13) completers were awarded "
+                f"statewide in {ipeds_data.get('data_year')}, per IPEDS — a proxy "
+                f"for the local teacher-credential pipeline."
+            ),
+            "value":                comp,
+            "value_unit":           "count",
+            "value_year":           ipeds_data.get("data_year"),
+            "source_class":         "FEDERAL_DATA",
+            "source_url":           ipeds_data.get("source_url"),
+            "source_title":         ipeds_data.get("source_title"),
+            "source_date":          None,
+            "source_notes":         "Statewide signal; not community-specific.",
+            "confidence":           "MODERATE",
+            "confidence_rationale": "Summed from IPEDS federal completions records (aggregate rows)",
+            "verification_status":  "VERIFIED",
+            "bias_flag":            None,
+            "extracted_by":         "ipeds_completers_fetcher",
+            "extracted_at":         today_str(),
+            "stage":                STAGE_ID,
+            "in_main_analysis":     True,
+            "needs_verification_reason": None,
+        })
+
+    logger.info(
+        "[%s] Injected replication datapoints (county_operators=%s, completers=%s, regional_operators=%s)",
+        community_id,
+        csp_county.get("distinct_operators") if csp_county else None,
+        ipeds_data.get("completers") if ipeds_data else None,
+        csp_regional.get("distinct_operators") if csp_regional else None,
+    )
+
+
+def _inject_funding_csp_evidence(
+    facts_output: dict,
+    csp_place: Optional[dict],
+    community_id: str,
+    state: str,
+) -> None:
+    """Append NM place-of-performance CSP award activity as funding_environment
+    EVIDENCE. NON-SCORING: in_main_analysis=False keeps it out of S5's
+    funding_environment scoring (which reads its own primary/secondary fact
+    keys), while still surfacing it in the fact bundle for S6 synthesis.
+    """
+    if not csp_place:
+        return
+
+    facts: list[dict] = facts_output.setdefault("facts", [])
+    if any(f.get("fact_key") == "csp_nm_place_of_performance_evidence" for f in facts):
+        return
+
+    facts.append({
+        "datapoint_id":         f"dp_{community_id}_funding_environment_001",
+        "community_id":         community_id,
+        "state":                state,
+        "dimension":            "funding_environment",
+        "fact_key":             "csp_nm_place_of_performance_evidence",
+        "claim": (
+            f"{csp_place.get('award_count', 0)} federal CSP awards "
+            f"(${csp_place.get('total_dollars', 0):,.0f}) had a "
+            f"place of performance in {state.upper()} over the last 10 years."
+        ),
+        "value":                csp_place.get("award_count", 0),
+        "value_unit":           "count",
+        "value_year":           None,
+        "source_class":         "FEDERAL_DATA",
+        "source_url":           csp_place.get("source_url"),
+        "source_title":         csp_place.get("source_title"),
+        "source_date":          None,
+        "source_notes":         "Contextual CSP-in-state evidence for synthesis; not scored.",
+        "confidence":           "MODERATE",
+        "confidence_rationale": "Counted from USAspending federal award records",
+        "verification_status":  "VERIFIED",
+        "bias_flag":            None,
+        "extracted_by":         "usaspending_csp_fetcher",
+        "extracted_at":         today_str(),
+        "stage":                STAGE_ID,
+        "in_main_analysis":     False,
+        "needs_verification_reason": "Contextual evidence only — intentionally excluded from scoring",
+    })
+    logger.info(
+        "[%s] Injected funding_environment CSP evidence (non-scoring): "
+        "%s NM awards, $%.0f",
+        community_id, csp_place.get("award_count", 0), csp_place.get("total_dollars", 0),
+    )
 
 
 def _inject_population_trends_facts(
