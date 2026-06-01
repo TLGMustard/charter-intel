@@ -1,0 +1,17 @@
+# NM Public Education Commission (PEC) charter renewal statistics.
+# Fill all three numeric fields to resolve NEEDS_VERIFICATION flags in S4.
+# S4 (Pass E) resolves any PEC renewal fact when renewal_rate, denial_rate,
+# and median_approval_days are all non-null.
+#
+# Fields to populate manually:
+#   renewal_rate          — fraction of renewals approved, e.g. 0.92
+#   denial_rate           — fraction denied, e.g. 0.08
+#   median_approval_days  — median days from application to decision, e.g. 180
+#   source                — citation string, e.g. "NM PEC Annual Report 2024"
+#   vintage               — data year as string, e.g. "2024"
+
+renewal_rate: null
+denial_rate: null
+median_approval_days: null
+source: null
+vintage: null

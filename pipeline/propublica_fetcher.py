@@ -134,6 +134,7 @@ def _fetch_org_financials(ein) -> Optional[dict]:
         "ntee_code": org.get("ntee_code"),
         "asset_amount": _pos_int(org.get("asset_amount")),
         "revenue_amount": _pos_int(org.get("revenue_amount")),
+        "tax_period": org.get("tax_period"),  # YYYYMM string from IRS 990, e.g. "202212"
     }
 
 
@@ -221,6 +222,11 @@ def get_philanthropic_activity(
     else:
         tier = "LIMITED"
 
+    # 5 — most recent 990 tax period across qualifying orgs (YYYYMM → year string).
+    tax_periods = [str(o["tax_period"]) for o in orgs if o.get("tax_period")]
+    data_vintage_year = max(tp[:4] for tp in tax_periods if len(tp) >= 4) if tax_periods else None
+    max_tax_period = max(tax_periods) if tax_periods else None
+
     result = {
         "foundation_count": foundation_count,
         "total_assets": total_assets,
@@ -232,6 +238,8 @@ def get_philanthropic_activity(
         "source_url": SOURCE_URL,
         "source_title": SOURCE_TITLE,
         "confidence": "MODERATE",
+        "tax_period": max_tax_period,
+        "data_vintage_note": f"990 data vintage: {data_vintage_year}" if data_vintage_year else None,
     }
     log.info(
         "propublica_fetcher: %s, %s — %d foundation(s), assets ~$%s, tier=%s",

@@ -58,6 +58,11 @@ STATE_FIPS = {
     "WV": "54", "WI": "55", "WY": "56",
 }
 
+# School status codes that indicate a closed school (mirrors ccd_closures_fetcher.py).
+_CLOSED_STATUS_CODES = frozenset({2, 6})
+# Only include closed schools from this year forward (prevents stale roster entries).
+_CLOSURE_RECENCY_CUTOFF = 2018
+
 # Generic education phrases that are NOT distinctive entity names. Compared by
 # exact (case-insensitive) match so real names like "East Mountain High School"
 # are still extracted.
@@ -210,12 +215,18 @@ def _fetch_statewide_city_charters(city: str, state_fips, year: int) -> list[dic
         name = r.get("school_name")
         if not name:
             continue
-        out.append({
+        status = r.get("school_status")
+        if status in _CLOSED_STATUS_CODES and year < _CLOSURE_RECENCY_CUTOFF:
+            continue  # too old to be a relevant roster entry
+        entry: dict = {
             "name": name,
             "ncessch": r.get("ncessch"),
             "leaid": r.get("leaid"),
             "enrollment": r.get("enrollment"),
-        })
+        }
+        if status in _CLOSED_STATUS_CODES:
+            entry["closure_year"] = year
+        out.append(entry)
     return out
 
 
@@ -275,12 +286,18 @@ def fetch_charter_roster(
         name = r.get("school_name")
         if not name:
             continue
-        _add({
+        status = r.get("school_status")
+        if status in _CLOSED_STATUS_CODES and year < _CLOSURE_RECENCY_CUTOFF:
+            continue  # too old to be a relevant roster entry
+        entry: dict = {
             "name": name,
             "ncessch": r.get("ncessch"),
             "leaid": r.get("leaid"),
             "enrollment": r.get("enrollment"),
-        })
+        }
+        if status in _CLOSED_STATUS_CODES:
+            entry["closure_year"] = year
+        _add(entry)
         if district_name is None:
             district_name = r.get("lea_name")
 

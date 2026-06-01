@@ -137,6 +137,11 @@ def run(
     # Degrades gracefully — if the roster cannot be fetched, facts are untouched.
     facts, entity_summary = _pass_d_entity_verification(facts, community_id, state, config)
 
+    # Pass E: static config resolution for NEEDS_VERIFICATION flags.
+    # Reads pec_renewal_stats.yaml and nmped_shortage_areas.yaml; no-ops
+    # when configs have null values (placeholder state).
+    facts = _pass_e_static_resolution(facts, community_id, state)
+
     summary = _build_summary(facts)
     summary["entity_verification"] = entity_summary
 
@@ -212,6 +217,98 @@ def _enforce_main_analysis_rules(fact: dict) -> dict:
             "against primary source. Requires human verification."
         )
     return fact
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Pass E — static config resolution
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _load_pec_renewal_stats() -> Optional[dict]:
+    """Return pec_renewal_stats.yaml as a dict only when all three numeric
+    fields are non-null; otherwise None (config not ready to resolve flags)."""
+    try:
+        with open("config/pec_renewal_stats.yaml") as f:
+            data = yaml.safe_load(f) or {}
+        required = ("renewal_rate", "denial_rate", "median_approval_days")
+        if all(data.get(k) is not None for k in required):
+            return data
+    except FileNotFoundError:
+        pass
+    except Exception as exc:
+        logger.warning("S4 Pass E: could not load pec_renewal_stats.yaml — %s", exc)
+    return None
+
+
+def _load_shortage_districts() -> list:
+    """Return the district list from nmped_shortage_areas.yaml, or []."""
+    try:
+        with open("config/nmped_shortage_areas.yaml") as f:
+            data = yaml.safe_load(f) or {}
+        return data.get("districts") or []
+    except FileNotFoundError:
+        return []
+    except Exception as exc:
+        logger.warning("S4 Pass E: could not load nmped_shortage_areas.yaml — %s", exc)
+        return []
+
+
+def _is_pec_renewal_fact(fact: dict) -> bool:
+    text = " ".join(filter(None, [
+        fact.get("fact_key"), fact.get("dimension"),
+        fact.get("needs_verification_reason"), fact.get("claim"),
+    ])).lower()
+    return "pec" in text and ("renewal" in text or "denial" in text)
+
+
+def _is_shortage_fact(fact: dict) -> bool:
+    text = " ".join(filter(None, [
+        fact.get("fact_key"), fact.get("dimension"),
+        fact.get("needs_verification_reason"), fact.get("claim"),
+    ])).lower()
+    return "shortage" in text and "teacher" in text
+
+
+def _pass_e_static_resolution(
+    facts: list[dict], community_id: str, state: str
+) -> list[dict]:
+    """Resolve NEEDS_VERIFICATION flags using static hand-populated config.
+
+    PEC renewal: resolves facts whose text references PEC + renewal/denial
+    when config/pec_renewal_stats.yaml has all three numeric fields non-null.
+
+    Shortage areas: resolves teacher shortage facts when the community's
+    city appears in config/nmped_shortage_areas.yaml districts list.
+    """
+    pec_stats = _load_pec_renewal_stats()
+    shortage_districts = _load_shortage_districts()
+
+    _, city_display, _ = _resolve_district(community_id, state)
+    district_in_shortage = bool(shortage_districts) and any(
+        city_display.lower() in d.lower() for d in shortage_districts
+    )
+
+    out: list[dict] = []
+    for fact in facts:
+        fact = dict(fact)
+        if fact.get("verification_status") == "NEEDS_VERIFICATION":
+            if pec_stats and _is_pec_renewal_fact(fact):
+                fact["verification_status"] = "VERIFIED"
+                fact["in_main_analysis"] = True
+                fact["needs_verification_reason"] = None
+                fact["verification_note"] = (
+                    f"Resolved via config/pec_renewal_stats.yaml "
+                    f"(source: {pec_stats.get('source')}, vintage: {pec_stats.get('vintage')})"
+                )
+            elif district_in_shortage and _is_shortage_fact(fact):
+                fact["verification_status"] = "VERIFIED"
+                fact["in_main_analysis"] = True
+                fact["needs_verification_reason"] = None
+                fact["verification_note"] = (
+                    "Resolved via config/nmped_shortage_areas.yaml — "
+                    "district confirmed on NM PED teacher shortage list"
+                )
+        out.append(fact)
+    return out
 
 
 def _build_summary(facts: list[dict]) -> dict:

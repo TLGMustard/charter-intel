@@ -1,0 +1,8 @@
+# NM PED teacher shortage area districts.
+# Districts confirmed on the NM PED teacher shortage designation list.
+# S4 (Pass E) resolves teacher shortage NEEDS_VERIFICATION flags when the
+# scan city's district name matches an entry here (case-insensitive substring
+# match against the city display name derived from community_id).
+
+districts:
+  - "Albuquerque Public Schools"

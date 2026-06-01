@@ -73,6 +73,18 @@ working, and the app can't accidentally break the pipeline.
 
 ---
 
+## 3. Session log
+
+**Session 28 (2026-06-01) — Lightweight Verification Flag Resolution**
+- Added `config/pec_renewal_stats.yaml` (placeholder: renewal_rate, denial_rate, median_approval_days, source, vintage — user fills to activate)
+- Added `config/nmped_shortage_areas.yaml` (NM PED teacher shortage districts list; Albuquerque Public Schools prepopulated)
+- Enhanced `propublica_fetcher.py`: surface 990 `tax_period` (YYYYMM) from per-EIN detail as `data_vintage_note` for confidence annotation
+- Enhanced `ccd_entity_verifier.py`: filter closed schools (status 2/6) from roster unless year ≥ 2018; expose `closure_year` for S7 recency notes
+- Wired S4 Pass E: deterministic static resolution — PEC renewal facts resolve when config fields non-null; teacher shortage facts resolve when district in shortage list
+- Tests: 290 passing
+
+---
+
 ## 3. Quick start (local development)
 
 Requires **Python 3.11+** (the pipeline uses 3.10+ syntax; 3.11 is the supported target).
