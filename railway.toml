@@ -16,8 +16,9 @@ builder = "dockerfile"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-# Streamlit's built-in health endpoint; Railway holds traffic until it passes.
-healthcheckPath = "/_stcore/health"
+# Flask UI health endpoint (CLIP_UI=flask). If reverting to Streamlit, change
+# back to /_stcore/health.
+healthcheckPath = "/api/health"
 healthcheckTimeout = 300
 
 # Keep the container running; restart only if it actually crashes. Do NOT enable
