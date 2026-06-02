@@ -10,8 +10,9 @@
 #   source                — citation string, e.g. "NM PEC Annual Report 2024"
 #   vintage               — data year as string, e.g. "2024"
 
-renewal_rate: null
-denial_rate: null
-median_approval_days: null
-source: null
-vintage: null
+renewal_rate: 1.0
+denial_rate: 0.0
+median_approval_days: 90
+source: "NM PED PEC Renewal Applications pages (2024 and 2025 cycles); median_approval_days is statutory maximum per NMSA 22-8B, not observed median"
+vintage: "2024-2025"
+confidence: "LOW — 30 schools across 2 cycles, all approved; voluntary closures and pre-denial counseling not captured in this data"

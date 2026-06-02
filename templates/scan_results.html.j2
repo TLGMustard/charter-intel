@@ -202,6 +202,12 @@
   <p class="meta">
     {{ city_count }} communities · ranked by composite score · generated {{ generated_at[:10] }}
   </p>
+  {% set insuf_excluded = results | selectattr("data_coverage_tier", "equalto", "INSUFFICIENT") | list %}
+  {% if insuf_excluded | length > 0 %}
+  <p class="insufficient-note" style="margin-bottom:16px;">
+    {{ insuf_excluded | length }} {{ "city" if insuf_excluded | length == 1 else "cities" }} excluded from ranking (insufficient data coverage).
+  </p>
+  {% endif %}
 
   {# Split results: reliable/provisional are ranked; unreliable + INSUFFICIENT
      are pulled out of the ranking. INSUFFICIENT (Session 18 Area C) means 4+

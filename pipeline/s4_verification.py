@@ -133,6 +133,15 @@ def run(
     # Enforce in_main_analysis rules deterministically (non-negotiable)
     facts = [_enforce_main_analysis_rules(f) for f in facts]
 
+    # Detect PCI promotion (stale S3 cache recovery) and strip the internal marker.
+    pci_promoted = any(f.pop("_pci_promoted", False) for f in facts)
+    if pci_promoted:
+        logger.warning(
+            "[%s] PCI promoted from legacy cache entry (in_main_analysis was False). "
+            "Re-run S3 to generate a fresh signal.",
+            community_id,
+        )
+
     # Pass D: live NCES CCD charter-roster entity verification.
     # Degrades gracefully — if the roster cannot be fetched, facts are untouched.
     facts, entity_summary = _pass_d_entity_verification(facts, community_id, state, config)
@@ -151,6 +160,7 @@ def run(
         "verified_at": today_str(),
         "facts": facts,
         "summary": summary,
+        "pci_promoted_from_cache": pci_promoted,
     }
 
     out_path = f"data/cache/community/{state.lower()}/{community_id}/s4_verified.json"
@@ -192,12 +202,23 @@ def _enforce_main_analysis_rules(fact: dict) -> dict:
     source_class = fact.get("source_class")
     confidence = fact.get("confidence")
 
-    if source_class in BLOCKED_SOURCE_CLASSES or confidence in ("LOW", "NONE"):
+    # political_climate_index is exempt from the LOW-confidence block (S29):
+    # a present index value always passes through to S5, regardless of source_class,
+    # confidence, or what S3 previously set. Confidence label is preserved.
+    _is_pci = fact.get("fact_key") == "political_climate_index" and fact.get("value") is not None
+
+    if (source_class in BLOCKED_SOURCE_CLASSES or confidence in ("LOW", "NONE")) and not _is_pci:
         fact["in_main_analysis"] = False
         if not fact.get("needs_verification_reason"):
             fact["needs_verification_reason"] = (
                 f"Blocked: source_class={source_class}, confidence={confidence}"
             )
+    elif _is_pci:
+        # Actively gate-open: promote in_main_analysis=True unconditionally so
+        # stale S3 caches (which may carry in_main_analysis=False) are corrected.
+        if fact.get("in_main_analysis") is False:
+            fact["_pci_promoted"] = True  # signals run() to set pci_promoted_from_cache
+        fact["in_main_analysis"] = True
 
     # Null-URL VERIFIED demotion: a fact cannot remain VERIFIED + in_main_analysis
     # without a traceable source URL (closes the KIPP _002 pattern — VERIFIED with

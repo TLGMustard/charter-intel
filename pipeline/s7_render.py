@@ -75,6 +75,16 @@ def run(
     # Restore original weights from the S5 scorecard so the table is accurate.
     _patch_excluded_weights(brief, state, community_id)
 
+    # Check whether S4 promoted political_climate_index from a stale cache entry.
+    pci_promoted = False
+    s4_path = f"data/cache/community/{state.lower()}/{community_id}/s4_verified.json"
+    if os.path.exists(s4_path):
+        try:
+            with open(s4_path) as _f:
+                pci_promoted = json.load(_f).get("pci_promoted_from_cache", False)
+        except Exception:
+            pass
+
     # Shared Jinja environment
     env = Environment(
         loader=FileSystemLoader("templates"),
@@ -120,6 +130,7 @@ def run(
             brief=brief,
             debug=debug,
             schools=brief.get("top_charter_schools", []),
+            pci_promoted=pci_promoted,
         )
         html_filename = f"{community_id}_{config.preset.value}_mode{config.mode.value}.html"
         html_out_path = os.path.join(out_dir, html_filename)
@@ -432,6 +443,10 @@ def render_scan_table(
         logger.warning("Scan table template not found: templates/%s", template_name)
         return None
 
+    insufficient_count = sum(
+        1 for r in sorted_results if r.get("data_coverage_tier") == "INSUFFICIENT"
+    )
+
     rendered = env.get_template(template_name).render(
         results=sorted_results,
         state=config.state,
@@ -444,6 +459,11 @@ def render_scan_table(
     with open(out_path, "w") as f:
         f.write(rendered)
 
+    if insufficient_count:
+        logger.info(
+            "Scan table: %d cities excluded from ranking (insufficient data coverage)",
+            insufficient_count,
+        )
     logger.info("Scan table written to %s", out_path)
     print(f"\n  Scan table: {out_path}\n")
     return out_path

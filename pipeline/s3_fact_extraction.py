@@ -663,9 +663,9 @@ def run(
         if not should_run_pc:
             # Gate blocked — inject a state baseline so S5 always has a dimension to
             # score. Area B (Session 18): this baseline is NOT community-specific
-            # evidence, so it is flagged LOW + carries an explicit data-gap tag. LOW
-            # confidence routes it out of the main analysis (S4) so political_climate
-            # is treated as used_default in S5 rather than a confident MIXED(5).
+            # evidence, so it is flagged LOW + carries an explicit data-gap tag.
+            # S29: the LOW-confidence S4 gate was removed — this fact now passes
+            # through to S5 with its PROVISIONAL/LOW label intact.
             #
             # Prefer an S2 state-level political climate score if one is available.
             # TODO: requires verified source — s2_state_context does not currently

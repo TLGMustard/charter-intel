@@ -14,12 +14,12 @@ NM:
         status: FLAGGED
         basis: "Pueblo of Jemez — tribal governance per special_considerations."
         note: "Charter authorization on Pueblo land may involve tribal jurisdiction not modeled by scoring. Human review required before any strategic use."
-    nm-156-navajo:
+    nm-navajo:
       tribal_jurisdiction_flag:
         status: FLAGGED
         basis: "Navajo Nation artifact — no NCES LEA match (null district mapping)."
         note: "Likely within Navajo Nation jurisdiction. Charter authority and applicable law require human determination. Not for strategic use without review."
-    nm-4386-shiprock:
+    nm-shiprock:
       tribal_jurisdiction_flag:
         status: FLAGGED
         basis: "Shiprock / Navajo Nation — no NCES LEA match (null district mapping)."
@@ -155,23 +155,17 @@ NM:
       '
   name: New Mexico
   nm_district_map:
-    nm-156-navajo: null
-    nm-230-el-prado: TAOS
-    nm-344-edgewood: MORIARTY-EDGEWOOD
-    nm-4-jemez-pueblo: JEMEZ VALLEY
-    nm-4386-shiprock: null
-    nm-564-gallup: GALLUP
-    nm-66-edgewood: MORIARTY-EDGEWOOD
+    nm-alamogordo: ALAMOGORDO
     nm-albuquerque: ALBUQUERQUE
     nm-angel-fire: CIMARRON
     nm-arbolera-espanola: ESPANOLA
     nm-aztec: AZTEC
-    nm-bld.-2b-albuquerque: ALBUQUERQUE
-    nm-bldg.-2-albuquerque: ALBUQUERQUE
     nm-carlsbad: CARLSBAD
     nm-cleveland: MORA
     nm-deming: DEMING
     nm-east-taos: TAOS
+    nm-edgewood: MORIARTY-EDGEWOOD
+    nm-el-prado: TAOS
     nm-espanola: ESPANOLA
     nm-gallup: GALLUP
     nm-jemez-pueblo: JEMEZ VALLEY
@@ -179,6 +173,7 @@ NM:
     nm-las-vegas: LAS VEGAS CITY
     nm-los-lunas: LOS LUNAS
     nm-los-ranchos-de-albuquerque: ALBUQUERQUE
+    nm-navajo: null
     nm-nm-602-gallup: GALLUP
     nm-questa: QUESTA
     nm-red-river: QUESTA
@@ -186,31 +181,24 @@ NM:
     nm-roswell: ROSWELL
     nm-sandia-park: MORIARTY-EDGEWOOD
     nm-santa-fe: SANTA FE
+    nm-shiprock: null
     nm-silver-city: SILVER CITY
     nm-socorro: SOCORRO
-    nm-ste-c-albuquerque: ALBUQUERQUE
     nm-taos: TAOS
     nm-truth-or-consequences: T OR C
-    nm-us-70-alamogordo: ALAMOGORDO
     nm-w-taos: TAOS
   nces_district_map:
-    nm-156-navajo: null      # no NCES match — Navajo Nation, no LEA in directory
-    nm-230-el-prado: '3502520'
-    nm-344-edgewood: '3501890'
-    nm-4-jemez-pueblo: '3501410'
-    nm-4386-shiprock: null   # no NCES match — Navajo Nation, no LEA in directory
-    nm-564-gallup: '3501110'
-    nm-66-edgewood: '3501890'
+    nm-alamogordo: '3500030'
     nm-albuquerque: '3500060'
     nm-angel-fire: '3500480'
     nm-arbolera-espanola: '3500900'
     nm-aztec: '3500150'
-    nm-bld.-2b-albuquerque: '3500060'
-    nm-bldg.-2-albuquerque: '3500060'
     nm-carlsbad: '3500300'
     nm-cleveland: '3501860'
     nm-deming: '3500690'
     nm-east-taos: '3502520'
+    nm-edgewood: '3501890'
+    nm-el-prado: '3502520'
     nm-espanola: '3500900'
     nm-gallup: '3501110'
     nm-jemez-pueblo: '3501410'
@@ -218,6 +206,7 @@ NM:
     nm-las-vegas: '3501530'
     nm-los-lunas: '3501680'
     nm-los-ranchos-de-albuquerque: '3500060'
+    nm-navajo: null      # no NCES match — Navajo Nation, no LEA in directory
     nm-nm-602-gallup: '3501110'
     nm-questa: '3502160'
     nm-red-river: '3502160'
@@ -225,12 +214,11 @@ NM:
     nm-roswell: '3502250'
     nm-sandia-park: '3501890'
     nm-santa-fe: '3502370'
+    nm-shiprock: null    # no NCES match — Navajo Nation, no LEA in directory
     nm-silver-city: '3502430'
     nm-socorro: '3502460'
-    nm-ste-c-albuquerque: '3500060'
     nm-taos: '3502520'
     nm-truth-or-consequences: '3502610'
-    nm-us-70-alamogordo: '3500030'
     nm-w-taos: '3502520'
   pilot: true
   state_fips: 35

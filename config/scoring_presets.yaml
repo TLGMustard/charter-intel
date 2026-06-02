@@ -98,15 +98,17 @@ maturity_adjusted:
     Session 12 calibration preset. Halves the combined weight of
     charter_saturation and replication_feasibility (r=-0.75, both measure
     charter ecosystem maturity). All other 7 active dimensions equal weight.
-    facilities_feasibility excluded (weight 0.0) pending CoStar data decision.
-    Full calibration pending operator profile definition with TMT.
+    facilities_feasibility formally shelved at 0.0 (S29): thresholds
+    unvalidated, insufficient NM data coverage. Scorer left in place for
+    future calibration. Full calibration pending operator profile definition
+    with TMT.
   dimensions:
     academic_need:           0.125
     charter_saturation:      0.0625
     population_trends:       0.125
     political_climate:       0.125
     authorizer_friendliness: 0.125
-    facilities_feasibility:  0.0
+    facilities_feasibility:  0.0  # Formally shelved: thresholds unvalidated, insufficient NM data coverage (S29)
     replication_feasibility: 0.0625
     funding_environment:     0.125
     competitive_opportunity: 0.125

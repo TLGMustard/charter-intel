@@ -109,6 +109,7 @@
     .banner-insufficient { background: var(--color-score-yellow-bg); border-color: var(--fill-yellow); color: #6b4a00; }
     .banner-gate { background: var(--color-score-red-bg); border-color: var(--fill-red); color: var(--color-score-red); }
     .banner-tribal { background: #eef4fb; border-color: var(--color-chrome-500); color: #234; }
+    .banner-pci-legacy { background: #fff7ed; border-color: #fb923c; color: #7c2d12; }
 
     /* ── 3. Executive snapshot ── */
     .exec-snapshot { line-height: 1.75; margin: 0; }
@@ -297,6 +298,13 @@
     <strong>ℹ Tribal jurisdiction: {{ (brief.tribal_jurisdiction_flag.status or '') | replace("_", " ") | e }}</strong>
     {{ brief.tribal_jurisdiction_flag.note | e }}
     {% if brief.tribal_jurisdiction_flag.resolution_path %}<br><em>Resolution:</em> {{ brief.tribal_jurisdiction_flag.resolution_path | e }}{% endif %}
+  </div>
+  {% endif %}
+
+  {% if pci_promoted %}
+  <div class="banner banner-pci-legacy">
+    <strong>⚠ Political climate score was recovered from a legacy cache entry.</strong>
+    Confidence is reduced — re-run S3 to generate a fresh signal.
   </div>
   {% endif %}
 
