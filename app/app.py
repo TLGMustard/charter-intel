@@ -274,6 +274,42 @@ def view_live_run() -> None:
         st.error(f"Run failed (exit code {status.get('exit_code')}). Check the log above.")
 
 
+def parse_run_slug(run_id: str) -> dict:
+    """Extract state_code and city_display from a run_id or community slug.
+
+    Accepts both formats:
+      "nm-rio-rancho"           → {state_code: "NM", city_display: "Rio Rancho"}
+      "scan-nm-rio-rancho-001"  → same
+
+    Falls back gracefully: state_code="" and city_display=run_id on parse failure.
+    """
+    try:
+        parts = run_id.strip().lower().split("-")
+        # Community slug format: first segment is a 2-letter state code.
+        # e.g. "nm-rio-rancho" from the run's `target` field.
+        if len(parts) >= 2 and len(parts[0]) == 2 and parts[0].isalpha():
+            return {
+                "state_code": parts[0].upper(),
+                "city_display": " ".join(parts[1:]).title(),
+                "run_id": run_id,
+            }
+        # Run ID format: {prefix}-{state}-{city...}-{digits}
+        # e.g. "scan-nm-rio-rancho-001" → drop prefix + trailing digit block.
+        if len(parts) >= 3:
+            inner = parts[1:]                       # drop prefix ("scan", "demo", …)
+            if inner and inner[-1].isdigit():
+                inner = inner[:-1]                  # drop numeric suffix ("001")
+            if inner and len(inner[0]) == 2 and inner[0].isalpha():
+                return {
+                    "state_code": inner[0].upper(),
+                    "city_display": " ".join(inner[1:]).title() or run_id,
+                    "run_id": run_id,
+                }
+    except Exception:
+        pass
+    return {"state_code": "", "city_display": run_id, "run_id": run_id}
+
+
 def view_history() -> None:
     st.header("History + Briefs")
     all_runs = runs_mod.list_runs()
@@ -293,10 +329,38 @@ def view_history() -> None:
     } for r in all_runs]
     st.dataframe(rows, use_container_width=True, hide_index=True)
 
-    run_ids = [r["run_id"] for r in all_runs]
-    default_idx = run_ids.index(st.session_state["active_run_id"]) \
-        if st.session_state.get("active_run_id") in run_ids else 0
-    selected = st.selectbox("Select a run to view its briefs", run_ids, index=default_idx)
+    # Build display label for each run — prefer the `target` community slug for
+    # human-readable parsing; fall back to run_id if target is absent.
+    run_meta: list[dict] = []
+    for r in all_runs:
+        p = parse_run_slug(r.get("target") or r["run_id"])
+        date_str = (r.get("start_time") or "")[:10]
+        label = f"{p['city_display']}  ({date_str})" if date_str else p["city_display"]
+        run_meta.append({"run_id": r["run_id"], "state_code": p["state_code"], "label": label})
+
+    # State filter — skip entirely when only one state is represented.
+    unique_states = sorted({m["state_code"] for m in run_meta if m["state_code"]})
+    if len(unique_states) > 1:
+        chosen_state = st.selectbox("State", ["All States"] + unique_states)
+        visible = [m for m in run_meta
+                   if chosen_state == "All States" or m["state_code"] == chosen_state]
+    else:
+        visible = run_meta
+
+    if not visible:
+        st.info("No runs for the selected state.")
+        return
+
+    visible_ids = [m["run_id"] for m in visible]
+    label_map = {m["run_id"]: m["label"] for m in visible}
+    active_id = st.session_state.get("active_run_id")
+    default_idx = visible_ids.index(active_id) if active_id in visible_ids else 0
+    selected = st.selectbox(
+        "Select a run to view its briefs",
+        visible_ids,
+        format_func=lambda rid: label_map.get(rid, rid),
+        index=default_idx,
+    )
 
     run = runs_mod.get_run(selected)
     if not run:
