@@ -41,7 +41,10 @@ link_persistent "${DATA_DIR}/outputs"    "${APP_DIR}/outputs"
 link_persistent "${DATA_DIR}/data_cache" "${APP_DIR}/data/cache"
 link_persistent "${DATA_DIR}/data_raw"   "${APP_DIR}/data/raw"
 
-echo "[entrypoint] persistence wired under ${DATA_DIR}; launching Streamlit on port ${PORT:-8501}"
-
-# Hand off to the existing, unmodified launcher (binds 0.0.0.0, honors PORT).
-exec bash "${APP_DIR}/app/run.sh"
+if [ "${CLIP_UI}" = "flask" ]; then
+    echo "[entrypoint] persistence wired under ${DATA_DIR}; launching Flask UI on port ${PORT:-8080}"
+    exec bash "${APP_DIR}/app/ui/run.sh"
+else
+    echo "[entrypoint] persistence wired under ${DATA_DIR}; launching Streamlit on port ${PORT:-8501}"
+    exec bash "${APP_DIR}/app/run.sh"
+fi
