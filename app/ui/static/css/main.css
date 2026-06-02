@@ -398,10 +398,9 @@ button, input, select {
 }
 .state-path:hover, .state-path:focus-visible {
   fill: var(--night-navy);
-  /* drop-shadow is a post-compositing filter — it renders outside the element
-     uniformly on every edge regardless of neighbor z-order, avoiding the
-     thin-border problem that SVG strokes have on shared edges. */
-  filter: drop-shadow(0 0 2.5px rgba(212,175,55,0.85)) drop-shadow(0 0 1px rgba(212,175,55,0.6));
+  stroke: var(--gold);
+  stroke-width: 2px;
+  stroke-opacity: 1;
   outline: none;
 }
 .state-path.active {
