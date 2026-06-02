@@ -310,6 +310,35 @@ def parse_run_slug(run_id: str) -> dict:
     return {"state_code": "", "city_display": run_id, "run_id": run_id}
 
 
+def _is_junk_slug(target: str) -> bool:
+    """Return True if the target community slug is a junk/address-fragment entry.
+
+    Excluded after stripping the 2-letter state prefix when the first city
+    segment is:
+      a) purely numeric  (e.g. nm-66-edgewood, nm-4386-shiprock)
+      b) a known address-fragment abbreviation  (bld, bldg, ste)
+      c) a highway-style prefix  (us-NNN, nm-NNN)
+    """
+    try:
+        parts = target.strip().lower().split("-")
+        if not (len(parts) >= 2 and len(parts[0]) == 2 and parts[0].isalpha()):
+            return False
+        city_parts = parts[1:]
+        if not city_parts:
+            return False
+        first  = city_parts[0]
+        second = city_parts[1] if len(city_parts) > 1 else ""
+        if re.match(r"^\d+$", first):                             # (a) numeric
+            return True
+        if re.match(r"^bldg?\.?$", first) or first == "ste":     # (b) address abbrev
+            return True
+        if first in ("us", "nm") and re.match(r"^\d+$", second): # (c) highway prefix
+            return True
+    except Exception:
+        pass
+    return False
+
+
 def view_history() -> None:
     st.header("History + Briefs")
     all_runs = runs_mod.list_runs()
@@ -331,12 +360,22 @@ def view_history() -> None:
 
     # Build display label for each run — prefer the `target` community slug for
     # human-readable parsing; fall back to run_id if target is absent.
+    # Junk slugs (numeric-prefixed / address-fragment targets) are skipped.
     run_meta: list[dict] = []
     for r in all_runs:
-        p = parse_run_slug(r.get("target") or r["run_id"])
+        target = r.get("target") or ""
+        if _is_junk_slug(target):
+            continue
+        p = parse_run_slug(target or r["run_id"])
         date_str = (r.get("start_time") or "")[:10]
         label = f"{p['city_display']}  ({date_str})" if date_str else p["city_display"]
-        run_meta.append({"run_id": r["run_id"], "state_code": p["state_code"], "label": label})
+        run_meta.append({
+            "run_id": r["run_id"],
+            "state_code": p["state_code"],
+            "city_display": p["city_display"],
+            "label": label,
+        })
+    run_meta.sort(key=lambda m: m["city_display"].casefold())
 
     # State filter — skip entirely when only one state is represented.
     unique_states = sorted({m["state_code"] for m in run_meta if m["state_code"]})
