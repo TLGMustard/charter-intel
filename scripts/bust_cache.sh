@@ -5,9 +5,10 @@
 #   bash scripts/bust_cache.sh "Santa Fe"
 #   bash scripts/bust_cache.sh "Carlsbad" --stages s3,s4
 #   bash scripts/bust_cache.sh "Questa"   --stages s6
+#   bash scripts/bust_cache.sh "Questa"   --refresh-data
 #
-# Without --stages: deletes the entire community and synthesis cache directories
-# (original full-bust behaviour, unchanged).
+# Without --stages or --refresh-data: deletes the entire community and synthesis
+# cache directories (original full-bust behaviour, unchanged).
 #
 # With --stages <list>: deletes only the cache files for the named stages.
 #   Recognised stage names and their cache locations:
@@ -18,18 +19,23 @@
 #     s1  → data/cache/state/{STATE}/s1_community_list_*.json
 #     s2  → data/cache/state/{STATE}/s2_state_context.json
 #
+# --refresh-data: clears S1, S3, S4, S5, S6 — forces a full data re-fetch on
+#   the next run while preserving the S2 state-context cache (the $0.22 Opus
+#   call). S7 has no independent cache (pure renderer) and is not listed.
+#   Equivalent to: --stages s1,s3,s4,s5,s6
+#
 # Run from repo root.
 
 STATE="nm"  # change here when adding a second state
 
 # ── Input validation ──────────────────────────────────────────────────────────
 if [[ -z "${1-}" ]] || [[ "$1" == --* ]]; then
-  echo "Usage: bash scripts/bust_cache.sh \"City Name\" [--stages s3,s4,...]"
+  echo "Usage: bash scripts/bust_cache.sh \"City Name\" [--stages s3,s4,...|--refresh-data]"
   exit 1
 fi
 
 CITY="$1"
-shift   # consume city name; remaining args may include --stages
+shift   # consume city name; remaining args may include --stages / --refresh-data
 
 STAGES=""
 while [[ $# -gt 0 ]]; do
@@ -39,9 +45,14 @@ while [[ $# -gt 0 ]]; do
       STAGES="${1-}"
       shift
       ;;
+    --refresh-data)
+      # Clears S1,S3,S4,S5,S6 — preserves S2 (state context, expensive Opus call).
+      STAGES="s1,s3,s4,s5,s6"
+      shift
+      ;;
     *)
       echo "Unknown argument: $1"
-      echo "Usage: bash scripts/bust_cache.sh \"City Name\" [--stages s3,s4,...]"
+      echo "Usage: bash scripts/bust_cache.sh \"City Name\" [--stages s3,s4,...|--refresh-data]"
       exit 1
       ;;
   esac

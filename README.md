@@ -376,3 +376,30 @@ Be honest about these before relying on CLIP for anything consequential:
 
 *The Mind Trust — Charter Community Landscape Intelligence Platform. Pre-production;
 scoring uncalibrated. See `docs/` for session history and `DEPLOY.md` for deployment.*
+
+---
+
+## Session Log
+
+### Session — 2026-06-03 (81af345)
+
+**Accomplished:**
+- Audited `data/raw/` (8.1 GB): deleted 4 national NCES membership CSVs (7.2 GB dead weight after parquet was built) and 2 orphaned files (`nces_lea_directory_2024.csv`, `nces_sch_characteristics_2024.csv`)
+- Added dead-function note above `get_school_enrollment_trends()` in `population_trends_fetcher.py` documenting raw CSV deletion and re-download URL
+- Completed Railway deploy readiness audit; fixed two blockers: removed `data/processed/` from `.dockerignore` so parquet bakes into image; added `CLIP_UI=flask` row to `DEPLOY.md` env var table
+- Fixed stale healthcheck path in `DEPLOY.md` (`/_stcore/health` → `/api/health`)
+- Committed and deployed S33 Flask scan wiring (`app/ui/server.py`, `app.js`, `index.html`, `main.css`) plus three new test files (337 passing)
+- Diagnosed Railway cold-start failure: `data/raw/` volume empty, parquet missing from image (gitignored `data/processed/`); built `data/seeded/` directory with 6 active NM data files + parquet and added idempotent entrypoint seeding blocks
+- Fixed entrypoint seeding crash: raw seeding loop iterated `data/seeded/processed/` as a state dir and tried `cp` on a directory without `-r`; added `[ -f "$f" ] || continue` guard and replaced processed seeding with direct-path parquet copy
+- Added `--refresh-data` flag to `scripts/bust_cache.sh`: clears S1, S3, S4, S5, S6 cache while preserving S2 (state context — expensive Opus call); S7 has no independent cache
+
+**Decisions:**
+- Parquet seeded via `data/seeded/processed/` (committed) rather than removing `data/processed/` from `.gitignore` — avoids committing derived data to the main tree; entrypoint copies 462 KB on every container start (fast, idempotent)
+- Raw NM data files seeded to volume (persistent, skip-if-exists) rather than baked directly into image layer — keeps them updatable without a full rebuild
+- `--refresh-data` implemented as a named alias for `--stages s1,s3,s4,s5,s6` inside existing arg-parsing machinery — zero new code paths
+
+**Next Steps:**
+- [ ] Fill `config/pec_renewal_stats.yaml` with verified PEC renewal/denial rate data to activate S4 Pass E resolution
+- [ ] Extend `config/nmped_shortage_areas.yaml` with full NMPED hard-to-staff district list
+- [ ] Calibrate scoring weights (blocked until operator-profile conversation with The Mind Trust)
+- [ ] Re-run Questa scan to rebuild cleared cache (smoke-test of `--refresh-data` cleared it)
