@@ -1231,6 +1231,11 @@ def run(
         )
         facts_output["charter_schools"]  = charter_intel.get("top_charter_schools", csv_schools)
         facts_output["local_authorizers"] = charter_intel.get("local_authorizers", csv_authorizers)
+        # LLM output omits num_schools_in_community; re-merge from roster-derived csv_authorizers.
+        _csv_count = {a["authorizer_name"]: a.get("num_schools_in_community") for a in csv_authorizers}
+        for _auth in facts_output["local_authorizers"]:
+            if not _auth.get("num_schools_in_community"):
+                _auth["num_schools_in_community"] = _csv_count.get(_auth.get("authorizer_name"))
     # ─────────────────────────────────────────────────────────────────────────
 
     # ── CMO local-presence skepticism gate (deterministic, config-driven) ──
