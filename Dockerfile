@@ -20,7 +20,7 @@ ENV PYTHONUNBUFFERED=1 \
 # detached main.py subprocesses the app spawns, so long-lived job-runner
 # containers never accumulate zombie processes.
 RUN apt-get update \
- && apt-get install -y --no-install-recommends build-essential curl tini \
+ && apt-get install -y --no-install-recommends build-essential curl tini unzip \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
