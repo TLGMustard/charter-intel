@@ -4,8 +4,12 @@
 # MCP connected at build time). DB IDs are NOT secrets; this file is committed.
 # The NOTION_API_KEY lives only in the environment, never here.
 #
-# PLACEHOLDER — fill these in once the four databases exist.
-signal_db_id: null
-source_db_id: null
-city_db_id: null
-dimension_db_id: null
+signal_db_id: "b2a9ec19174e4f7088278afbfa71734c"
+source_db_id: "2100b479fc4445a28172f3cc2e604027"
+city_db_id: "d57a768c798346fea1f1b0093d7ce029"
+dimension_db_id: "5a4fc6ec0fca4a9581f49986b7d9a817"
+# Data source IDs (collection UUIDs) — used for queries (data_sources.query API)
+signal_ds_id: "bcaed7d7-5809-4c2b-be7c-bca65f921295"
+source_ds_id: "9bd8717e-6a29-42d6-8ffd-01f21515b7af"
+city_ds_id: "7398a191-73d5-4609-9e4a-da85b3bcec3a"
+dimension_ds_id: "d055d392-171a-4b13-babf-d52f1b930fad"

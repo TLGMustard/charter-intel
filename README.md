@@ -529,3 +529,30 @@ scoring uncalibrated. See `docs/` for session history and `DEPLOY.md` for deploy
 - [ ] Populate `source_date` in S3 fetchers with fiscal year-end dates to enable accurate `data_through` vintage dating
 - [ ] Fill `config/pec_renewal_stats.yaml` with verified PEC renewal/denial rate data
 - [ ] Calibrate scoring weights (blocked on operator-profile conversation with The Mind Trust)
+
+---
+
+### Session 36 — 2026-06-04 (2d23bbe)
+
+**Accomplished:**
+- Created all four Notion databases (City, Dimension, Source, Signal) via MCP with full schema; Signal includes 3 outbound relations (city, dimension, source) and a self-relation (`superseded_by`)
+- Seeded City DB (3 rows: nm-albuquerque, tx-houston, oh-columbus) and Dimension DB (10 rows with per-dimension `wf_base`/`half_life_days` from `field_signal_weights.yaml`); defaults applied for `competitive_opportunity` and `operational_complexity`
+- Wrote 8 IDs to `config/notion_ids.yaml` — 4 database IDs (for `pages.create`) and 4 data source UUIDs (for `data_sources.query`)
+- Fixed `pipeline/layer2/notion_client.py`: title property key `"name"` → `"title"` in `write_signal` and `write_source`; all 5 `databases.query` calls migrated to `data_sources.query`; `_page_to_source` reader fixed from `_r_text` to `_r_title`; data source IDs loaded in `__init__`
+- Pinned `notion-client>=2.2.1,<3.0.0` in `requirements.txt` — v3 removed `databases.query`; installed 2.7.0
+- Smoke test passing end-to-end: write source → write signal → read back (1 active) → update → expire stale
+- Created 3 operator saved views on Signal DB via MCP: "Needs Review" (table, `confidence_tier=review`), "Active by City" (board, `status=active`, grouped by city), "Expired / Archive" (table, `status=expired OR rejected`)
+
+**Decisions:**
+- Config stores both `*_db_id` and `*_ds_id` separately — `pages.create` uses database IDs, `data_sources.query` uses collection UUIDs; they are different identifiers in the new Notion API
+- `superseded_by` added as a one-way relation (not DUAL) to avoid an unwanted reverse synced property on Signal
+- Databases created via Notion MCP used a different integration token than the `CLIP` key in `.env`; required manual "Share with CLIP integration" step in Notion UI before the Python SDK could access them — document this for any future workspace recreation
+- `notion-client` v3 released with breaking API changes; `<3.0.0` pin prevents silent breakage on next `pip install`
+
+**Next Steps:**
+- [ ] Wire `NotionSignalStore` into the S3/S4 pipeline ingestion path — signals extracted by S3 should be written to Layer 2 at pipeline end
+- [ ] Generalize `NM_STATE_AVG_PPR` in `nces_fetcher.py` — load per-state average from states.yaml
+- [ ] Generalize `STATE_FIPS` in `saipe_fetcher.py` via states.yaml `state_fips` field
+- [ ] Populate `source_date` in S3 fetchers with fiscal year-end dates
+- [ ] Fill `config/pec_renewal_stats.yaml` with verified PEC renewal/denial rate data
+- [ ] Calibrate scoring weights (blocked on operator-profile conversation with The Mind Trust)

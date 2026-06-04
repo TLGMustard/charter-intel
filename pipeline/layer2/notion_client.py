@@ -176,6 +176,11 @@ class NotionSignalStore(SignalStore):
         self.source_db_id = ids["source_db_id"]
         self.city_db_id = ids["city_db_id"]
         self.dimension_db_id = ids["dimension_db_id"]
+        # Data source IDs for query calls (data_sources.query API, notion-client 2.x)
+        self.signal_ds_id = ids.get("signal_ds_id") or ids["signal_db_id"]
+        self.source_ds_id = ids.get("source_ds_id") or ids["source_db_id"]
+        self.city_ds_id = ids.get("city_ds_id") or ids["city_db_id"]
+        self.dimension_ds_id = ids.get("dimension_ds_id") or ids["dimension_db_id"]
 
         self._client = Client(auth=self._api_key)
         self._min_interval = min_interval
@@ -219,8 +224,8 @@ class NotionSignalStore(SignalStore):
         cursor = None
         while True:
             resp = self._call(
-                self._client.databases.query,
-                database_id=self.dimension_db_id,
+                self._client.data_sources.query,
+                data_source_id=self.dimension_ds_id,
                 start_cursor=cursor,
             )
             for page in resp.get("results", []):
@@ -241,8 +246,8 @@ class NotionSignalStore(SignalStore):
         if city_slug in self._city_id_by_slug:
             return self._city_id_by_slug[city_slug]
         resp = self._call(
-            self._client.databases.query,
-            database_id=self.city_db_id,
+            self._client.data_sources.query,
+            data_source_id=self.city_ds_id,
             filter={"property": "city_slug", "title": {"equals": city_slug}},
         )
         results = resp.get("results", [])
@@ -266,7 +271,7 @@ class NotionSignalStore(SignalStore):
         )
         meta = signal.get("source_metadata")
         props = {
-            "name": _p_title(title),
+            "title": _p_title(title),
             "city": _p_relation(city_id),
             "dimension": _p_relation(dim_id),
             "direction": _p_select(signal.get("direction")),
@@ -310,8 +315,8 @@ class NotionSignalStore(SignalStore):
         cursor = None
         while True:
             resp = self._call(
-                self._client.databases.query,
-                database_id=self.signal_db_id,
+                self._client.data_sources.query,
+                data_source_id=self.signal_ds_id,
                 filter={"and": and_filters},
                 start_cursor=cursor,
             )
@@ -351,8 +356,8 @@ class NotionSignalStore(SignalStore):
         cursor = None
         while True:
             resp = self._call(
-                self._client.databases.query,
-                database_id=self.signal_db_id,
+                self._client.data_sources.query,
+                data_source_id=self.signal_ds_id,
                 filter={"property": "status", "select": {"equals": "active"}},
                 start_cursor=cursor,
             )
@@ -385,8 +390,8 @@ class NotionSignalStore(SignalStore):
 
     def get_source_by_external_id(self, external_id: str) -> Optional[dict]:
         resp = self._call(
-            self._client.databases.query,
-            database_id=self.source_db_id,
+            self._client.data_sources.query,
+            data_source_id=self.source_ds_id,
             filter={"property": "external_id", "rich_text": {"equals": external_id}},
         )
         results = resp.get("results", [])
@@ -398,10 +403,10 @@ class NotionSignalStore(SignalStore):
             source.get("external_id", ""),
         )
         props = {
-            "name": _p_title(title),
+            "title": _p_title(title),
             "source_type": _p_select(source.get("source_type")),
             "external_id": _p_text(source.get("external_id")),
-            "title": _p_text(source.get("title")),
+            "subject": _p_text(source.get("subject")),
             "source_date": _p_date(source.get("source_date")),
             "ingested_at": _p_date(source.get("ingested_at") or datetime.now(timezone.utc)),
             "raw_url": _p_url(source.get("raw_url")),
@@ -444,7 +449,7 @@ class NotionSignalStore(SignalStore):
             "source_id": page["id"],
             "source_type": _r_select(p.get("source_type", {})),
             "external_id": _r_text(p.get("external_id", {})),
-            "title": _r_text(p.get("title", {})),
+            "title": _r_title(p.get("title", {})),
             "source_date": _r_date(p.get("source_date", {})),
             "ingested_at": _r_date(p.get("ingested_at", {})),
             "raw_url": _r_url(p.get("raw_url", {})),
