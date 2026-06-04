@@ -30,6 +30,7 @@ import json
 import logging
 import os
 import re
+from pathlib import Path
 import sys
 import urllib.parse
 import urllib.request
@@ -61,7 +62,8 @@ log = logging.getLogger(__name__)
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 
-_SHAPEFILE_PATH = "data/raw/national/tl_2023_us_zcta520/tl_2023_us_zcta520.shp"
+_REPO_ROOT = Path(__file__).parent.parent
+_SHAPEFILE_PATH = _REPO_ROOT / "data/raw/national/tl_2023_us_zcta520/tl_2023_us_zcta520.shp"
 _ZCTA_COL = "ZCTA5CE20"                  # attribute column in TIGER 2023 ZCTA file
 _TRANSIT_CACHE_DIR = "data/cache/zip/transit"
 _TRANSITLAND_BASE = "https://transit.land/api/v2/rest"
