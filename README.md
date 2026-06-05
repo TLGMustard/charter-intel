@@ -75,6 +75,17 @@ working, and the app can't accidentally break the pipeline.
 
 ## 3. Session log
 
+**Session 34 (2026-06-05) — Multi-State Hard Blockers: FIPS, Path Threading, Graceful Missing Files (c7ff84e)**
+- **Task 1** — Created `pipeline/utils/fips_utils.py` with complete 50-state + DC FIPS lookup dict and `get_state_fips(state)` function. Single source of truth for state FIPS codes.
+- **Task 2** — Fixed `s1_discovery.py` highway prefix regex: changed hardcoded `NM` to `[A-Z]{2}` to strip highway codes from any state (MS 82, TN 64, WI 35, NM 14, etc.).
+- **Task 3** — Parameterized data paths across 4 fetchers: `charter_schools_fetcher.py`, `authorizers_fetcher.py`, `ped_fetcher.py`, `population_trends_fetcher.py`. All now derive CSV paths from state param instead of hardcoded nm/.
+- **Task 4** — Removed hardcoded `STATE_FIPS = "35"` from `saipe_fetcher.py`; added `state` param to `get_poverty_data()`, derive FIPS via `get_state_fips()`, thread through API calls.
+- **Task 5** — Removed `STATE_FIPS = "35"` from `acs_fetcher.py`; removed NM-only guard from `get_total_population()`, parameterized both `_fetch_district()` and `_fetch_acs_vars()` to accept `state_fips`.
+- **Task 6** — Expanded `ADJACENT_STATES` dict in `usaspending_csp_fetcher.py` with MS, TN, WI definitions; added fallback for unknown states (log warning, use state-only list).
+- **Task 7** — Added 29 new tests: `test_fips_utils.py` (8), `test_acs_fetcher.py` (4), enhanced `test_s1_discovery.py` (+8), `test_saipe_fetcher.py` (+2), `test_usaspending_csp_fetcher.py` (+8).
+- **Graceful degradation** — All missing-file errors now log at debug level and return empty list/None rather than crash. MS/TN/WI data files will be added in Session 2 (states.yaml) and Session 3 (CSV downloads).
+- Tests: 502 (baseline) → 531 (final, +29 new, 0 failed).
+
 **Session 33 (2026-06-04) — Fix @media print CSS in strategic_brief.html.j2 (e76b9c7)**
 - Replaced CSS-variable-override `@media print` block in `templates/strategic_brief.html.j2` with explicit `!important` property declarations — Chrome's print renderer resolves variables before applying media query overrides, causing broken dark colors in print/PDF
 - Corrected all selector names to match actual template classes: `.page-shell` (not `.layout-wrapper`), `.sb-score-num` (not `.score-display`), `.exec-snapshot` (not `.executive-snapshot`), `.disclosure-footer` (not `.brief-footer`), `.banner-insufficient/.banner-gate/.banner-tribal/.banner-pci-legacy` (not generic `.banner-warn/info`)
