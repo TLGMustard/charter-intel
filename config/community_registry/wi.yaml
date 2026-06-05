@@ -1,0 +1,2496 @@
+wi-abbotsford:
+  display_name: Abbotsford
+  district_name: Abbotsford School District
+  district_nces_id: '5500030'
+  enrollment: 798
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-algoma:
+  display_name: Algoma
+  district_name: Algoma School District
+  district_nces_id: '5500150'
+  enrollment: 664
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-alma-center:
+  display_name: Alma Center
+  district_name: Alma Center School District
+  district_nces_id: '5500210'
+  enrollment: 587
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-altoona:
+  display_name: Altoona
+  district_name: Altoona School District
+  district_nces_id: '5500270'
+  enrollment: 1891
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-amery:
+  display_name: Amery
+  district_name: Amery School District
+  district_nces_id: '5500300'
+  enrollment: 1397
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-amherst:
+  display_name: Amherst
+  district_name: Tomorrow River School District
+  district_nces_id: '5500330'
+  enrollment: 1217
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-antigo:
+  display_name: Antigo
+  district_name: Antigo Unified School District
+  district_nces_id: '5500360'
+  enrollment: 2037
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-appleton:
+  display_name: Appleton
+  district_name: Appleton Area School District
+  district_nces_id: '5500390'
+  enrollment: 15270
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-arbor-vitae:
+  display_name: Arbor Vitae
+  district_name: Woodruff J1 School District
+  district_nces_id: '5517160'
+  enrollment: 521
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-arcadia:
+  display_name: Arcadia
+  district_name: Arcadia School District
+  district_nces_id: '5500420'
+  enrollment: 1283
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-ashland:
+  display_name: Ashland
+  district_name: Ashland School District
+  district_nces_id: '5500510'
+  enrollment: 1855
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-auburndale:
+  display_name: Auburndale
+  district_name: Auburndale School District
+  district_nces_id: '5500600'
+  enrollment: 850
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-augusta:
+  display_name: Augusta
+  district_name: Augusta School District
+  district_nces_id: '5500630'
+  enrollment: 604
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-baldwin:
+  display_name: Baldwin
+  district_name: Baldwin-Woodville Area School District
+  district_nces_id: '5500720'
+  enrollment: 1741
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-balsam-lake:
+  display_name: Balsam Lake
+  district_name: Unity School District
+  district_nces_id: '5500750'
+  enrollment: 954
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-bangor:
+  display_name: Bangor
+  district_name: Bangor School District
+  district_nces_id: '5500780'
+  enrollment: 639
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-baraboo:
+  display_name: Baraboo
+  district_name: Baraboo School District
+  district_nces_id: '5500810'
+  enrollment: 2701
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-barron:
+  display_name: Barron
+  district_name: Barron Area School District
+  district_nces_id: '5500870'
+  enrollment: 1119
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-beaver-dam:
+  display_name: Beaver Dam
+  district_name: Beaver Dam Unified School District
+  district_nces_id: '5500960'
+  enrollment: 3173
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-belleville:
+  display_name: Belleville
+  district_name: Belleville School District
+  district_nces_id: '5500990'
+  enrollment: 911
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-beloit-5500092:
+  display_name: Beloit
+  district_name: The Lincoln Academy Inc.
+  district_nces_id: '5500092'
+  enrollment: 524
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-beloit-5501050:
+  display_name: Beloit
+  district_name: Beloit School District
+  district_nces_id: '5501050'
+  enrollment: 5165
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-beloit-5501080:
+  display_name: Beloit
+  district_name: Beloit Turner School District
+  district_nces_id: '5501080'
+  enrollment: 1631
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-berlin:
+  display_name: Berlin
+  district_name: Berlin Area School District
+  district_nces_id: '5501140'
+  enrollment: 1333
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-black-river-falls:
+  display_name: Black River Falls
+  district_name: Black River Falls School District
+  district_nces_id: '5501260'
+  enrollment: 1572
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-blair:
+  display_name: Blair
+  district_name: Blair-Taylor School District
+  district_nces_id: '5500016'
+  enrollment: 632
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-bloomer:
+  display_name: Bloomer
+  district_name: Bloomer School District
+  district_nces_id: '5501350'
+  enrollment: 1263
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-bonduel:
+  display_name: Bonduel
+  district_name: Bonduel School District
+  district_nces_id: '5501470'
+  enrollment: 745
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-boscobel:
+  display_name: Boscobel
+  district_name: Boscobel Area School District
+  district_nces_id: '5501500'
+  enrollment: 703
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-boyceville:
+  display_name: Boyceville
+  district_name: Boyceville Community School District
+  district_nces_id: '5501590'
+  enrollment: 692
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-brillion:
+  display_name: Brillion
+  district_name: Brillion School District
+  district_nces_id: '5501680'
+  enrollment: 947
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-bristol:
+  display_name: Bristol
+  district_name: 'Bristol #1 School District'
+  district_nces_id: '5501710'
+  enrollment: 782
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-brodhead:
+  display_name: Brodhead
+  district_name: Brodhead School District
+  district_nces_id: '5501740'
+  enrollment: 1016
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-brookfield:
+  display_name: Brookfield
+  district_name: Elmbrook School District
+  district_nces_id: '5501770'
+  enrollment: 7781
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-brown-deer:
+  display_name: Brown Deer
+  district_name: Brown Deer School District
+  district_nces_id: '5501800'
+  enrollment: 1655
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-brussels:
+  display_name: Brussels
+  district_name: Southern Door County School District
+  district_nces_id: '5514130'
+  enrollment: 995
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-burlington-5501890:
+  display_name: Burlington
+  district_name: Burlington Area School District
+  district_nces_id: '5501890'
+  enrollment: 2922
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-burlington-5512390:
+  display_name: Burlington
+  district_name: Randall J1 School District
+  district_nces_id: '5512390'
+  enrollment: 625
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-burlington-5516560:
+  display_name: Burlington
+  district_name: Wheatland J1 School District
+  district_nces_id: '5516560'
+  enrollment: 612
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-cadott:
+  display_name: Cadott
+  district_name: Cadott Community School District
+  district_nces_id: '5502040'
+  enrollment: 807
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-cambridge:
+  display_name: Cambridge
+  district_name: Cambridge School District
+  district_nces_id: '5502100'
+  enrollment: 915
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-cameron:
+  display_name: Cameron
+  district_name: Cameron School District
+  district_nces_id: '5502130'
+  enrollment: 1151
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-campbellsport:
+  display_name: Campbellsport
+  district_name: Campbellsport School District
+  district_nces_id: '5502160'
+  enrollment: 1338
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-cashton:
+  display_name: Cashton
+  district_name: Cashton School District
+  district_nces_id: '5502340'
+  enrollment: 625
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-cedar-grove:
+  display_name: Cedar Grove
+  district_name: Cedar Grove-Belgium Area School District
+  district_nces_id: '5502430'
+  enrollment: 910
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-cedarburg:
+  display_name: Cedarburg
+  district_name: Cedarburg School District
+  district_nces_id: '5502460'
+  enrollment: 3091
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-chetek:
+  display_name: Chetek
+  district_name: Chetek-Weyerhaeuser Area School District
+  district_nces_id: '5500061'
+  enrollment: 962
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-chilton:
+  display_name: Chilton
+  district_name: Chilton School District
+  district_nces_id: '5502520'
+  enrollment: 1137
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-chippewa-falls:
+  display_name: Chippewa Falls
+  district_name: Chippewa Falls Area Unified School District
+  district_nces_id: '5502550'
+  enrollment: 4783
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-clear-lake:
+  display_name: Clear Lake
+  district_name: Clear Lake School District
+  district_nces_id: '5502610'
+  enrollment: 565
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-clinton:
+  display_name: Clinton
+  district_name: Clinton Community School District
+  district_nces_id: '5502640'
+  enrollment: 1062
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-clintonville:
+  display_name: Clintonville
+  district_name: Clintonville School District
+  district_nces_id: '5502670'
+  enrollment: 1180
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-colby:
+  display_name: Colby
+  district_name: Colby School District
+  district_nces_id: '5502730'
+  enrollment: 936
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-coleman:
+  display_name: Coleman
+  district_name: Coleman School District
+  district_nces_id: '5502760'
+  enrollment: 738
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-colfax:
+  display_name: Colfax
+  district_name: Colfax School District
+  district_nces_id: '5502790'
+  enrollment: 727
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-columbus:
+  display_name: Columbus
+  district_name: Columbus School District
+  district_nces_id: '5502820'
+  enrollment: 1167
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-combined-locks:
+  display_name: Combined Locks
+  district_name: Kimberly Area School District
+  district_nces_id: '5507470'
+  enrollment: 5132
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-crandon:
+  display_name: Crandon
+  district_name: Crandon School District
+  district_nces_id: '5502910'
+  enrollment: 832
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-crivitz:
+  display_name: Crivitz
+  district_name: Crivitz School District
+  district_nces_id: '5502970'
+  enrollment: 791
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-cuba-city:
+  display_name: Cuba City
+  district_name: Cuba City School District
+  district_nces_id: '5503030'
+  enrollment: 677
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-cudahy:
+  display_name: Cudahy
+  district_name: Cudahy School District
+  district_nces_id: '5503060'
+  enrollment: 2093
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-cumberland:
+  display_name: Cumberland
+  district_name: Cumberland School District
+  district_nces_id: '5503090'
+  enrollment: 988
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-darlington:
+  display_name: Darlington
+  district_name: Darlington Community School District
+  district_nces_id: '5503150'
+  enrollment: 900
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-de-pere-5503210:
+  display_name: De Pere
+  district_name: De Pere School District
+  district_nces_id: '5503210'
+  enrollment: 4555
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-de-pere-5516320:
+  display_name: De Pere
+  district_name: West De Pere School District
+  district_nces_id: '5516320'
+  enrollment: 3598
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-deerfield:
+  display_name: Deerfield
+  district_name: Deerfield Community School District
+  district_nces_id: '5503270'
+  enrollment: 751
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-deforest:
+  display_name: Deforest
+  district_name: De Forest Area School District
+  district_nces_id: '5503180'
+  enrollment: 4147
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-delavan:
+  display_name: Delavan
+  district_name: Delavan-Darien School District
+  district_nces_id: '5503640'
+  enrollment: 1817
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-denmark:
+  display_name: Denmark
+  district_name: Denmark School District
+  district_nces_id: '5503660'
+  enrollment: 1622
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-dodgeville:
+  display_name: Dodgeville
+  district_name: Dodgeville School District
+  district_nces_id: '5503690'
+  enrollment: 1068
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-durand:
+  display_name: Durand
+  district_name: Durand-Arkansaw School District
+  district_nces_id: '5503840'
+  enrollment: 999
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-eagle-river:
+  display_name: Eagle River
+  district_name: Northland Pines School District
+  district_nces_id: '5503860'
+  enrollment: 1391
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-east-troy:
+  display_name: East Troy
+  district_name: East Troy Community School District
+  district_nces_id: '5504020'
+  enrollment: 1456
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-eau-claire:
+  display_name: Eau Claire
+  district_name: Eau Claire Area School District
+  district_nces_id: '5504050'
+  enrollment: 10871
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-edgar:
+  display_name: Edgar
+  district_name: Edgar School District
+  district_nces_id: '5504080'
+  enrollment: 611
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-edgerton:
+  display_name: Edgerton
+  district_name: Edgerton School District
+  district_nces_id: '5504110'
+  enrollment: 1930
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-elk-mound:
+  display_name: Elk Mound
+  district_name: Elk Mound Area School District
+  district_nces_id: '5504230'
+  enrollment: 1210
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-elkhorn:
+  display_name: Elkhorn
+  district_name: Elkhorn Area School District
+  district_nces_id: '5504290'
+  enrollment: 3582
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-ellsworth:
+  display_name: Ellsworth
+  district_name: Ellsworth Community School District
+  district_nces_id: '5504320'
+  enrollment: 1624
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-evansville:
+  display_name: Evansville
+  district_name: Evansville Community School District
+  district_nces_id: '5504440'
+  enrollment: 1594
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-fall-creek:
+  display_name: Fall Creek
+  district_name: Fall Creek School District
+  district_nces_id: '5504500'
+  enrollment: 871
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-fennimore:
+  display_name: Fennimore
+  district_name: Fennimore Community School District
+  district_nces_id: '5504590'
+  enrollment: 810
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-fish-creek:
+  display_name: Fish Creek
+  district_name: Gibraltar Area School District
+  district_nces_id: '5505220'
+  enrollment: 547
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-fond-du-lac:
+  display_name: Fond Du Lac
+  district_name: Fond du Lac School District
+  district_nces_id: '5504680'
+  enrollment: 6603
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-fort-atkinson:
+  display_name: Fort Atkinson
+  district_name: Fort Atkinson School District
+  district_nces_id: '5504740'
+  enrollment: 2523
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-fountain-city:
+  display_name: Fountain City
+  district_name: Cochrane-Fountain City School District
+  district_nces_id: '5502700'
+  enrollment: 560
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-franklin:
+  display_name: Franklin
+  district_name: Franklin Public School District
+  district_nces_id: '5504830'
+  enrollment: 4781
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-fredonia:
+  display_name: Fredonia
+  district_name: Northern Ozaukee School District
+  district_nces_id: '5504890'
+  enrollment: 1117
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-freedom:
+  display_name: Freedom
+  district_name: Freedom Area School District
+  district_nces_id: '5504920'
+  enrollment: 1554
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-friendship:
+  display_name: Friendship
+  district_name: Adams-Friendship Area School District
+  district_nces_id: '5500060'
+  enrollment: 1315
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-galesville:
+  display_name: Galesville
+  district_name: Galesville-Ettrick-Trempealeau School District
+  district_nces_id: '5504960'
+  enrollment: 1364
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-germantown:
+  display_name: Germantown
+  district_name: Germantown School District
+  district_nces_id: '5505160'
+  enrollment: 3903
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-gillett:
+  display_name: Gillett
+  district_name: Gillett School District
+  district_nces_id: '5505250'
+  enrollment: 517
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-glendale-5505460:
+  display_name: Glendale
+  district_name: Glendale-River Hills School District
+  district_nces_id: '5505460'
+  enrollment: 962
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-glendale-5505490:
+  display_name: Glendale
+  district_name: Nicolet Union High School School District
+  district_nces_id: '5505490'
+  enrollment: 1089
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-glenwood-city:
+  display_name: Glenwood City
+  district_name: Glenwood City School District
+  district_nces_id: '5505520'
+  enrollment: 624
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-grafton:
+  display_name: Grafton
+  district_name: Grafton School District
+  district_nces_id: '5505610'
+  enrollment: 2116
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-grantsburg:
+  display_name: Grantsburg
+  district_name: Grantsburg School District
+  district_nces_id: '5505670'
+  enrollment: 1759
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-green-bay-5500540:
+  display_name: Green Bay
+  district_name: Ashwaubenon School District
+  district_nces_id: '5500540'
+  enrollment: 3215
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-green-bay-5505820:
+  display_name: Green Bay
+  district_name: Green Bay Area Public School District
+  district_nces_id: '5505820'
+  enrollment: 18922
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-green-bay-5506630:
+  display_name: Green Bay
+  district_name: Howard-Suamico School District
+  district_nces_id: '5506630'
+  enrollment: 5781
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-greendale:
+  display_name: Greendale
+  district_name: Greendale School District
+  district_nces_id: '5505910'
+  enrollment: 2664
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-greenfield-5505940:
+  display_name: Greenfield
+  district_name: Greenfield School District
+  district_nces_id: '5505940'
+  enrollment: 3493
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-greenfield-5506000:
+  display_name: Greenfield
+  district_name: Whitnall School District
+  district_nces_id: '5506000'
+  enrollment: 2397
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-hammond:
+  display_name: Hammond
+  district_name: Saint Croix Central School District
+  district_nces_id: '5506060'
+  enrollment: 1866
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-hartford-5506090:
+  display_name: Hartford
+  district_name: Hartford J1 School District
+  district_nces_id: '5506090'
+  enrollment: 1517
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-hartford-5506120:
+  display_name: Hartford
+  district_name: Hartford UHS School District
+  district_nces_id: '5506120'
+  enrollment: 1316
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-hartland-5506140:
+  display_name: Hartland
+  district_name: Hartland-Lakeside J3 School District
+  district_nces_id: '5506140'
+  enrollment: 1139
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-hartland-5506180:
+  display_name: Hartland
+  district_name: Arrowhead UHS School District
+  district_nces_id: '5506180'
+  enrollment: 2086
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-hartland-5509360:
+  display_name: Hartland
+  district_name: Merton Community School District
+  district_nces_id: '5509360'
+  enrollment: 920
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-hayward:
+  display_name: Hayward
+  district_name: Hayward Community School District
+  district_nces_id: '5506270'
+  enrollment: 1905
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-hazel-green:
+  display_name: Hazel Green
+  district_name: Southwestern Wisconsin School District
+  district_nces_id: '5506300'
+  enrollment: 529
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-hillsboro:
+  display_name: Hillsboro
+  district_name: Hillsboro School District
+  district_nces_id: '5506480'
+  enrollment: 502
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-holmen:
+  display_name: Holmen
+  district_name: Holmen School District
+  district_nces_id: '5506540'
+  enrollment: 3879
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-horicon:
+  display_name: Horicon
+  district_name: Horicon School District
+  district_nces_id: '5506570'
+  enrollment: 799
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-hortonville:
+  display_name: Hortonville
+  district_name: Hortonville Area School District
+  district_nces_id: '5506600'
+  enrollment: 4258
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-howards-grove:
+  display_name: Howards Grove
+  district_name: Howards Grove School District
+  district_nces_id: '5506660'
+  enrollment: 925
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-hudson:
+  display_name: Hudson
+  district_name: Hudson School District
+  district_nces_id: '5506690'
+  enrollment: 5377
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-hurley:
+  display_name: Hurley
+  district_name: Hurley School District
+  district_nces_id: '5506750'
+  enrollment: 546
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-iola:
+  display_name: Iola
+  district_name: Iola-Scandinavia School District
+  district_nces_id: '5506840'
+  enrollment: 571
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-janesville:
+  display_name: Janesville
+  district_name: Janesville School District
+  district_nces_id: '5507020'
+  enrollment: 9537
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-jefferson:
+  display_name: Jefferson
+  district_name: Jefferson School District
+  district_nces_id: '5507050'
+  enrollment: 1731
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-johnson-creek:
+  display_name: Johnson Creek
+  district_name: Johnson Creek School District
+  district_nces_id: '5507170'
+  enrollment: 605
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-juneau:
+  display_name: Juneau
+  district_name: Dodgeland School District
+  district_nces_id: '5507260'
+  enrollment: 754
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-kaukauna:
+  display_name: Kaukauna
+  district_name: Kaukauna Area School District
+  district_nces_id: '5507290'
+  enrollment: 4057
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-kenosha:
+  display_name: Kenosha
+  district_name: Kenosha School District
+  district_nces_id: '5507320'
+  enrollment: 19069
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-keshena:
+  display_name: Keshena
+  district_name: Menominee Indian School District
+  district_nces_id: '5509070'
+  enrollment: 987
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-kewaskum:
+  display_name: Kewaskum
+  district_name: Kewaskum School District
+  district_nces_id: '5507380'
+  enrollment: 1789
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-kewaunee:
+  display_name: Kewaunee
+  district_name: Kewaunee School District
+  district_nces_id: '5507410'
+  enrollment: 861
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-kiel:
+  display_name: Kiel
+  district_name: Kiel Area School District
+  district_nces_id: '5507440'
+  enrollment: 1224
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-kohler:
+  display_name: Kohler
+  district_name: Kohler School District
+  district_nces_id: '5507500'
+  enrollment: 714
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-la-crosse:
+  display_name: La Crosse
+  district_name: La Crosse School District
+  district_nces_id: '5507530'
+  enrollment: 5992
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-lac-du-flambeau:
+  display_name: Lac Du Flambeau
+  district_name: 'Lac du Flambeau #1 School District'
+  district_nces_id: '5504620'
+  enrollment: 515
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-ladysmith:
+  display_name: Ladysmith
+  district_name: Ladysmith School District
+  district_nces_id: '5507590'
+  enrollment: 743
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-lake-geneva-5507620:
+  display_name: Lake Geneva
+  district_name: Lake Geneva J1 School District
+  district_nces_id: '5507620'
+  enrollment: 1824
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-lake-geneva-5507650:
+  display_name: Lake Geneva
+  district_name: Lake Geneva-Genoa City UHS School District
+  district_nces_id: '5507650'
+  enrollment: 1347
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-lake-mills:
+  display_name: Lake Mills
+  district_name: Lake Mills Area School District
+  district_nces_id: '5507710'
+  enrollment: 1511
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-lancaster:
+  display_name: Lancaster
+  district_name: Lancaster Community School District
+  district_nces_id: '5507770'
+  enrollment: 991
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-little-chute:
+  display_name: Little Chute
+  district_name: Little Chute Area School District
+  district_nces_id: '5508160'
+  enrollment: 1582
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-livingston:
+  display_name: Livingston
+  district_name: Iowa-Grant School District
+  district_nces_id: '5506870'
+  enrollment: 676
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-lodi:
+  display_name: Lodi
+  district_name: Lodi School District
+  district_nces_id: '5508190'
+  enrollment: 1491
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-lomira:
+  display_name: Lomira
+  district_name: Lomira School District
+  district_nces_id: '5508220'
+  enrollment: 1023
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-luxemburg:
+  display_name: Luxemburg
+  district_name: Luxemburg-Casco School District
+  district_nces_id: '5508340'
+  enrollment: 2001
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-madison:
+  display_name: Madison
+  district_name: Madison Metropolitan School District
+  district_nces_id: '5508520'
+  enrollment: 25237
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-manawa:
+  display_name: Manawa
+  district_name: Manawa School District
+  district_nces_id: '5508550'
+  enrollment: 564
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-manitowoc:
+  display_name: Manitowoc
+  district_name: Manitowoc School District
+  district_nces_id: '5508610'
+  enrollment: 4726
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-maple:
+  display_name: Maple
+  district_name: Maple School District
+  district_nces_id: '5508640'
+  enrollment: 1295
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-marathon:
+  display_name: Marathon
+  district_name: Marathon City School District
+  district_nces_id: '5508670'
+  enrollment: 753
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-marinette:
+  display_name: Marinette
+  district_name: Marinette School District
+  district_nces_id: '5508700'
+  enrollment: 1919
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-markesan:
+  display_name: Markesan
+  district_name: Markesan School District
+  district_nces_id: '5508760'
+  enrollment: 780
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-marshall:
+  display_name: Marshall
+  district_name: Marshall School District
+  district_nces_id: '5508790'
+  enrollment: 918
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-marshfield:
+  display_name: Marshfield
+  district_name: Marshfield Unified School District
+  district_nces_id: '5508820'
+  enrollment: 3842
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-mauston:
+  display_name: Mauston
+  district_name: Mauston School District
+  district_nces_id: '5508850'
+  enrollment: 1411
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-mayville:
+  display_name: Mayville
+  district_name: Mayville School District
+  district_nces_id: '5508880'
+  enrollment: 979
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-mazomanie:
+  display_name: Mazomanie
+  district_name: Wisconsin Heights School District
+  district_nces_id: '5501230'
+  enrollment: 749
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-mcfarland:
+  display_name: Mcfarland
+  district_name: McFarland School District
+  district_nces_id: '5508910'
+  enrollment: 5484
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-medford:
+  display_name: Medford
+  district_name: Medford Area Public School District
+  district_nces_id: '5508940'
+  enrollment: 3150
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-melrose:
+  display_name: Melrose
+  district_name: Melrose-Mindoro School District
+  district_nces_id: '5509000'
+  enrollment: 757
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-menasha:
+  display_name: Menasha
+  district_name: Menasha Joint School District
+  district_nces_id: '5509030'
+  enrollment: 3160
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-menomonee-falls:
+  display_name: Menomonee Falls
+  district_name: Menomonee Falls School District
+  district_nces_id: '5509060'
+  enrollment: 3914
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-menomonie:
+  display_name: Menomonie
+  district_name: Menomonie Area School District
+  district_nces_id: '5509090'
+  enrollment: 3290
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-mequon:
+  display_name: Mequon
+  district_name: Mequon-Thiensville School District
+  district_nces_id: '5509130'
+  enrollment: 3562
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-merrill:
+  display_name: Merrill
+  district_name: Merrill Area School District
+  district_nces_id: '5509210'
+  enrollment: 2907
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-middleton:
+  display_name: Middleton
+  district_name: Middleton-Cross Plains Area School District
+  district_nces_id: '5509510'
+  enrollment: 7263
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-milton:
+  display_name: Milton
+  district_name: Milton School District
+  district_nces_id: '5509570'
+  enrollment: 3425
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-milwaukee-5500042:
+  display_name: Milwaukee
+  district_name: Milwaukee Science Education Consortium Inc.
+  district_nces_id: '5500042'
+  enrollment: 1401
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-milwaukee-5500065:
+  display_name: Milwaukee
+  district_name: Milwaukee Scholars Charter School Inc.
+  district_nces_id: '5500065'
+  enrollment: 670
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-milwaukee-5500074:
+  display_name: Milwaukee
+  district_name: Seeds of Health Inc
+  district_nces_id: '5500074'
+  enrollment: 1181
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-milwaukee-5500077:
+  display_name: Milwaukee
+  district_name: United Community Center Inc.
+  district_nces_id: '5500077'
+  enrollment: 1548
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-milwaukee-5500113:
+  display_name: Milwaukee
+  district_name: Woodlands School Inc.
+  district_nces_id: '5500113'
+  enrollment: 632
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-milwaukee-5504800:
+  display_name: Milwaukee
+  district_name: Fox Point J2 School District
+  district_nces_id: '5504800'
+  enrollment: 825
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-milwaukee-5509600:
+  display_name: Milwaukee
+  district_name: Milwaukee School District
+  district_nces_id: '5509600'
+  enrollment: 67500
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-mineral-point:
+  display_name: Mineral Point
+  district_name: Mineral Point Unified School District
+  district_nces_id: '5509660'
+  enrollment: 777
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-minocqua-5509630:
+  display_name: Minocqua
+  district_name: Lakeland UHS School District
+  district_nces_id: '5509630'
+  enrollment: 745
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-minocqua-5509690:
+  display_name: Minocqua
+  district_name: Minocqua J1 School District
+  district_nces_id: '5509690'
+  enrollment: 551
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-mishicot:
+  display_name: Mishicot
+  district_name: Mishicot School District
+  district_nces_id: '5509750'
+  enrollment: 919
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-mondovi:
+  display_name: Mondovi
+  district_name: Mondovi School District
+  district_nces_id: '5509780'
+  enrollment: 962
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-monona:
+  display_name: Monona
+  district_name: Monona Grove School District
+  district_nces_id: '5509810'
+  enrollment: 3539
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-monroe:
+  display_name: Monroe
+  district_name: Monroe School District
+  district_nces_id: '5509840'
+  enrollment: 2241
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-montello:
+  display_name: Montello
+  district_name: Montello School District
+  district_nces_id: '5509870'
+  enrollment: 593
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-mosinee:
+  display_name: Mosinee
+  district_name: Mosinee School District
+  district_nces_id: '5509960'
+  enrollment: 1983
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-mount-horeb:
+  display_name: Mount Horeb
+  district_name: Mount Horeb Area School District
+  district_nces_id: '5509990'
+  enrollment: 2387
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-mukwonago:
+  display_name: Mukwonago
+  district_name: Mukwonago School District
+  district_nces_id: '5510060'
+  enrollment: 5009
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-muscoda:
+  display_name: Muscoda
+  district_name: Riverdale School District
+  district_nces_id: '5510140'
+  enrollment: 653
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-muskego:
+  display_name: Muskego
+  district_name: Muskego-Norway School District
+  district_nces_id: '5510170'
+  enrollment: 4767
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-necedah:
+  display_name: Necedah
+  district_name: Necedah Area School District
+  district_nces_id: '5510230'
+  enrollment: 698
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-neenah:
+  display_name: Neenah
+  district_name: Neenah Joint School District
+  district_nces_id: '5510320'
+  enrollment: 6527
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-neillsville:
+  display_name: Neillsville
+  district_name: Neillsville School District
+  district_nces_id: '5510350'
+  enrollment: 861
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-nekoosa:
+  display_name: Nekoosa
+  district_name: Nekoosa School District
+  district_nces_id: '5510380'
+  enrollment: 1246
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-new-berlin:
+  display_name: New Berlin
+  district_name: New Berlin School District
+  district_nces_id: '5510470'
+  enrollment: 4256
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-new-glarus:
+  display_name: New Glarus
+  district_name: New Glarus School District
+  district_nces_id: '5510500'
+  enrollment: 961
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-new-holstein:
+  display_name: New Holstein
+  district_name: New Holstein School District
+  district_nces_id: '5510530'
+  enrollment: 1024
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-new-lisbon:
+  display_name: New Lisbon
+  district_name: New Lisbon School District
+  district_nces_id: '5510560'
+  enrollment: 582
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-new-london:
+  display_name: New London
+  district_name: New London School District
+  district_nces_id: '5510590'
+  enrollment: 2102
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-new-richmond:
+  display_name: New Richmond
+  district_name: New Richmond School District
+  district_nces_id: '5510620'
+  enrollment: 3554
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-north-fond-du-lac:
+  display_name: North Fond Du Lac
+  district_name: North Fond du Lac School District
+  district_nces_id: '5510740'
+  enrollment: 1567
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-oak-creek:
+  display_name: Oak Creek
+  district_name: Oak Creek-Franklin Joint School District
+  district_nces_id: '5510830'
+  enrollment: 6510
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-oakfield:
+  display_name: Oakfield
+  district_name: Oakfield School District
+  district_nces_id: '5510860'
+  enrollment: 527
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-oconomowoc-5500087:
+  display_name: Oconomowoc
+  district_name: Lake Country Classical Academy Inc.
+  district_nces_id: '5500087'
+  enrollment: 508
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-oconomowoc-5510890:
+  display_name: Oconomowoc
+  district_name: Oconomowoc Area School District
+  district_nces_id: '5510890'
+  enrollment: 5015
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-oconto:
+  display_name: Oconto
+  district_name: Oconto Unified School District
+  district_nces_id: '5510920'
+  enrollment: 959
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-oconto-falls:
+  display_name: Oconto Falls
+  district_name: Oconto Falls Public School District
+  district_nces_id: '5510950'
+  enrollment: 1695
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-omro:
+  display_name: Omro
+  district_name: Omro School District
+  district_nces_id: '5510980'
+  enrollment: 1107
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-onalaska:
+  display_name: Onalaska
+  district_name: Onalaska School District
+  district_nces_id: '5511010'
+  enrollment: 3007
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-ontario:
+  display_name: Ontario
+  district_name: Norwalk-Ontario-Wilton School District
+  district_nces_id: '5510770'
+  enrollment: 576
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-oostburg:
+  display_name: Oostburg
+  district_name: Oostburg School District
+  district_nces_id: '5511070'
+  enrollment: 1006
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-oregon:
+  display_name: Oregon
+  district_name: Oregon School District
+  district_nces_id: '5511100'
+  enrollment: 4114
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-orfordville:
+  display_name: Orfordville
+  district_name: Parkview School District
+  district_nces_id: '5511130'
+  enrollment: 853
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-osceola:
+  display_name: Osceola
+  district_name: Osceola School District
+  district_nces_id: '5511160'
+  enrollment: 1594
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-oshkosh:
+  display_name: Oshkosh
+  district_name: Oshkosh Area School District
+  district_nces_id: '5511190'
+  enrollment: 9149
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-osseo:
+  display_name: Osseo
+  district_name: Osseo-Fairchild School District
+  district_nces_id: '5511220'
+  enrollment: 806
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-palmyra:
+  display_name: Palmyra
+  district_name: Palmyra-Eagle Area School District
+  district_nces_id: '5511350'
+  enrollment: 574
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-pardeeville:
+  display_name: Pardeeville
+  district_name: Pardeeville Area School District
+  district_nces_id: '5511370'
+  enrollment: 865
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-park-falls:
+  display_name: Park Falls
+  district_name: Chequamegon School District
+  district_nces_id: '5500058'
+  enrollment: 679
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-patch-grove:
+  display_name: Patch Grove
+  district_name: River Ridge School District
+  district_nces_id: '5500017'
+  enrollment: 524
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-peshtigo:
+  display_name: Peshtigo
+  district_name: Peshtigo School District
+  district_nces_id: '5511610'
+  enrollment: 1079
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-pewaukee:
+  display_name: Pewaukee
+  district_name: Pewaukee School District
+  district_nces_id: '5511640'
+  enrollment: 2948
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-phillips:
+  display_name: Phillips
+  district_name: Phillips School District
+  district_nces_id: '5511730'
+  enrollment: 719
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-pittsville:
+  display_name: Pittsville
+  district_name: Pittsville School District
+  district_nces_id: '5511790'
+  enrollment: 562
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-plainfield:
+  display_name: Plainfield
+  district_name: Tri-County Area School District
+  district_nces_id: '5511820'
+  enrollment: 575
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-platteville:
+  display_name: Platteville
+  district_name: Platteville School District
+  district_nces_id: '5511850'
+  enrollment: 1576
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-plymouth:
+  display_name: Plymouth
+  district_name: Plymouth Joint School District
+  district_nces_id: '5511940'
+  enrollment: 2110
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-port-washington:
+  display_name: Port Washington
+  district_name: Port Washington-Saukville School District
+  district_nces_id: '5512000'
+  enrollment: 2519
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-portage:
+  display_name: Portage
+  district_name: Portage Community School District
+  district_nces_id: '5512060'
+  enrollment: 2116
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-poynette:
+  display_name: Poynette
+  district_name: Poynette School District
+  district_nces_id: '5512120'
+  enrollment: 1001
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-prairie-du-chien:
+  display_name: Prairie Du Chien
+  district_name: Prairie du Chien Area School District
+  district_nces_id: '5512150'
+  enrollment: 986
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-prairie-du-sac:
+  display_name: Prairie Du Sac
+  district_name: Sauk Prairie School District
+  district_nces_id: '5513410'
+  enrollment: 2720
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-prescott:
+  display_name: Prescott
+  district_name: Prescott School District
+  district_nces_id: '5512240'
+  enrollment: 1243
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-pulaski:
+  display_name: Pulaski
+  district_name: Pulaski Community School District
+  district_nces_id: '5512330'
+  enrollment: 3775
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-racine-5500045:
+  display_name: Racine
+  district_name: Racine Charter One Inc.
+  district_nces_id: '5500045'
+  enrollment: 517
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-racine-5512360:
+  display_name: Racine
+  district_name: Racine Unified School District
+  district_nces_id: '5512360'
+  enrollment: 16182
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-randolph:
+  display_name: Randolph
+  district_name: Randolph School District
+  district_nces_id: '5512420'
+  enrollment: 522
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-random-lake:
+  display_name: Random Lake
+  district_name: Random Lake School District
+  district_nces_id: '5512450'
+  enrollment: 687
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-reedsburg:
+  display_name: Reedsburg
+  district_name: Reedsburg School District
+  district_nces_id: '5512660'
+  enrollment: 2650
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-reedsville:
+  display_name: Reedsville
+  district_name: Reedsville School District
+  district_nces_id: '5512690'
+  enrollment: 584
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-rhinelander:
+  display_name: Rhinelander
+  district_name: Rhinelander School District
+  district_nces_id: '5512720'
+  enrollment: 2288
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-rice-lake:
+  display_name: Rice Lake
+  district_name: Rice Lake Area School District
+  district_nces_id: '5512810'
+  enrollment: 2186
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-richland-center:
+  display_name: Richland Center
+  district_name: Richland School District
+  district_nces_id: '5512960'
+  enrollment: 1139
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-ripon:
+  display_name: Ripon
+  district_name: Ripon Area School District
+  district_nces_id: '5513020'
+  enrollment: 1694
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-river-falls:
+  display_name: River Falls
+  district_name: River Falls School District
+  district_nces_id: '5513050'
+  enrollment: 3488
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-rosendale:
+  display_name: Rosendale
+  district_name: Rosendale-Brandon School District
+  district_nces_id: '5513100'
+  enrollment: 959
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-saint-croix-falls:
+  display_name: Saint Croix Falls
+  district_name: Saint Croix Falls School District
+  district_nces_id: '5513230'
+  enrollment: 1075
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-saint-francis:
+  display_name: Saint Francis
+  district_name: Saint Francis School District
+  district_nces_id: '5513260'
+  enrollment: 1066
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-salem-5513290:
+  display_name: Salem
+  district_name: Central/Westosha UHS School District
+  district_nces_id: '5513290'
+  enrollment: 1219
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-salem-5513350:
+  display_name: Salem
+  district_name: Salem School District
+  district_nces_id: '5513350'
+  enrollment: 1000
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-schofield:
+  display_name: Schofield
+  district_name: D C Everest Area School District
+  district_nces_id: '5513170'
+  enrollment: 6000
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-seymour:
+  display_name: Seymour
+  district_name: Seymour Community School District
+  district_nces_id: '5513530'
+  enrollment: 1928
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-shawano:
+  display_name: Shawano
+  district_name: Shawano School District
+  district_nces_id: '5513620'
+  enrollment: 2238
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-sheboygan:
+  display_name: Sheboygan
+  district_name: Sheboygan Area School District
+  district_nces_id: '5513650'
+  enrollment: 9477
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-sheboygan-falls:
+  display_name: Sheboygan Falls
+  district_name: Sheboygan Falls School District
+  district_nces_id: '5513680'
+  enrollment: 1581
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-shell-lake:
+  display_name: Shell Lake
+  district_name: Shell Lake School District
+  district_nces_id: '5513710'
+  enrollment: 636
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-shiocton:
+  display_name: Shiocton
+  district_name: Shiocton School District
+  district_nces_id: '5513770'
+  enrollment: 732
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-shorewood:
+  display_name: Shorewood
+  district_name: Shorewood School District
+  district_nces_id: '5513800'
+  enrollment: 1933
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-slinger:
+  display_name: Slinger
+  district_name: Slinger School District
+  district_nces_id: '5513950'
+  enrollment: 3350
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-somerset:
+  display_name: Somerset
+  district_name: Somerset School District
+  district_nces_id: '5514010'
+  enrollment: 1463
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-south-milwaukee:
+  display_name: South Milwaukee
+  district_name: South Milwaukee School District
+  district_nces_id: '5514040'
+  enrollment: 2773
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-sparta:
+  display_name: Sparta
+  district_name: Sparta Area School District
+  district_nces_id: '5514160'
+  enrollment: 2841
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-spencer:
+  display_name: Spencer
+  district_name: Spencer School District
+  district_nces_id: '5514190'
+  enrollment: 611
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-spooner:
+  display_name: Spooner
+  district_name: Spooner Area School District
+  district_nces_id: '5514220'
+  enrollment: 1015
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-spring-green:
+  display_name: Spring Green
+  district_name: River Valley School District
+  district_nces_id: '5514250'
+  enrollment: 1109
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-spring-valley:
+  display_name: Spring Valley
+  district_name: Spring Valley School District
+  district_nces_id: '5514340'
+  enrollment: 708
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-stanley:
+  display_name: Stanley
+  district_name: Stanley-Boyd Area School District
+  district_nces_id: '5514430'
+  enrollment: 1089
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-stevens-point:
+  display_name: Stevens Point
+  district_name: Stevens Point Area Public School District
+  district_nces_id: '5514490'
+  enrollment: 7025
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-stoughton:
+  display_name: Stoughton
+  district_name: Stoughton Area School District
+  district_nces_id: '5514550'
+  enrollment: 2757
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-stratford:
+  display_name: Stratford
+  district_name: Stratford School District
+  district_nces_id: '5514580'
+  enrollment: 806
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-strum:
+  display_name: Strum
+  district_name: Eleva-Strum School District
+  district_nces_id: '5504200'
+  enrollment: 667
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-sturgeon-bay-5513500:
+  display_name: Sturgeon Bay
+  district_name: Sevastopol School District
+  district_nces_id: '5513500'
+  enrollment: 597
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-sturgeon-bay-5514610:
+  display_name: Sturgeon Bay
+  district_name: Sturgeon Bay School District
+  district_nces_id: '5514610'
+  enrollment: 1065
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-sun-prairie:
+  display_name: Sun Prairie
+  district_name: Sun Prairie Area School District
+  district_nces_id: '5514640'
+  enrollment: 8350
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-superior:
+  display_name: Superior
+  district_name: Superior School District
+  district_nces_id: '5514670'
+  enrollment: 4155
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-sussex:
+  display_name: Sussex
+  district_name: Hamilton School District
+  district_nces_id: '5506030'
+  enrollment: 5106
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-thorp:
+  display_name: Thorp
+  district_name: Thorp School District
+  district_nces_id: '5514820'
+  enrollment: 538
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-three-lakes:
+  display_name: Three Lakes
+  district_name: Three Lakes School District
+  district_nces_id: '5514850'
+  enrollment: 519
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-tomah:
+  display_name: Tomah
+  district_name: Tomah Area School District
+  district_nces_id: '5514910'
+  enrollment: 3056
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-tomahawk:
+  display_name: Tomahawk
+  district_name: Tomahawk School District
+  district_nces_id: '5514940'
+  enrollment: 1204
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-two-rivers:
+  display_name: Two Rivers
+  district_name: Two Rivers Public School District
+  district_nces_id: '5515120'
+  enrollment: 1790
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-union-grove-5515150:
+  display_name: Union Grove
+  district_name: Union Grove UHS School District
+  district_nces_id: '5515150'
+  enrollment: 1045
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-union-grove-5515180:
+  display_name: Union Grove
+  district_name: Union Grove J1 School District
+  district_nces_id: '5515180'
+  enrollment: 902
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-valders:
+  display_name: Valders
+  district_name: Valders Area School District
+  district_nces_id: '5515210'
+  enrollment: 970
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-verona:
+  display_name: Verona
+  district_name: Verona Area School District
+  district_nces_id: '5515330'
+  enrollment: 5827
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-viroqua:
+  display_name: Viroqua
+  district_name: Viroqua Area School District
+  district_nces_id: '5515360'
+  enrollment: 1042
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-wales:
+  display_name: Wales
+  district_name: Kettle Moraine School District
+  district_nces_id: '5503510'
+  enrollment: 3477
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-washburn:
+  display_name: Washburn
+  district_name: Washburn School District
+  district_nces_id: '5515540'
+  enrollment: 599
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-waterford-5515600:
+  display_name: Waterford
+  district_name: Waterford UHS School District
+  district_nces_id: '5515600'
+  enrollment: 954
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-waterford-5515660:
+  display_name: Waterford
+  district_name: Waterford Graded J1 School District
+  district_nces_id: '5515660'
+  enrollment: 1464
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-waterloo:
+  display_name: Waterloo
+  district_name: Waterloo School District
+  district_nces_id: '5515720'
+  enrollment: 768
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-watertown:
+  display_name: Watertown
+  district_name: Watertown Unified School District
+  district_nces_id: '5515750'
+  enrollment: 3202
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-waukesha:
+  display_name: Waukesha
+  district_name: Waukesha School District
+  district_nces_id: '5515780'
+  enrollment: 11855
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-waunakee:
+  display_name: Waunakee
+  district_name: Waunakee Community School District
+  district_nces_id: '5515810'
+  enrollment: 4408
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-waupaca:
+  display_name: Waupaca
+  district_name: Waupaca School District
+  district_nces_id: '5515840'
+  enrollment: 1999
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-waupun:
+  display_name: Waupun
+  district_name: Waupun School District
+  district_nces_id: '5515870'
+  enrollment: 1974
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-wausau:
+  display_name: Wausau
+  district_name: Wausau School District
+  district_nces_id: '5515900'
+  enrollment: 7899
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-wautoma:
+  display_name: Wautoma
+  district_name: Wautoma Area School District
+  district_nces_id: '5515960'
+  enrollment: 1307
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-wauwatosa:
+  display_name: Wauwatosa
+  district_name: Wauwatosa School District
+  district_nces_id: '5515990'
+  enrollment: 6935
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-webster:
+  display_name: Webster
+  district_name: Webster School District
+  district_nces_id: '5516230'
+  enrollment: 646
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-west-allis:
+  display_name: West Allis
+  district_name: West Allis-West Milwaukee School District
+  district_nces_id: '5516260'
+  enrollment: 7095
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-west-bend:
+  display_name: West Bend
+  district_name: West Bend School District
+  district_nces_id: '5516290'
+  enrollment: 5736
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-west-salem:
+  display_name: West Salem
+  district_name: West Salem School District
+  district_nces_id: '5516350'
+  enrollment: 1861
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-westby:
+  display_name: Westby
+  district_name: Westby Area School District
+  district_nces_id: '5516410'
+  enrollment: 1037
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-westfield:
+  display_name: Westfield
+  district_name: Westfield School District
+  district_nces_id: '5516440'
+  enrollment: 1055
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-weyauwega:
+  display_name: Weyauwega
+  district_name: Weyauwega-Fremont School District
+  district_nces_id: '5516500'
+  enrollment: 822
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-whitefish-bay:
+  display_name: Whitefish Bay
+  district_name: Whitefish Bay School District
+  district_nces_id: '5516620'
+  enrollment: 2860
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-whitehall:
+  display_name: Whitehall
+  district_name: Whitehall School District
+  district_nces_id: '5516650'
+  enrollment: 773
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-whitewater:
+  display_name: Whitewater
+  district_name: Whitewater Unified School District
+  district_nces_id: '5516680'
+  enrollment: 1986
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-wild-rose:
+  display_name: Wild Rose
+  district_name: Wild Rose School District
+  district_nces_id: '5516710'
+  enrollment: 556
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-williams-bay:
+  display_name: Williams Bay
+  district_name: Williams Bay School District
+  district_nces_id: '5516740'
+  enrollment: 672
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-wilmot:
+  display_name: Wilmot
+  district_name: Wilmot UHS School District
+  district_nces_id: '5516770'
+  enrollment: 949
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-winneconne:
+  display_name: Winneconne
+  district_name: Winneconne Community School District
+  district_nces_id: '5516830'
+  enrollment: 1796
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-wisconsin-dells:
+  display_name: Wisconsin Dells
+  district_name: Wisconsin Dells School District
+  district_nces_id: '5517040'
+  enrollment: 1815
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-wisconsin-rapids:
+  display_name: Wisconsin Rapids
+  district_name: Wisconsin Rapids School District
+  district_nces_id: '5517070'
+  enrollment: 4678
+  has_charters: true
+  source: ccd_auto
+  state: WI
+wi-wittenberg:
+  display_name: Wittenberg
+  district_name: Wittenberg-Birnamwood School District
+  district_nces_id: '5517100'
+  enrollment: 1154
+  has_charters: false
+  source: ccd_auto
+  state: WI
+wi-wrightstown:
+  display_name: Wrightstown
+  district_name: Wrightstown Community School District
+  district_nces_id: '5517190'
+  enrollment: 1302
+  has_charters: false
+  source: ccd_auto
+  state: WI

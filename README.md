@@ -75,6 +75,17 @@ working, and the app can't accidentally break the pipeline.
 
 ## 3. Session log
 
+**Session 3 / National CCD (2026-06-05) — National NCES Parquets + MS/TN/WI Community Registries**
+- Replaced all state-trimmed NCES CSVs with single national parquet files queryable by STABBR, enabling any state to work without per-state data downloads.
+- Created `scripts/download_nces_national.py` — downloads 6 CCD files from the Urban Institute Education Data API to `data/raw/national/`.
+- Created `scripts/build_national_parquet.py` — converts those CSVs to 4 compressed parquets: `nces_lea_directory.parquet` (19,714 districts, `has_charter_schools` derived from school-level charter indicator), `nces_lea_finance.parquet` (19,570 districts, 51 states), `nces_sch_lunch.parquet` (146K FRL rows, 44 states), `nces_lea_membership.parquet` (78K rows, 4 years: 2020/22/23/24).
+- Updated `pipeline/utils/nces_fetcher.py`: `_read_finance()` and `_aggregate_frl()` now query national parquets by LEAID / LEAID+filters instead of state-specific CSV paths.
+- Updated `pipeline/utils/population_trends_fetcher.py`: removed NM-hardcoded `NCES_SOURCE_FILES` constant.
+- Updated `scripts/build_nces_cache.py`: reads `data/raw/national/nces_lea_membership.parquet`, filters by STABBR, writes per-state parquet — no longer requires state-specific CSV downloads.
+- Updated `scripts/build_community_registry.py`: `load_ccd()` now accepts `.parquet` files; uses `has_charter_schools` column from directory parquet as authoritative `has_charters` signal when no roster file is provided.
+- Built community registries: `config/community_registry/ms.yaml` (142 districts), `tn.yaml` (139), `wi.yaml` (312).
+- Tests: 544 passed (updated `test_nces_fetcher.py` for national parquet design).
+
 **Session 34 (2026-06-05) — Multi-State Hard Blockers: FIPS, Path Threading, Graceful Missing Files (c7ff84e)**
 - **Task 1** — Created `pipeline/utils/fips_utils.py` with complete 50-state + DC FIPS lookup dict and `get_state_fips(state)` function. Single source of truth for state FIPS codes.
 - **Task 2** — Fixed `s1_discovery.py` highway prefix regex: changed hardcoded `NM` to `[A-Z]{2}` to strip highway codes from any state (MS 82, TN 64, WI 35, NM 14, etc.).
@@ -292,7 +303,11 @@ charter-intel/
 ├── outputs/                 # Generated briefs (gitignored; nm-questa demo committed)
 ├── data/                    # Caches + raw source data (gitignored)
 ├── tests/                   # 160 pytest tests + recorded fixtures
-├── scripts/                 # One-off / maintenance scripts (cache build, cache bust, etc.)
+├── scripts/                 # One-off / maintenance scripts (cache build, cache bust, national data download, etc.)
+│   ├── download_nces_national.py  # Download 6 national CCD files from Urban Institute API → data/raw/national/
+│   ├── build_national_parquet.py  # Convert those CSVs to 4 national parquets (run once after download)
+│   ├── build_nces_cache.py        # Filter national membership parquet to one state → data/processed/{state}/
+│   └── build_community_registry.py  # Generate config/community_registry/{state}.yaml from parquet
 └── docs/                    # Session notes, cost baseline, data sources, annual update
 ```
 
@@ -350,8 +365,11 @@ Be honest about these before relying on CLIP for anything consequential:
 - **Interpreter sensitivity.** Needs Python 3.11+. A machine whose `python3` is older
   (e.g. 3.9) can run the tests but not a real pipeline invocation; set `CLIP_PYTHON`
   to a 3.11+ interpreter for deployment.
-- **Some `data/` source files are gitignored** (e.g. NCES raw CSVs). On a fresh
-  deploy, NCES-dependent features need those files provisioned on the volume.
+- **NCES data requires a one-time download on a fresh deploy.** Run
+  `python3 scripts/download_nces_national.py` then `python3 scripts/build_national_parquet.py`
+  to produce the four national parquets in `data/raw/national/`. Per-state processed
+  parquets (`data/processed/{state}/`) are built automatically on first pipeline run
+  for that state. The raw CSVs and all `data/` files are gitignored.
 - **Contact information in briefs must be human-verified** before any external use.
 - **Legacy/experimental files** exist in `pipeline/` (`s3_extract.py`, `s4_verify.py`,
   `s5_score.py`, `run_*.py`); the canonical stages are the seven listed in section 2.
@@ -626,6 +644,34 @@ scoring uncalibrated. See `docs/` for session history and `DEPLOY.md` for deploy
 - [ ] Populate `source_date` in S3 fetchers with fiscal year-end dates
 - [ ] Fill `config/pec_renewal_stats.yaml` with verified PEC renewal/denial rate data
 - [ ] Calibrate scoring weights (blocked on operator-profile conversation with The Mind Trust)
+
+---
+
+### Session 3 / National CCD — 2026-06-05
+
+**Accomplished:**
+- Created `scripts/download_nces_national.py` — downloads 6 national NCES CCD files from the Urban Institute Education Data API using per-state pagination strategy; produces `nces_lea_directory_2022.csv`, `nces_sch_directory_2022.csv`, and `nces_lea_membership_{2020,2022,2023,2024}.csv` in `data/raw/national/`
+- Created `scripts/build_national_parquet.py` — converts those CSVs to 4 compressed parquets: `nces_lea_directory.parquet` (19,714 districts, `has_charter_schools` derived from school directory), `nces_lea_finance.parquet` (19,570 rows, 51 states; source was `data/raw/nm/nces_lea_finance_2024.csv` already national, moved to `data/raw/national/`), `nces_sch_lunch.parquet` (146K FRL rows in NCES filter format), `nces_lea_membership.parquet` (78K rows, years 2020/22/23/24)
+- Updated `pipeline/utils/nces_fetcher.py`: `_read_finance()` reads from `data/raw/national/nces_lea_finance.parquet` (LEAID lookup by index); `_aggregate_frl()` reads from `data/raw/national/nces_sch_lunch.parquet` (filtered by LEAID, LUNCH_PROGRAM, DATA_GROUP); added `pandas` import; both fall back gracefully with clear message if parquet missing
+- Updated `pipeline/utils/population_trends_fetcher.py`: removed `NCES_SOURCE_FILES`, `_MEMBERSHIP_FILES`, `_SCHOOL_MEMBERSHIP_FILES` — all were NM-hardcoded paths to deleted CSV files
+- Updated `scripts/build_nces_cache.py`: replaced per-state CSV imports with a single national parquet read filtered by STABBR; removed `NCES_SOURCE_FILES` import from population_trends_fetcher
+- Updated `scripts/build_community_registry.py`: `load_ccd()` accepts `.parquet` files (detected by extension) via new `_iter_ccd_rows()` helper; reads `has_charter_schools` column from directory parquet as `has_charters` fallback when no roster signals are provided; enrollment parsing handles float strings (e.g. `"4766.0"`)
+- Built community registries from `data/raw/national/nces_lea_directory.parquet`: MS (142 districts, 4 with charters), TN (139 districts, 6 with charters), WI (312 districts, 94 with charters)
+- Built MS membership parquet at `data/processed/ms/nces_membership_ms.parquet` (614 rows, 4 years, 159 districts) via updated `build_nces_cache.py`
+- Updated `tests/unit/test_nces_fetcher.py`: rewrote 2 state-specific CSV tests to use parquet fixtures; added `_write_finance_parquet` helper; added `test_read_finance_returns_none_for_unknown_leaid`
+- NM regression verified: APS LEAID `3500060` returns `MEMBERSCH=79805`, `FRL=55009`; NM parquet (`data/processed/nm/nces_membership_nm.parquet`) intact at 317,158 rows
+
+**Decisions:**
+- `_read_finance()` looks up by LEAID directly (globally unique); `state` param is no longer used for path derivation — both NM and any other state read the same national parquet
+- `has_charter_schools` from the Urban Institute school directory (charter==1 schools per LEA) is used as the authoritative `has_charters` signal in the registry; roster city/name matching still takes priority when a roster is provided
+- The NM validation warnings in `build_national_parquet.py` comparing directory/finance rows to `nces_ccd_schools_nm.csv` are expected false alarms — the baseline is school-level (892 rows) while the directory parquet is district-level (~194 NM districts)
+- `build_nces_cache.py` is now fully self-contained; it no longer imports from `population_trends_fetcher`
+
+**Tests:** 544 passed.
+
+**Next Steps (Session 4):**
+- [ ] Add MS, TN, WI to `config/states.yaml` (nces_district_map entries + data_sources) to enable full S1–S7 pipeline runs for those states
+- [ ] Wire S5/S6/S7 templates for MS/TN/WI (Session 5)
 
 ---
 

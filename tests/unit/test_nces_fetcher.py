@@ -1,8 +1,8 @@
 """
 tests/unit/test_nces_fetcher.py
 
-Unit tests for nces_fetcher helpers — focused on state-agnostic path
-derivation and graceful fallback when files are absent.
+Unit tests for nces_fetcher helpers — focused on national parquet path
+and graceful fallback when files are absent.
 """
 from __future__ import annotations
 
@@ -10,6 +10,7 @@ import os
 import sys
 from unittest.mock import patch, MagicMock
 
+import pandas as pd
 import pytest
 
 _ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -18,50 +19,53 @@ sys.path.insert(0, _ROOT)
 import pipeline.utils.nces_fetcher as nf
 
 
+def _write_finance_parquet(tmp_path, rows: list[dict]) -> None:
+    """Write a minimal finance parquet at data/raw/national/nces_lea_finance.parquet."""
+    nat_dir = tmp_path / "data" / "raw" / "national"
+    nat_dir.mkdir(parents=True)
+    df = pd.DataFrame(rows).set_index("LEAID")
+    df.to_parquet(nat_dir / "nces_lea_finance.parquet", compression="snappy")
+
+
 # ─────────────────────────────────────────────────────────────────────────────
-# _read_finance — path derivation
+# _read_finance — national parquet path
 # ─────────────────────────────────────────────────────────────────────────────
 
-def test_read_finance_returns_none_when_nm_file_missing(tmp_path, monkeypatch):
+def test_read_finance_returns_none_when_parquet_missing(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
-    # No finance CSV present anywhere — must return None, not raise.
+    # No national parquet present — must return None, not raise.
     result = nf._read_finance("3500060", "NM")
     assert result is None
 
 
-def test_read_finance_returns_none_when_tx_file_missing(tmp_path, monkeypatch):
+def test_read_finance_returns_none_when_tx_parquet_missing(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     result = nf._read_finance("4800001", "TX")
     assert result is None
 
 
-def test_read_finance_reads_state_specific_path(tmp_path, monkeypatch):
-    """Finance CSV is read from data/raw/{state}/, not a hardcoded nm/ path."""
+def test_read_finance_reads_from_national_parquet(tmp_path, monkeypatch):
+    """Finance is read from data/raw/national/nces_lea_finance.parquet, not state-specific paths."""
     monkeypatch.chdir(tmp_path)
-    tx_dir = tmp_path / "data" / "raw" / "tx"
-    tx_dir.mkdir(parents=True)
-    csv_path = tx_dir / "nces_lea_finance_2024.csv"
-    csv_path.write_text(
-        "LEAID,MEMBERSCH,TOTALREV,TFEDREV,TSTREV,TLOCREV,TOTALEXP\n"
-        "4800001,5000,50000000,5000000,20000000,25000000,48000000\n"
-    )
+    _write_finance_parquet(tmp_path, [
+        {"LEAID": "4800001", "STABBR": "TX",
+         "MEMBERSCH": 5000, "TOTALREV": 50000000, "TFEDREV": 5000000,
+         "TSTREV": 20000000, "TLOCREV": 25000000, "TOTALEXP": 48000000},
+    ])
     result = nf._read_finance("4800001", "TX")
     assert result is not None
     assert result["MEMBERSCH"] == 5000
 
 
-def test_read_finance_nm_path_not_used_for_tx(tmp_path, monkeypatch):
-    """A file at data/raw/nm/ must NOT satisfy a TX query."""
+def test_read_finance_returns_none_for_unknown_leaid(tmp_path, monkeypatch):
+    """LEAID not present in parquet returns None, not an exception."""
     monkeypatch.chdir(tmp_path)
-    nm_dir = tmp_path / "data" / "raw" / "nm"
-    nm_dir.mkdir(parents=True)
-    csv_path = nm_dir / "nces_lea_finance_2024.csv"
-    csv_path.write_text(
-        "LEAID,MEMBERSCH,TOTALREV,TFEDREV,TSTREV,TLOCREV,TOTALEXP\n"
-        "4800001,5000,50000000,5000000,20000000,25000000,48000000\n"
-    )
-    # TX query — must look in data/raw/tx/, not data/raw/nm/
-    result = nf._read_finance("4800001", "TX")
+    _write_finance_parquet(tmp_path, [
+        {"LEAID": "4800001", "STABBR": "TX",
+         "MEMBERSCH": 5000, "TOTALREV": 50000000, "TFEDREV": 5000000,
+         "TSTREV": 20000000, "TLOCREV": 25000000, "TOTALEXP": 48000000},
+    ])
+    result = nf._read_finance("9999999", "TX")
     assert result is None
 
 

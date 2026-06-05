@@ -1,0 +1,1112 @@
+tn-alamo-4700030:
+  display_name: Alamo
+  district_name: Alamo
+  district_nces_id: '4700030'
+  enrollment: 578
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-alamo-4700850:
+  display_name: Alamo
+  district_name: Crockett County
+  district_nces_id: '4700850'
+  enrollment: 2004
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-alcoa:
+  display_name: Alcoa
+  district_name: Alcoa
+  district_nces_id: '4700060'
+  enrollment: 2211
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-altamont:
+  display_name: Altamont
+  district_name: Grundy County
+  district_nces_id: '4701530'
+  enrollment: 1789
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-arlington:
+  display_name: Arlington
+  district_name: Arlington
+  district_nces_id: '4700152'
+  enrollment: 4803
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-ashland-city:
+  display_name: Ashland City
+  district_name: Cheatham County
+  district_nces_id: '4700570'
+  enrollment: 5833
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-athens-4700120:
+  display_name: Athens
+  district_name: Athens
+  district_nces_id: '4700120'
+  enrollment: 1802
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-athens-4702820:
+  display_name: Athens
+  district_name: McMinn County
+  district_nces_id: '4702820'
+  enrollment: 5225
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-atwood:
+  display_name: Atwood
+  district_name: West Carroll Sp Dist
+  district_nces_id: '4704490'
+  enrollment: 837
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-bartlett:
+  display_name: Bartlett
+  district_name: Bartlett
+  district_nces_id: '4700153'
+  enrollment: 8946
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-benton:
+  display_name: Benton
+  district_name: Polk County
+  district_nces_id: '4703450'
+  enrollment: 2148
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-blountville:
+  display_name: Blountville
+  district_name: Sullivan County
+  district_nces_id: '4703990'
+  enrollment: 8380
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-bolivar:
+  display_name: Bolivar
+  district_name: Hardeman County Schools
+  district_nces_id: '4701650'
+  enrollment: 3332
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-bradford:
+  display_name: Bradford
+  district_name: Bradford
+  district_nces_id: '4701390'
+  enrollment: 615
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-bristol:
+  display_name: Bristol
+  district_name: Bristol
+  district_nces_id: '4700360'
+  enrollment: 4029
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-brownsville:
+  display_name: Brownsville
+  district_name: Haywood County
+  district_nces_id: '4701770'
+  enrollment: 2721
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-bruceton:
+  display_name: Bruceton
+  district_name: Hollow Rock - Bruceton
+  district_nces_id: '4701890'
+  enrollment: 658
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-byrdstown:
+  display_name: Byrdstown
+  district_name: Pickett County
+  district_nces_id: '4703420'
+  enrollment: 644
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-camden:
+  display_name: Camden
+  district_name: Benton County
+  district_nces_id: '4700240'
+  enrollment: 2163
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-carthage:
+  display_name: Carthage
+  district_name: Smith County
+  district_nces_id: '4703870'
+  enrollment: 3061
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-celina:
+  display_name: Celina
+  district_name: Clay County
+  district_nces_id: '4700660'
+  enrollment: 1097
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-centerville:
+  display_name: Centerville
+  district_name: Hickman County
+  district_nces_id: '4701860'
+  enrollment: 3175
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-chattanooga:
+  display_name: Chattanooga
+  district_name: Hamilton County
+  district_nces_id: '4701590'
+  enrollment: 45902
+  has_charters: true
+  source: ccd_auto
+  state: TN
+tn-clarksville:
+  display_name: Clarksville
+  district_name: Montgomery County
+  district_nces_id: '4703030'
+  enrollment: 38773
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-cleveland-4700330:
+  display_name: Cleveland
+  district_name: Bradley County
+  district_nces_id: '4700330'
+  enrollment: 10269
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-cleveland-4700690:
+  display_name: Cleveland
+  district_name: Cleveland
+  district_nces_id: '4700690'
+  enrollment: 5768
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-clinton-4700090:
+  display_name: Clinton
+  district_name: Anderson County
+  district_nces_id: '4700090'
+  enrollment: 6317
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-clinton-4700720:
+  display_name: Clinton
+  district_name: Clinton
+  district_nces_id: '4700720'
+  enrollment: 968
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-collierville:
+  display_name: Collierville
+  district_name: Collierville
+  district_nces_id: '4700149'
+  enrollment: 9259
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-columbia:
+  display_name: Columbia
+  district_name: Maury County
+  district_nces_id: '4702760'
+  enrollment: 13152
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-cookeville:
+  display_name: Cookeville
+  district_name: Putnam County
+  district_nces_id: '4703480'
+  enrollment: 12032
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-covington:
+  display_name: Covington
+  district_name: Tipton County
+  district_nces_id: '4704080'
+  enrollment: 10249
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-crossville:
+  display_name: Crossville
+  district_name: Cumberland County
+  district_nces_id: '4700900'
+  enrollment: 7216
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-dandridge:
+  display_name: Dandridge
+  district_name: Jefferson County
+  district_nces_id: '4702100'
+  enrollment: 6995
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-dayton-4700930:
+  display_name: Dayton
+  district_name: Dayton
+  district_nces_id: '4700930'
+  enrollment: 848
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-dayton-4703510:
+  display_name: Dayton
+  district_name: Rhea County
+  district_nces_id: '4703510'
+  enrollment: 4091
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-decatur:
+  display_name: Decatur
+  district_name: Meigs County
+  district_nces_id: '4702910'
+  enrollment: 1751
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-decaturville:
+  display_name: Decaturville
+  district_name: Decatur County
+  district_nces_id: '4700960'
+  enrollment: 1524
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-dickson:
+  display_name: Dickson
+  district_name: Dickson County
+  district_nces_id: '4701020'
+  enrollment: 8129
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-dover:
+  display_name: Dover
+  district_name: Stewart County
+  district_nces_id: '4703960'
+  enrollment: 2002
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-dresden:
+  display_name: Dresden
+  district_name: Weakley County
+  district_nces_id: '4704470'
+  enrollment: 3987
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-dunlap:
+  display_name: Dunlap
+  district_name: Sequatchie County
+  district_nces_id: '4703750'
+  enrollment: 2031
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-dyer:
+  display_name: Dyer
+  district_name: Gibson Co Sp Dist
+  district_nces_id: '4701400'
+  enrollment: 3962
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-dyersburg-4701050:
+  display_name: Dyersburg
+  district_name: Dyer County
+  district_nces_id: '4701050'
+  enrollment: 3645
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-dyersburg-4701080:
+  display_name: Dyersburg
+  district_name: Dyersburg
+  district_nces_id: '4701080'
+  enrollment: 2613
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-elizabethton-4700510:
+  display_name: Elizabethton
+  district_name: Carter County
+  district_nces_id: '4700510'
+  enrollment: 4764
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-elizabethton-4701110:
+  display_name: Elizabethton
+  district_name: Elizabethton
+  district_nces_id: '4701110'
+  enrollment: 2738
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-erin:
+  display_name: Erin
+  district_name: Houston County
+  district_nces_id: '4701920'
+  enrollment: 1281
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-erwin:
+  display_name: Erwin
+  district_name: Unicoi County
+  district_nces_id: '4704230'
+  enrollment: 2220
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-fayetteville-4701200:
+  display_name: Fayetteville
+  district_name: Fayetteville
+  district_nces_id: '4701200'
+  enrollment: 1185
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-fayetteville-4702490:
+  display_name: Fayetteville
+  district_name: Lincoln County
+  district_nces_id: '4702490'
+  enrollment: 4002
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-franklin-4701260:
+  display_name: Franklin
+  district_name: Franklin SSD
+  district_nces_id: '4701260'
+  enrollment: 3190
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-franklin-4704530:
+  display_name: Franklin
+  district_name: Williamson County
+  district_nces_id: '4704530'
+  enrollment: 42171
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-gainesboro:
+  display_name: Gainesboro
+  district_name: Jackson County
+  district_nces_id: '4702070'
+  enrollment: 1463
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-gallatin:
+  display_name: Gallatin
+  district_name: Sumner County
+  district_nces_id: '4704020'
+  enrollment: 30732
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-germantown:
+  display_name: Germantown
+  district_name: Germantown
+  district_nces_id: '4700151'
+  enrollment: 6026
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-greeneville-4701470:
+  display_name: Greeneville
+  district_name: Greene County
+  district_nces_id: '4701470'
+  enrollment: 6265
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-greeneville-4701500:
+  display_name: Greeneville
+  district_name: Greeneville
+  district_nces_id: '4701500'
+  enrollment: 2997
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-hartsville:
+  display_name: Hartsville
+  district_name: Trousdale County
+  district_nces_id: '4704170'
+  enrollment: 1407
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-henderson:
+  display_name: Henderson
+  district_name: Chester County
+  district_nces_id: '4700600'
+  enrollment: 2811
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-hohenwald:
+  display_name: Hohenwald
+  district_name: Lewis County
+  district_nces_id: '4702430'
+  enrollment: 1698
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-humboldt:
+  display_name: Humboldt
+  district_name: Humboldt City Schools
+  district_nces_id: '4701950'
+  enrollment: 1110
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-huntingdon:
+  display_name: Huntingdon
+  district_name: Huntingdon Special School District
+  district_nces_id: '4702010'
+  enrollment: 1335
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-huntsville:
+  display_name: Huntsville
+  district_name: Scott County
+  district_nces_id: '4703720'
+  enrollment: 2524
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-jacksboro:
+  display_name: Jacksboro
+  district_name: Campbell County
+  district_nces_id: '4700420'
+  enrollment: 5294
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-jackson:
+  display_name: Jackson
+  district_name: Madison County
+  district_nces_id: '4702580'
+  enrollment: 12463
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-jamestown:
+  display_name: Jamestown
+  district_name: Fentress County
+  district_nces_id: '4701230'
+  enrollment: 2270
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-jasper:
+  display_name: Jasper
+  district_name: Marion County
+  district_nces_id: '4702640'
+  enrollment: 3960
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-johnson-city:
+  display_name: Johnson City
+  district_name: Johnson City
+  district_nces_id: '4702130'
+  enrollment: 8001
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-jonesborough:
+  display_name: Jonesborough
+  district_name: Washington County
+  district_nces_id: '4704380'
+  enrollment: 8281
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-kingsport:
+  display_name: Kingsport
+  district_name: Kingsport
+  district_nces_id: '4702190'
+  enrollment: 7784
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-kingston:
+  display_name: Kingston
+  district_name: Roane County
+  district_nces_id: '4703590'
+  enrollment: 6344
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-knoxville:
+  display_name: Knoxville
+  district_name: Knox County
+  district_nces_id: '4702220'
+  enrollment: 60609
+  has_charters: true
+  source: ccd_auto
+  state: TN
+tn-lafayette:
+  display_name: Lafayette
+  district_name: Macon County
+  district_nces_id: '4702550'
+  enrollment: 4231
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-lakeland:
+  display_name: Lakeland
+  district_name: Lakeland
+  district_nces_id: '4700154'
+  enrollment: 2132
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-lawrenceburg:
+  display_name: Lawrenceburg
+  district_name: Lawrence County
+  district_nces_id: '4702340'
+  enrollment: 7032
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-lebanon-4702370:
+  display_name: Lebanon
+  district_name: Lebanon
+  district_nces_id: '4702370'
+  enrollment: 4221
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-lebanon-4704550:
+  display_name: Lebanon
+  district_name: Wilson County
+  district_nces_id: '4704550'
+  enrollment: 20308
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-lenoir-city:
+  display_name: Lenoir City
+  district_name: Lenoir City
+  district_nces_id: '4702400'
+  enrollment: 2568
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-lewisburg:
+  display_name: Lewisburg
+  district_name: Marshall County
+  district_nces_id: '4702670'
+  enrollment: 5406
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-lexington-4701800:
+  display_name: Lexington
+  district_name: Henderson County
+  district_nces_id: '4701800'
+  enrollment: 4054
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-lexington-4702460:
+  display_name: Lexington
+  district_name: Lexington
+  district_nces_id: '4702460'
+  enrollment: 884
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-linden:
+  display_name: Linden
+  district_name: Perry County
+  district_nces_id: '4703390'
+  enrollment: 1069
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-livingston:
+  display_name: Livingston
+  district_name: Overton County
+  district_nces_id: '4703330'
+  enrollment: 3102
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-loudon:
+  display_name: Loudon
+  district_name: Loudon County
+  district_nces_id: '4702520'
+  enrollment: 4979
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-lynchburg:
+  display_name: Lynchburg
+  district_name: Moore County
+  district_nces_id: '4703060'
+  enrollment: 901
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-madisonville:
+  display_name: Madisonville
+  district_name: Monroe County
+  district_nces_id: '4703000'
+  enrollment: 5023
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-manchester-4700780:
+  display_name: Manchester
+  district_name: Coffee County
+  district_nces_id: '4700780'
+  enrollment: 4395
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-manchester-4702610:
+  display_name: Manchester
+  district_name: Manchester
+  district_nces_id: '4702610'
+  enrollment: 1583
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-maryville-4700300:
+  display_name: Maryville
+  district_name: Blount County
+  district_nces_id: '4700300'
+  enrollment: 10234
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-maryville-4702700:
+  display_name: Maryville
+  district_name: Maryville
+  district_nces_id: '4702700'
+  enrollment: 5671
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-maynardville:
+  display_name: Maynardville
+  district_name: Union County
+  district_nces_id: '4704290'
+  enrollment: 5939
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-mckenzie:
+  display_name: Mckenzie
+  district_name: McKenzie
+  district_nces_id: '4702790'
+  enrollment: 1288
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-mcminnville:
+  display_name: Mcminnville
+  district_name: Warren County
+  district_nces_id: '4704350'
+  enrollment: 6477
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-memphis:
+  display_name: Memphis
+  district_name: Memphis-Shelby County Schools
+  district_nces_id: '4700148'
+  enrollment: 109797
+  has_charters: true
+  source: ccd_auto
+  state: TN
+tn-milan:
+  display_name: Milan
+  district_name: Milan
+  district_nces_id: '4702970'
+  enrollment: 1996
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-millington:
+  display_name: Millington
+  district_name: Millington Municipal Schools
+  district_nces_id: '4700150'
+  enrollment: 2602
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-morristown:
+  display_name: Morristown
+  district_name: Hamblen County
+  district_nces_id: '4700001'
+  enrollment: 10289
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-mountain-city:
+  display_name: Mountain City
+  district_name: Johnson County
+  district_nces_id: '4702160'
+  enrollment: 4971
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-murfreesboro-4703150:
+  display_name: Murfreesboro
+  district_name: Murfreesboro
+  district_nces_id: '4703150'
+  enrollment: 9408
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-murfreesboro-4703690:
+  display_name: Murfreesboro
+  district_name: Rutherford County
+  district_nces_id: '4703690'
+  enrollment: 50707
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-nashville-4700147:
+  display_name: Nashville
+  district_name: Achievement School District
+  district_nces_id: '4700147'
+  enrollment: 5966
+  has_charters: true
+  source: ccd_auto
+  state: TN
+tn-nashville-4700156:
+  display_name: Nashville
+  district_name: Department Of Children's Services Education Division
+  district_nces_id: '4700156'
+  enrollment: 1159
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-nashville-4700157:
+  display_name: Nashville
+  district_name: Tennessee Public Charter School Commission
+  district_nces_id: '4700157'
+  enrollment: 3818
+  has_charters: true
+  source: ccd_auto
+  state: TN
+tn-nashville-4703180:
+  display_name: Nashville
+  district_name: Davidson County
+  district_nces_id: '4703180'
+  enrollment: 80651
+  has_charters: true
+  source: ccd_auto
+  state: TN
+tn-newport-4700750:
+  display_name: Newport
+  district_name: Cocke County
+  district_nces_id: '4700750'
+  enrollment: 4339
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-newport-4703210:
+  display_name: Newport
+  district_name: Newport
+  district_nces_id: '4703210'
+  enrollment: 701
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-oak-ridge:
+  display_name: Oak Ridge
+  district_name: Oak Ridge
+  district_nces_id: '4703240'
+  enrollment: 4961
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-oneida:
+  display_name: Oneida
+  district_name: Oneida
+  district_nces_id: '4703300'
+  enrollment: 1463
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-paris-4701830:
+  display_name: Paris
+  district_name: Henry County
+  district_nces_id: '4701830'
+  enrollment: 3014
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-paris-4703360:
+  display_name: Paris
+  district_name: Paris
+  district_nces_id: '4703360'
+  enrollment: 1585
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-pikeville:
+  display_name: Pikeville
+  district_name: Bledsoe County
+  district_nces_id: '4700270'
+  enrollment: 1654
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-pulaski:
+  display_name: Pulaski
+  district_name: Giles County
+  district_nces_id: '4701410'
+  enrollment: 3670
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-ripley:
+  display_name: Ripley
+  district_name: Lauderdale County
+  district_nces_id: '4702310'
+  enrollment: 3413
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-rogersville-4701740:
+  display_name: Rogersville
+  district_name: Hawkins County
+  district_nces_id: '4701740'
+  enrollment: 6304
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-rogersville-4703660:
+  display_name: Rogersville
+  district_name: Rogersville
+  district_nces_id: '4703660'
+  enrollment: 624
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-rutledge:
+  display_name: Rutledge
+  district_name: Grainger County
+  district_nces_id: '4701440'
+  enrollment: 3105
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-savannah:
+  display_name: Savannah
+  district_name: Hardin County
+  district_nces_id: '4701680'
+  enrollment: 3370
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-selmer:
+  display_name: Selmer
+  district_name: McNairy County
+  district_nces_id: '4702880'
+  enrollment: 3831
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-sevierville:
+  display_name: Sevierville
+  district_name: Sevier County
+  district_nces_id: '4703780'
+  enrollment: 14455
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-shelbyville:
+  display_name: Shelbyville
+  district_name: Bedford County
+  district_nces_id: '4700180'
+  enrollment: 9047
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-smithville:
+  display_name: Smithville
+  district_name: DeKalb County
+  district_nces_id: '4700990'
+  enrollment: 2938
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-sneedville:
+  display_name: Sneedville
+  district_name: Hancock County
+  district_nces_id: '4701620'
+  enrollment: 954
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-somerville:
+  display_name: Somerville
+  district_name: Fayette County Public Schools
+  district_nces_id: '4701170'
+  enrollment: 3238
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-sparta:
+  display_name: Sparta
+  district_name: White County
+  district_nces_id: '4704500'
+  enrollment: 3872
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-spencer:
+  display_name: Spencer
+  district_name: Van Buren County
+  district_nces_id: '4704320'
+  enrollment: 794
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-springfield:
+  display_name: Springfield
+  district_name: Robertson County
+  district_nces_id: '4703600'
+  enrollment: 11504
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-sweetwater:
+  display_name: Sweetwater
+  district_name: Sweetwater
+  district_nces_id: '4704050'
+  enrollment: 1486
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-tazewell:
+  display_name: Tazewell
+  district_name: Claiborne County
+  district_nces_id: '4700630'
+  enrollment: 4070
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-tiptonville:
+  display_name: Tiptonville
+  district_name: Lake County
+  district_nces_id: '4702280'
+  enrollment: 749
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-trenton:
+  display_name: Trenton
+  district_name: Trenton
+  district_nces_id: '4704100'
+  enrollment: 1354
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-tullahoma:
+  display_name: Tullahoma
+  district_name: Tullahoma
+  district_nces_id: '4704200'
+  enrollment: 3641
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-union-city-4703270:
+  display_name: Union City
+  district_name: Obion County
+  district_nces_id: '4703270'
+  enrollment: 3113
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-union-city-4704260:
+  display_name: Union City
+  district_name: Union City
+  district_nces_id: '4704260'
+  enrollment: 1540
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-wartburg:
+  display_name: Wartburg
+  district_name: Morgan County
+  district_nces_id: '4703090'
+  enrollment: 2877
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-waverly:
+  display_name: Waverly
+  district_name: Humphreys County
+  district_nces_id: '4701980'
+  enrollment: 2693
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-waynesboro:
+  display_name: Waynesboro
+  district_name: Wayne County
+  district_nces_id: '4704440'
+  enrollment: 2162
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-winchester:
+  display_name: Winchester
+  district_name: Franklin County
+  district_nces_id: '4701290'
+  enrollment: 5004
+  has_charters: false
+  source: ccd_auto
+  state: TN
+tn-woodbury:
+  display_name: Woodbury
+  district_name: Cannon County
+  district_nces_id: '4700450'
+  enrollment: 1865
+  has_charters: false
+  source: ccd_auto
+  state: TN

@@ -88,58 +88,86 @@ def _detect_col(fieldnames: list[str], candidates: tuple[str, ...], label: str) 
 # CCD LOADER
 # ─────────────────────────────────────────────
 
+def _iter_ccd_rows(ccd_path: str) -> tuple[list[str], list[dict]]:
+    """Return (fieldnames, rows_as_dicts) from a CSV or parquet file."""
+    if ccd_path.endswith(".parquet"):
+        try:
+            import pandas as pd
+        except ImportError:
+            print("ERROR: pandas not installed. Run: pip install pandas pyarrow", file=sys.stderr)
+            sys.exit(1)
+        df = pd.read_parquet(ccd_path)
+        # Reset index so LEAID (the parquet index) becomes a regular column
+        if df.index.name == "LEAID" or df.index.name == "leaid":
+            df = df.reset_index()
+        fieldnames = list(df.columns)
+        rows = df.astype(str).replace("nan", "").to_dict(orient="records")
+        return fieldnames, rows
+
+    with open(ccd_path, newline="", encoding="utf-8-sig") as f:
+        reader = csv.DictReader(f)
+        rows = list(reader)
+        fieldnames = reader.fieldnames or []
+    return list(fieldnames), rows
+
+
 def load_ccd(ccd_path: str, state: str, floor: int) -> tuple[list[dict], int]:
     """
-    Read NCES CCD LEA directory CSV, filter to state and floor.
+    Read NCES CCD LEA directory CSV or parquet, filter to state and floor.
 
     Returns (district_rows, excluded_count).
     Each row dict has keys: leaid, lea_name, city, enrollment.
     """
-    with open(ccd_path, newline="", encoding="utf-8-sig") as f:
-        reader = csv.DictReader(f)
-        fieldnames = reader.fieldnames or []
+    fieldnames, all_rows = _iter_ccd_rows(ccd_path)
 
-        col_leaid  = _detect_col(fieldnames, _LEAID_CANDIDATES,  "NCES LEA ID")
-        col_name   = _detect_col(fieldnames, _NAME_CANDIDATES,   "district name")
-        col_city   = _detect_col(fieldnames, _CITY_CANDIDATES,   "city")
-        col_state  = _detect_col(fieldnames, _STATE_CANDIDATES,  "state")
-        col_enroll = _detect_col(fieldnames, _ENROLL_CANDIDATES, "enrollment")
+    col_leaid  = _detect_col(fieldnames, _LEAID_CANDIDATES,  "NCES LEA ID")
+    col_name   = _detect_col(fieldnames, _NAME_CANDIDATES,   "district name")
+    col_city   = _detect_col(fieldnames, _CITY_CANDIDATES,   "city")
+    col_state  = _detect_col(fieldnames, _STATE_CANDIDATES,  "state")
+    col_enroll = _detect_col(fieldnames, _ENROLL_CANDIDATES, "enrollment")
 
-        rows = []
-        excluded = 0
+    rows = []
+    excluded = 0
 
-        for row in reader:
-            # Filter to the target state
-            if col_state:
-                row_state = row.get(col_state, "").strip().upper()
-                if row_state != state.upper():
-                    continue
-
-            leaid    = row.get(col_leaid, "").strip()  if col_leaid  else ""
-            lea_name = row.get(col_name,  "").strip()  if col_name   else ""
-            city     = row.get(col_city,  "").strip()  if col_city   else ""
-
-            enrollment = 0
-            if col_enroll:
-                raw = row.get(col_enroll, "") or ""
-                try:
-                    enrollment = int(str(raw).strip())
-                except (ValueError, TypeError):
-                    enrollment = 0
-
-            if not leaid or not city:
+    for row in all_rows:
+        # Filter to the target state
+        if col_state:
+            row_state = row.get(col_state, "").strip().upper()
+            if row_state != state.upper():
                 continue
 
-            if enrollment < floor:
-                excluded += 1
-                continue
+        leaid    = row.get(col_leaid, "").strip()  if col_leaid  else ""
+        lea_name = row.get(col_name,  "").strip()  if col_name   else ""
+        city     = row.get(col_city,  "").strip()  if col_city   else ""
 
-            rows.append({
-                "leaid":    leaid,
-                "lea_name": lea_name,
-                "city":     city,
-                "enrollment": enrollment,
-            })
+        enrollment = 0
+        if col_enroll:
+            raw = row.get(col_enroll, "") or ""
+            try:
+                enrollment = int(str(raw).strip().split(".")[0])
+            except (ValueError, TypeError):
+                enrollment = 0
+
+        if not leaid or not city:
+            continue
+
+        if enrollment < floor:
+            excluded += 1
+            continue
+
+        # Read has_charter_schools from parquet directory column if present
+        has_charters_ccd: Optional[bool] = None
+        raw_charter = row.get("has_charter_schools", "")
+        if raw_charter not in ("", "nan", "None"):
+            has_charters_ccd = str(raw_charter).strip().lower() in ("true", "1", "yes")
+
+        rows.append({
+            "leaid":            leaid,
+            "lea_name":         lea_name,
+            "city":             city,
+            "enrollment":       enrollment,
+            "has_charters_ccd": has_charters_ccd,
+        })
 
     return rows, excluded
 
@@ -229,7 +257,7 @@ def build_registry(
         else:
             cid = _community_id(state, d["city"])
 
-        # Determine has_charters from roster signals
+        # Determine has_charters: roster signals take priority; CCD parquet column is fallback
         has_charters = False
         if district_names or cities:
             if (
@@ -237,6 +265,8 @@ def build_registry(
                 or d["lea_name"].lower() in district_names
             ):
                 has_charters = True
+        elif d.get("has_charters_ccd") is True:
+            has_charters = True
 
         registry[cid] = {
             "display_name":    d["city"].title(),

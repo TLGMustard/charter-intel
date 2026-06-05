@@ -41,31 +41,8 @@ log = logging.getLogger(__name__)
 
 STATES_YAML = "config/states.yaml"
 
-# (year_key, file_path) — year_key is the label used in enrollment_by_year dict.
-# Files are named by data-collection year; 2021 is absent by design.
-# Exported as NCES_SOURCE_FILES so build_nces_cache.py can import them without
-# duplicating paths. These are the national files — build_nces_cache.py filters
-# to a specific state and writes data/processed/{state}/nces_membership_{state}.parquet.
-# TODO(S35-sweep): NCES_SOURCE_FILES and _SCHOOL_MEMBERSHIP_FILES hardcode nm/
-# paths. Derive from state param (data/raw/{state}/nces_lea_membership_{year}.csv)
-# before expanding beyond NM.
-NCES_SOURCE_FILES: list[tuple[int, str]] = [
-    (2020, "data/raw/nm/nces_lea_membership_2020.csv"),
-    (2022, "data/raw/nm/nces_lea_membership_2022.csv"),
-    (2023, "data/raw/nm/nces_lea_membership_2023.csv"),
-    (2024, "data/raw/nm/nces_lea_membership_2024.csv"),
-]
-_MEMBERSHIP_FILES = NCES_SOURCE_FILES  # internal alias kept for _SCHOOL_MEMBERSHIP_FILES below
-
 SOURCE_URL   = "https://nces.ed.gov/ccd/files.asp"
 SOURCE_TITLE = "NCES CCD LEA Membership Data"
-
-# School-level files only — 2024 file is district-level (no NCESSCH column)
-_SCHOOL_MEMBERSHIP_FILES: list[tuple[int, str]] = [
-    (2020, "data/raw/nm/nces_lea_membership_2020.csv"),
-    (2022, "data/raw/nm/nces_lea_membership_2022.csv"),
-    (2023, "data/raw/nm/nces_lea_membership_2023.csv"),
-]
 
 # Trend thresholds: pct_change outside ±3% → growing/declining; within → stable
 _GROWING_THRESHOLD  =  3.0

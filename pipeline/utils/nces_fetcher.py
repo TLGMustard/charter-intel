@@ -27,6 +27,7 @@ import time
 import urllib.request
 from typing import Optional
 
+import pandas as pd
 import yaml
 
 log = logging.getLogger(__name__)
@@ -247,39 +248,42 @@ def _read_finance(leaid: str, state: str) -> Optional[dict]:
     Filters out rows where key columns carry the -2 missing sentinel before
     any arithmetic. Returns a dict of raw numeric values.
     """
-    finance_csv = f"data/raw/{state.lower()}/nces_lea_finance_2024.csv"
-    if not os.path.exists(finance_csv):
-        log.warning("nces_fetcher: finance file not found — %s", finance_csv)
+    finance_pq = "data/raw/national/nces_lea_finance.parquet"
+    if not os.path.exists(finance_pq):
+        log.warning(
+            "nces_fetcher: national finance parquet not found. "
+            "Run scripts/build_national_parquet.py"
+        )
         return None
 
     try:
-        with open(finance_csv, newline="", encoding="utf-8-sig") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                if row.get("LEAID", "").strip() != leaid:
-                    continue
+        df = pd.read_parquet(finance_pq)
+        if leaid not in df.index:
+            return None
+        row = df.loc[leaid]
 
-                def _int(col: str) -> Optional[int]:
-                    """Parse col; return None if missing, blank, or sentinel -2."""
-                    raw = row.get(col, "").strip()
-                    if not raw:
-                        return None
-                    try:
-                        val = int(raw)
-                        return None if val == _MISSING_SENTINEL else val
-                    except ValueError:
-                        return None
+        def _int(col: str) -> Optional[int]:
+            if col not in df.columns:
+                return None
+            raw = row[col]
+            if pd.isna(raw):
+                return None
+            try:
+                val = int(raw)
+                return None if val == _MISSING_SENTINEL else val
+            except (ValueError, TypeError):
+                return None
 
-                return {
-                    "MEMBERSCH": _int("MEMBERSCH"),
-                    "TOTALREV":  _int("TOTALREV"),
-                    "TFEDREV":   _int("TFEDREV"),
-                    "TSTREV":    _int("TSTREV"),
-                    "TLOCREV":   _int("TLOCREV"),
-                    "TOTALEXP":  _int("TOTALEXP"),
-                }
+        return {
+            "MEMBERSCH": _int("MEMBERSCH"),
+            "TOTALREV":  _int("TOTALREV"),
+            "TFEDREV":   _int("TFEDREV"),
+            "TSTREV":    _int("TSTREV"),
+            "TLOCREV":   _int("TLOCREV"),
+            "TOTALEXP":  _int("TOTALEXP"),
+        }
     except Exception as exc:
-        log.warning("nces_fetcher: error reading finance file — %s", exc)
+        log.warning("nces_fetcher: error reading finance parquet — %s", exc)
 
     return None
 
@@ -300,43 +304,33 @@ def _aggregate_frl(leaid: str, state: str) -> Optional[int]:
     Returns total FRL-eligible student count, or None if the file is missing.
     Note: denominator (total enrollment) comes from finance MEMBERSCH, not here.
     """
-    lunch_csv = f"data/raw/{state.lower()}/nces_sch_lunch_2024.csv"
-    if not os.path.exists(lunch_csv):
-        log.warning("nces_fetcher: lunch file not found — %s", lunch_csv)
+    lunch_pq = "data/raw/national/nces_sch_lunch.parquet"
+    if not os.path.exists(lunch_pq):
+        log.warning(
+            "nces_fetcher: national lunch parquet not found. "
+            "Run scripts/build_national_parquet.py"
+        )
         return None
-
-    frl_total = 0
-    found_any = False
 
     try:
-        with open(lunch_csv, newline="", encoding="utf-8-sig") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                if row.get("LEAID", "").strip() != leaid:
-                    continue
-                if row.get("DATA_GROUP", "").strip() != "Free and Reduced-price Lunch Table":
-                    continue
-                if row.get("TOTAL_INDICATOR", "").strip() != "Category Set A":
-                    continue
-                if row.get("DMS_FLAG", "").strip() != "Reported":
-                    continue
-                lp = row.get("LUNCH_PROGRAM", "").strip()
-                if lp not in ("Free lunch qualified", "Reduced-price lunch qualified"):
-                    continue
-
-                try:
-                    count = int(row.get("STUDENT_COUNT", "0") or "0")
-                except ValueError:
-                    continue
-                if count > 0:
-                    frl_total += count
-                    found_any = True
-
+        df = pd.read_parquet(lunch_pq)
+        mask = (
+            (df["LEAID"] == leaid)
+            & (df["DATA_GROUP"] == "Free and Reduced-price Lunch Table")
+            & (df["TOTAL_INDICATOR"] == "Category Set A")
+            & (df["DMS_FLAG"] == "Reported")
+            & (df["LUNCH_PROGRAM"].isin(
+                ["Free lunch qualified", "Reduced-price lunch qualified"]
+            ))
+        )
+        rows = df[mask]
+        if rows.empty:
+            return None
+        total = pd.to_numeric(rows["STUDENT_COUNT"], errors="coerce").fillna(0).astype(int).sum()
+        return int(total) if total > 0 else None
     except Exception as exc:
-        log.warning("nces_fetcher: error reading lunch file — %s", exc)
+        log.warning("nces_fetcher: error reading lunch parquet — %s", exc)
         return None
-
-    return frl_total if found_any else None
 
 
 # ── Public interface ──────────────────────────────────────────────────────────

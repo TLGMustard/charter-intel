@@ -1,0 +1,1136 @@
+ms-aberdeen:
+  display_name: Aberdeen
+  district_name: ABERDEEN SCHOOL DIST
+  district_nces_id: '2800360'
+  enrollment: 998
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-ackerman:
+  display_name: Ackerman
+  district_name: CHOCTAW CO SCHOOL DIST
+  district_nces_id: '2800990'
+  enrollment: 1230
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-amory-2800450:
+  display_name: Amory
+  district_name: AMORY SCHOOL DIST
+  district_nces_id: '2800450'
+  enrollment: 1518
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-amory-2802940:
+  display_name: Amory
+  district_name: MONROE CO SCHOOL DIST
+  district_nces_id: '2802940'
+  enrollment: 2119
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-ashland:
+  display_name: Ashland
+  district_name: BENTON CO SCHOOL DIST
+  district_nces_id: '2800600'
+  enrollment: 961
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-avon:
+  display_name: Avon
+  district_name: WESTERN LINE SCHOOL DISTRICT
+  district_nces_id: '2804680'
+  enrollment: 1632
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-baldwyn:
+  display_name: Baldwyn
+  district_name: BALDWYN SCHOOL DISTRICT
+  district_nces_id: '2800540'
+  enrollment: 756
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-batesville:
+  display_name: Batesville
+  district_name: SOUTH PANOLA SCHOOL DISTRICT
+  district_nces_id: '2804050'
+  enrollment: 4313
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-bay-springs:
+  display_name: Bay Springs
+  district_name: WEST JASPER CONSOLIDATED SCHOOLS
+  district_nces_id: '2804590'
+  enrollment: 1411
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-bay-st-louis:
+  display_name: Bay St. Louis
+  district_name: BAY ST LOUIS WAVELAND SCHOOL DIST
+  district_nces_id: '2800570'
+  enrollment: 1672
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-belzoni:
+  display_name: Belzoni
+  district_name: HUMPHREYS CO SCHOOL DIST
+  district_nces_id: '2802040'
+  enrollment: 1207
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-biloxi:
+  display_name: Biloxi
+  district_name: BILOXI PUBLIC SCHOOL DIST
+  district_nces_id: '2800630'
+  enrollment: 5812
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-booneville-2800820:
+  display_name: Booneville
+  district_name: BOONEVILLE SCHOOL DIST
+  district_nces_id: '2800820'
+  enrollment: 1321
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-booneville-2803750:
+  display_name: Booneville
+  district_name: PRENTISS CO SCHOOL DIST
+  district_nces_id: '2803750'
+  enrollment: 2278
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-brandon:
+  display_name: Brandon
+  district_name: RANKIN CO SCHOOL DIST
+  district_nces_id: '2803830'
+  enrollment: 18720
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-brookhaven-2800840:
+  display_name: Brookhaven
+  district_name: BROOKHAVEN SCHOOL DIST
+  district_nces_id: '2800840'
+  enrollment: 2586
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-brookhaven-2802640:
+  display_name: Brookhaven
+  district_name: LINCOLN COUNTY SCHOOL DISTRICT
+  district_nces_id: '2802640'
+  enrollment: 2795
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-brooklyn:
+  display_name: Brooklyn
+  district_name: FORREST COUNTY AG HIGH SCHOOL
+  district_nces_id: '2801510'
+  enrollment: 611
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-canton:
+  display_name: Canton
+  district_name: CANTON PUBLIC SCHOOL DIST
+  district_nces_id: '2800900'
+  enrollment: 3166
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-carriere:
+  display_name: Carriere
+  district_name: PEARL RIVER CO SCHOOL DIST
+  district_nces_id: '2803540'
+  enrollment: 3284
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-carrollton:
+  display_name: Carrollton
+  district_name: CARROLL COUNTY SCHOOL DIST
+  district_nces_id: '2800930'
+  enrollment: 805
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-carthage:
+  display_name: Carthage
+  district_name: LEAKE CO SCHOOL DIST
+  district_nces_id: '2802520'
+  enrollment: 2532
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-charleston:
+  display_name: Charleston
+  district_name: EAST TALLAHATCHIE CONSOL SCH DIST
+  district_nces_id: '2801410'
+  enrollment: 853
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-choctaw:
+  display_name: Choctaw
+  district_name: CHOCTAW CENTRAL HIGH SCHOOL
+  district_nces_id: '5900031'
+  enrollment: 578
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-clarksdale-2800194:
+  display_name: Clarksdale
+  district_name: CLARKSDALE COLLEGIATE DISTRICT
+  district_nces_id: '2800194'
+  enrollment: 511
+  has_charters: true
+  source: ccd_auto
+  state: MS
+ms-clarksdale-2801050:
+  display_name: Clarksdale
+  district_name: CLARKSDALE MUNICIPAL SCHOOL DIST
+  district_nces_id: '2801050'
+  enrollment: 2118
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-clarksdale-2801110:
+  display_name: Clarksdale
+  district_name: COAHOMA COUNTY SCHOOL DISTRICT
+  district_nces_id: '2801110'
+  enrollment: 988
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-cleveland:
+  display_name: Cleveland
+  district_name: CLEVELAND SCHOOL DIST
+  district_nces_id: '2800750'
+  enrollment: 2818
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-clinton:
+  display_name: Clinton
+  district_name: CLINTON PUBLIC SCHOOL DIST
+  district_nces_id: '2801090'
+  enrollment: 5211
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-coldwater:
+  display_name: Coldwater
+  district_name: TATE CO SCHOOL DIST
+  district_nces_id: '2804230'
+  enrollment: 2014
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-collins:
+  display_name: Collins
+  district_name: COVINGTON COUNTY SCHOOL DISTRICT
+  district_nces_id: '2801290'
+  enrollment: 2609
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-columbia-2801170:
+  display_name: Columbia
+  district_name: COLUMBIA SCHOOL DISTRICT
+  district_nces_id: '2801170'
+  enrollment: 1646
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-columbia-2802820:
+  display_name: Columbia
+  district_name: MARION CO SCHOOL DIST
+  district_nces_id: '2802820'
+  enrollment: 1904
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-columbus-2801200:
+  display_name: Columbus
+  district_name: COLUMBUS MUNICIPAL SCHOOL DIST
+  district_nces_id: '2801200'
+  enrollment: 3090
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-columbus-2802730:
+  display_name: Columbus
+  district_name: LOWNDES CO SCHOOL DIST
+  district_nces_id: '2802730'
+  enrollment: 5261
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-corinth-2800390:
+  display_name: Corinth
+  district_name: ALCORN SCHOOL DIST
+  district_nces_id: '2800390'
+  enrollment: 3188
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-corinth-2801260:
+  display_name: Corinth
+  district_name: CORINTH SCHOOL DIST
+  district_nces_id: '2801260'
+  enrollment: 2490
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-decatur:
+  display_name: Decatur
+  district_name: NEWTON COUNTY SCHOOL DISTRICT
+  district_nces_id: '2803150'
+  enrollment: 1688
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-dekalb:
+  display_name: Dekalb
+  district_name: KEMPER CO SCHOOL DIST
+  district_nces_id: '2802310'
+  enrollment: 884
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-ellisville:
+  display_name: Ellisville
+  district_name: JONES CO SCHOOL DIST
+  district_nces_id: '2802280'
+  enrollment: 8524
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-enterprise:
+  display_name: Enterprise
+  district_name: ENTERPRISE SCHOOL DIST
+  district_nces_id: '2801440'
+  enrollment: 955
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-eupora:
+  display_name: Eupora
+  district_name: WEBSTER CO SCHOOL DIST
+  district_nces_id: '2804560'
+  enrollment: 1739
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-falkner:
+  display_name: Falkner
+  district_name: NORTH TIPPAH SCHOOL DIST
+  district_nces_id: '2803270'
+  enrollment: 1286
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-fayette:
+  display_name: Fayette
+  district_name: JEFFERSON CO SCHOOL DIST
+  district_nces_id: '2802220'
+  enrollment: 1063
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-forest-2801470:
+  display_name: Forest
+  district_name: FOREST MUNICIPAL SCHOOL DIST
+  district_nces_id: '2801470'
+  enrollment: 1645
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-forest-2803900:
+  display_name: Forest
+  district_name: SCOTT CO SCHOOL DIST
+  district_nces_id: '2803900'
+  enrollment: 3989
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-fulton:
+  display_name: Fulton
+  district_name: ITAWAMBA COUNTY SCHOOL DIST
+  district_nces_id: '2802100'
+  enrollment: 3375
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-greenville:
+  display_name: Greenville
+  district_name: GREENVILLE PUBLIC SCHOOLS
+  district_nces_id: '2801620'
+  enrollment: 3542
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-greenwood:
+  display_name: Greenwood
+  district_name: GREENWOOD-LEFLORE CONS SCH DISTRICT
+  district_nces_id: '2800198'
+  enrollment: 4030
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-grenada:
+  display_name: Grenada
+  district_name: GRENADA SCHOOL DIST
+  district_nces_id: '2801680'
+  enrollment: 3864
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-gulfport-2801710:
+  display_name: Gulfport
+  district_name: GULFPORT SCHOOL DIST
+  district_nces_id: '2801710'
+  enrollment: 6113
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-gulfport-2801770:
+  display_name: Gulfport
+  district_name: HARRISON CO SCHOOL DIST
+  district_nces_id: '2801770'
+  enrollment: 14355
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-hattiesburg-2801490:
+  display_name: Hattiesburg
+  district_name: FORREST COUNTY SCHOOL DISTRICT
+  district_nces_id: '2801490'
+  enrollment: 2129
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-hattiesburg-2801800:
+  display_name: Hattiesburg
+  district_name: HATTIESBURG PUBLIC SCHOOL DIST
+  district_nces_id: '2801800'
+  enrollment: 3667
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-hazlehurst-2801220:
+  display_name: Hazlehurst
+  district_name: COPIAH CO SCHOOL DIST
+  district_nces_id: '2801220'
+  enrollment: 2205
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-hazlehurst-2801830:
+  display_name: Hazlehurst
+  district_name: HAZLEHURST CITY SCHOOL DISTRICT
+  district_nces_id: '2801830'
+  enrollment: 1368
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-heidelberg:
+  display_name: Heidelberg
+  district_name: EAST JASPER CONSOLIDATED SCH DIST
+  district_nces_id: '2801380'
+  enrollment: 755
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-hernando:
+  display_name: Hernando
+  district_name: DESOTO CO SCHOOL DIST
+  district_nces_id: '2801320'
+  enrollment: 35003
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-hollandale:
+  display_name: Hollandale
+  district_name: HOLLANDALE SCHOOL DIST
+  district_nces_id: '2801890'
+  enrollment: 548
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-holly-springs-2801950:
+  display_name: Holly Springs
+  district_name: HOLLY SPRINGS SCHOOL DIST
+  district_nces_id: '2801950'
+  enrollment: 1025
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-holly-springs-2802850:
+  display_name: Holly Springs
+  district_name: MARSHALL CO SCHOOL DIST
+  district_nces_id: '2802850'
+  enrollment: 2777
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-houston:
+  display_name: Houston
+  district_name: CHICKASAW CO SCHOOL DIST
+  district_nces_id: '2800200'
+  enrollment: 2214
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-indianola:
+  display_name: Indianola
+  district_name: SUNFLOWER CTY CONS SCHOOL DISTRICT
+  district_nces_id: '2800187'
+  enrollment: 2929
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-iuka:
+  display_name: Iuka
+  district_name: TISHOMINGO CO SP MUN SCH DIST
+  district_nces_id: '2804260'
+  enrollment: 2897
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-jackson-2800188:
+  display_name: Jackson
+  district_name: REIMAGINE PREP
+  district_nces_id: '2800188'
+  enrollment: 514
+  has_charters: true
+  source: ccd_auto
+  state: MS
+ms-jackson-2800192:
+  display_name: Jackson
+  district_name: JOEL E. SMILLOW PREP
+  district_nces_id: '2800192'
+  enrollment: 577
+  has_charters: true
+  source: ccd_auto
+  state: MS
+ms-jackson-2800193:
+  display_name: Jackson
+  district_name: JOEL E SMILOW COLLEGIATE
+  district_nces_id: '2800193'
+  enrollment: 569
+  has_charters: true
+  source: ccd_auto
+  state: MS
+ms-jackson-2802190:
+  display_name: Jackson
+  district_name: JACKSON PUBLIC SCHOOL DISTRICT
+  district_nces_id: '2802190'
+  enrollment: 18710
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-kiln:
+  display_name: Kiln
+  district_name: HANCOCK CO SCHOOL DIST
+  district_nces_id: '2801740'
+  enrollment: 4060
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-kosciusko-2800510:
+  display_name: Kosciusko
+  district_name: ATTALA CO SCHOOL DIST
+  district_nces_id: '2800510'
+  enrollment: 1004
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-kosciusko-2802340:
+  display_name: Kosciusko
+  district_name: KOSCIUSKO SCHOOL DISTRICT
+  district_nces_id: '2802340'
+  enrollment: 2123
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-laurel:
+  display_name: Laurel
+  district_name: LAUREL SCHOOL DISTRICT
+  district_nces_id: '2802460'
+  enrollment: 2712
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-leakesville:
+  display_name: Leakesville
+  district_name: GREENE COUNTY SCHOOL DISTRICT
+  district_nces_id: '2801590'
+  enrollment: 1640
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-leland:
+  display_name: Leland
+  district_name: LELAND SCHOOL DIST
+  district_nces_id: '2802610'
+  enrollment: 700
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-lexington:
+  display_name: Lexington
+  district_name: HOLMES COUNTY CONSOLIDATED SD
+  district_nces_id: '2800195'
+  enrollment: 2544
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-liberty:
+  display_name: Liberty
+  district_name: AMITE COUNTY SCHOOL DISTRICT
+  district_nces_id: '2800420'
+  enrollment: 853
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-long-beach:
+  display_name: Long Beach
+  district_name: LONG BEACH SCHOOL DIST
+  district_nces_id: '2802670'
+  enrollment: 2929
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-louisville:
+  display_name: Louisville
+  district_name: LOUISVILLE MUNICIPAL SCHOOL DIST
+  district_nces_id: '2802700'
+  enrollment: 2523
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-lucedale:
+  display_name: Lucedale
+  district_name: GEORGE CO SCHOOL DIST
+  district_nces_id: '2801560'
+  enrollment: 4165
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-macon:
+  display_name: Macon
+  district_name: NOXUBEE COUNTY SCHOOL DISTRICT
+  district_nces_id: '2803300'
+  enrollment: 1397
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-magnolia:
+  display_name: Magnolia
+  district_name: SOUTH PIKE SCHOOL DIST
+  district_nces_id: '2804080'
+  enrollment: 1557
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-marks:
+  display_name: Marks
+  district_name: QUITMAN CO SCHOOL DIST
+  district_nces_id: '2803810'
+  enrollment: 852
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-mccomb:
+  display_name: Mccomb
+  district_name: MCCOMB SCHOOL DISTRICT
+  district_nces_id: '2802880'
+  enrollment: 2140
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-meadville:
+  display_name: Meadville
+  district_name: FRANKLIN CO SCHOOL DIST
+  district_nces_id: '2801530'
+  enrollment: 1211
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-mendenhall:
+  display_name: Mendenhall
+  district_name: SIMPSON CO SCHOOL DIST
+  district_nces_id: '2803990'
+  enrollment: 3008
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-meridian-2802430:
+  display_name: Meridian
+  district_name: LAUDERDALE CO SCHOOL DIST
+  district_nces_id: '2802430'
+  enrollment: 5910
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-meridian-2802910:
+  display_name: Meridian
+  district_name: MERIDIAN PUBLIC SCHOOLS
+  district_nces_id: '2802910'
+  enrollment: 4614
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-monticello:
+  display_name: Monticello
+  district_name: LAWRENCE CO SCHOOL DIST
+  district_nces_id: '2802490'
+  enrollment: 1696
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-moss-point:
+  display_name: Moss Point
+  district_name: MOSS POINT SEPARATE SCHOOL DIST
+  district_nces_id: '2803000'
+  enrollment: 1569
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-mound-bayou:
+  display_name: Mound Bayou
+  district_name: NORTH BOLIVAR CONS SCHOOL DIST
+  district_nces_id: '2800186'
+  enrollment: 780
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-natchez:
+  display_name: Natchez
+  district_name: NATCHEZ-ADAMS SCHOOL DISTRICT
+  district_nces_id: '2803030'
+  enrollment: 2842
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-nettleton:
+  display_name: Nettleton
+  district_name: NETTLETON SCHOOL DIST
+  district_nces_id: '2803090'
+  enrollment: 1112
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-new-albany-2803120:
+  display_name: New Albany
+  district_name: NEW ALBANY PUBLIC SCHOOLS
+  district_nces_id: '2803120'
+  enrollment: 2114
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-new-albany-2804350:
+  display_name: New Albany
+  district_name: UNION CO SCHOOL DIST
+  district_nces_id: '2804350'
+  enrollment: 2980
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-new-augusta:
+  display_name: New Augusta
+  district_name: PERRY CO SCHOOL DIST
+  district_nces_id: '2803570'
+  enrollment: 933
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-newton:
+  display_name: Newton
+  district_name: NEWTON MUNICIPAL SCHOOL DISTRICT
+  district_nces_id: '2803180'
+  enrollment: 816
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-ocean-springs:
+  display_name: Ocean Springs
+  district_name: OCEAN SPRINGS SCHOOL DIST
+  district_nces_id: '2803360'
+  enrollment: 5861
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-okolona:
+  display_name: Okolona
+  district_name: OKOLONA SEPARATE SCHOOL DIST
+  district_nces_id: '2803390'
+  enrollment: 511
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-oxford-2802370:
+  display_name: Oxford
+  district_name: LAFAYETTE CO SCHOOL DIST
+  district_nces_id: '2802370'
+  enrollment: 2872
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-oxford-2803450:
+  display_name: Oxford
+  district_name: OXFORD SCHOOL DISTRICT
+  district_nces_id: '2803450'
+  enrollment: 4766
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-pascagoula:
+  display_name: Pascagoula
+  district_name: PASCAGOULA-GAUTIER SCHOOL DISTRICT
+  district_nces_id: '2803480'
+  enrollment: 6565
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-pass-christian:
+  display_name: Pass Christian
+  district_name: PASS CHRISTIAN PUBLIC SCHOOL DIST
+  district_nces_id: '2803510'
+  enrollment: 1944
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-pearl:
+  display_name: Pearl
+  district_name: PEARL PUBLIC SCHOOL DISTRICT
+  district_nces_id: '2803520'
+  enrollment: 4216
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-petal:
+  display_name: Petal
+  district_name: PETAL SCHOOL DIST
+  district_nces_id: '2803530'
+  enrollment: 4392
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-philadelphia-2803060:
+  display_name: Philadelphia
+  district_name: NESHOBA COUNTY SCHOOL DISTRICT
+  district_nces_id: '2803060'
+  enrollment: 3038
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-philadelphia-2803600:
+  display_name: Philadelphia
+  district_name: PHILADELPHIA PUBLIC SCHOOL DIST
+  district_nces_id: '2803600'
+  enrollment: 829
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-picayune:
+  display_name: Picayune
+  district_name: PICAYUNE SCHOOL DISTRICT
+  district_nces_id: '2803630'
+  enrollment: 3431
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-pittsboro:
+  display_name: Pittsboro
+  district_name: CALHOUN CO SCHOOL DIST
+  district_nces_id: '2800870'
+  enrollment: 2080
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-pontotoc-2803660:
+  display_name: Pontotoc
+  district_name: PONTOTOC CO SCHOOL DIST
+  district_nces_id: '2803660'
+  enrollment: 3466
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-pontotoc-2803690:
+  display_name: Pontotoc
+  district_name: PONTOTOC CITY SCHOOLS
+  district_nces_id: '2803690'
+  enrollment: 2302
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-poplarville:
+  display_name: Poplarville
+  district_name: POPLARVILLE SEPARATE SCHOOL DIST
+  district_nces_id: '2803720'
+  enrollment: 1909
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-port-gibson:
+  display_name: Port Gibson
+  district_name: CLAIBORNE CO SCHOOL DIST
+  district_nces_id: '2801020'
+  enrollment: 1188
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-prentiss:
+  display_name: Prentiss
+  district_name: JEFFERSON DAVIS CO SCHOOL DIST
+  district_nces_id: '2802250'
+  enrollment: 1235
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-purvis:
+  display_name: Purvis
+  district_name: LAMAR COUNTY SCHOOL DISTRICT
+  district_nces_id: '2802400'
+  enrollment: 10276
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-quitman:
+  display_name: Quitman
+  district_name: QUITMAN SCHOOL DIST
+  district_nces_id: '2803780'
+  enrollment: 1593
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-raleigh:
+  display_name: Raleigh
+  district_name: SMITH CO SCHOOL DIST
+  district_nces_id: '2804020'
+  enrollment: 2443
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-raymond:
+  display_name: Raymond
+  district_name: HINDS CO SCHOOL DIST
+  district_nces_id: '2801860'
+  enrollment: 4968
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-richton:
+  display_name: Richton
+  district_name: RICHTON SCHOOL DIST
+  district_nces_id: '2803870'
+  enrollment: 597
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-ridgeland:
+  display_name: Ridgeland
+  district_name: MADISON CO SCHOOL DIST
+  district_nces_id: '2802790'
+  enrollment: 13162
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-ripley:
+  display_name: Ripley
+  district_name: SOUTH TIPPAH SCHOOL DIST
+  district_nces_id: '2804110'
+  enrollment: 2485
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-rolling-fork:
+  display_name: Rolling Fork
+  district_name: SOUTH DELTA SCHOOL DISTRICT
+  district_nces_id: '2803960'
+  enrollment: 604
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-rosedale:
+  display_name: Rosedale
+  district_name: WEST BOLIVAR CONS SCHOOL DIST
+  district_nces_id: '2800185'
+  enrollment: 938
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-sardis:
+  display_name: Sardis
+  district_name: NORTH PANOLA SCHOOL DISTRICT
+  district_nces_id: '2803210'
+  enrollment: 1219
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-senatobia:
+  display_name: Senatobia
+  district_name: SENATOBIA MUNICIPAL SCHOOL DIST
+  district_nces_id: '2803930'
+  enrollment: 1666
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-starkville:
+  display_name: Starkville
+  district_name: STARKVILLE- OKTIBBEHA CONS DIST
+  district_nces_id: '2800189'
+  enrollment: 4894
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-summit:
+  display_name: Summit
+  district_name: NORTH PIKE SCHOOL DIST
+  district_nces_id: '2803240'
+  enrollment: 2245
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-sumner:
+  display_name: Sumner
+  district_name: WEST TALLAHATCHIE SCHOOL DISTRICT
+  district_nces_id: '2804650'
+  enrollment: 513
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-tunica:
+  display_name: Tunica
+  district_name: TUNICA COUNTY SCHOOL DISTRICT
+  district_nces_id: '2804290'
+  enrollment: 1671
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-tupelo-2802550:
+  display_name: Tupelo
+  district_name: LEE COUNTY SCHOOL DISTRICT
+  district_nces_id: '2802550'
+  enrollment: 6303
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-tupelo-2804320:
+  display_name: Tupelo
+  district_name: TUPELO PUBLIC SCHOOL DIST
+  district_nces_id: '2804320'
+  enrollment: 7132
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-tylertown:
+  display_name: Tylertown
+  district_name: WALTHALL CO SCHOOL DIST
+  district_nces_id: '2804440'
+  enrollment: 1684
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-union:
+  display_name: Union
+  district_name: UNION PUBLIC SCHOOL DIST
+  district_nces_id: '2804380'
+  enrollment: 927
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-vancleave:
+  display_name: Vancleave
+  district_name: JACKSON CO SCHOOL DIST
+  district_nces_id: '2802160'
+  enrollment: 8906
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-vicksburg:
+  display_name: Vicksburg
+  district_name: VICKSBURG WARREN SCHOOL DIST
+  district_nces_id: '2804470'
+  enrollment: 6862
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-water-valley:
+  display_name: Water Valley
+  district_name: WATER VALLEY SCHOOL DISTRICT
+  district_nces_id: '2804500'
+  enrollment: 1041
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-waynesboro:
+  display_name: Waynesboro
+  district_name: WAYNE CO SCHOOL DIST
+  district_nces_id: '2804530'
+  enrollment: 2900
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-west-point:
+  display_name: West Point
+  district_name: WEST POINT CONSOLIDATED SCHOOL DIST
+  district_nces_id: '2800191'
+  enrollment: 2609
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-wiggins:
+  display_name: Wiggins
+  district_name: STONE CO SCHOOL DIST
+  district_nces_id: '2804170'
+  enrollment: 2518
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-winona:
+  display_name: Winona
+  district_name: WINONA-MONTGOMERY CONSOLIDATED
+  district_nces_id: '2800196'
+  enrollment: 1144
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-woodville:
+  display_name: Woodville
+  district_name: WILKINSON CO SCHOOL DIST
+  district_nces_id: '2804710'
+  enrollment: 891
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-yazoo-city-2804770:
+  display_name: Yazoo City
+  district_name: YAZOO CITY MUNICIPAL SCHOOL DIST
+  district_nces_id: '2804770'
+  enrollment: 2029
+  has_charters: false
+  source: ccd_auto
+  state: MS
+ms-yazoo-city-2804800:
+  display_name: Yazoo City
+  district_name: YAZOO CO SCHOOL DIST
+  district_nces_id: '2804800'
+  enrollment: 1320
+  has_charters: false
+  source: ccd_auto
+  state: MS
