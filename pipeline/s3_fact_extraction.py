@@ -30,6 +30,8 @@ from pipeline.utils.cache import CacheManager
 from pipeline.utils.schema_validator import validate_against_schema
 from pipeline.utils.ped_fetcher import get_district_data
 from pipeline.fetchers.ms_proficiency_fetcher import get_ms_district_data
+from pipeline.fetchers.tn_proficiency_fetcher import get_tn_district_data
+from pipeline.fetchers.wi_proficiency_fetcher import get_wi_district_data
 from pipeline.utils.nces_fetcher import get_district_data as get_nces_district_data, get_charter_enrollment_share
 from pipeline.utils.acs_fetcher  import get_district_data as get_acs_district_data, get_total_population as get_acs_total_population
 from pipeline.utils.population_trends_fetcher import get_population_trends
@@ -538,9 +540,16 @@ def run(
         else "(No verified roster — S1 not yet run for this community)"
     )
 
-    # Load verified proficiency data for prompt injection (NM: PED; MS: MSRC)
-    if state.upper() == "MS":
+    # Load verified proficiency data for prompt injection. Each state has its own
+    # authoritative source adapter (NM: PED; MS: MSRC; TN: TCAP; WI: Forward Exam).
+    # Adapters return None gracefully when their data file is not yet populated.
+    state_uc = state.upper()
+    if state_uc == "MS":
         ped_data = get_ms_district_data(community_id)
+    elif state_uc == "TN":
+        ped_data = get_tn_district_data(community_id)
+    elif state_uc == "WI":
+        ped_data = get_wi_district_data(community_id)
     else:
         ped_data = get_district_data(community_id, state)
     if ped_data:

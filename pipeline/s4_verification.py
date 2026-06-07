@@ -154,9 +154,12 @@ def run(
     summary = _build_summary(facts)
     summary["entity_verification"] = entity_summary
 
-    # True when real proficiency data was injected into S3 prompt (NM, MS).
-    # False for states without proficiency adapters (TN, WI, etc.) — S5 uses
-    # this to exclude academic_need from the composite rather than defaulting to 5.0.
+    # True when real proficiency data was injected into the S3 prompt. Adapters
+    # exist for NM (PED), MS (MSRC), TN (TCAP) and WI (Forward Exam); this flag is
+    # source-agnostic and trips for any state once its adapter yields data and the
+    # fact is extracted. TN/WI adapters return None until their CSV is populated,
+    # so this stays False for them — S5 then excludes academic_need from the
+    # composite rather than defaulting to 5.0.
     has_proficiency_data = any(
         f.get("fact_key") == "district_proficiency_ela_pct"
         and f.get("source_class") == "PED_DATA"
