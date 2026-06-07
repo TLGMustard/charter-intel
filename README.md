@@ -776,3 +776,26 @@ scoring uncalibrated. See `docs/` for session history and `DEPLOY.md` for deploy
 - [ ] Wire Phase 2 ingestion to write `s2_cache_bust` signals with correct `source_metadata` JSON
 - [ ] Populate MS/TN/WI `data_sources` URLs (authorizer_registry, charter_roster, enrollment_data, performance_data)
 - [ ] Run full MS community batch (`--state MS --depth fast`) once charter_law is verified
+
+---
+
+### Session — 2026-06-07 (37c5864)
+
+**Accomplished:**
+- Diagnosed city combobox dropdown invisibility: `backdrop-filter: blur(20px)` on `#panel-scan` creates a CSS containing block for `position: fixed` descendants, causing `#city-listbox` viewport-relative coordinates from `getBoundingClientRect()` to be interpreted as panel-relative — on an ~860px viewport the dropdown rendered ~500px off-screen to the right
+- Fixed in one line inside `_cbInit()` in `app/ui/static/js/app.js`: `document.body.appendChild(panel)` moves the listbox out of `#panel-scan`'s DOM subtree so `position: fixed` resolves correctly against the viewport
+- Verified all existing `_cb*` functions (`_cbBuild`, `_cbFilter`, `_cbOpenPanel`, `_cbClosePanel`, `_cbSelect`) continue to work unchanged — they all use `getElementById("city-listbox")` which still finds the element regardless of its position in the DOM tree
+- Confirmed 650 tests pass, zero CDN links introduced
+
+**Decisions:**
+- Chose the minimal single-line DOM move over alternatives (re-calculating offset-adjusted coordinates or removing `backdrop-filter` from the scan panel) — keeps all existing JS/CSS logic intact and is robust to future layout changes
+- No HTML or CSS changes required; fix is entirely in the JS init function
+
+**Next Steps:**
+- [ ] Remove debug `console.log` statements in `_cbInit`, `_cbOpenPanel`, and related `_cb*` functions (added in commit `b9e0b42`, still present)
+- [ ] Verify and populate MS/TN/WI `charter_law` fields from authoritative state statutes
+- [ ] Verify `per_pupil_revenue_avg` for MS (12500.0), TN (11800.0), WI (13200.0) against NCES FY2022 actuals
+- [ ] Wire Phase 2 ingestion to write `s2_cache_bust` signals with correct `source_metadata` JSON
+- [ ] Run full MS community batch (`--state MS --depth fast`) once charter_law is verified
+
+**Tests:** 650 passed.
