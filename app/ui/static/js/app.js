@@ -1232,13 +1232,23 @@ function _cbFilter(query) {
 
   panel.querySelectorAll(".combobox-option").forEach((opt) => {
     const matches = !q || opt.dataset.name.toLowerCase().includes(q);
-    opt.toggleAttribute("hidden", !matches);
+    if (matches) {
+      opt.removeAttribute("hidden");
+    } else {
+      opt.setAttribute("hidden", "");
+    }
     if (matches) anyVisible = true;
   });
 
   // Show/hide the group header with the options
   const header = panel.querySelector("[data-role='group-header']");
-  if (header) header.toggleAttribute("hidden", !anyVisible);
+  if (header) {
+    if (anyVisible) {
+      header.removeAttribute("hidden");
+    } else {
+      header.setAttribute("hidden", "");
+    }
+  }
 
   // Empty-state notice
   let emptyEl = panel.querySelector(".combobox-empty");
