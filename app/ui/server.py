@@ -38,6 +38,7 @@ OUTPUTS_DIR = BASE_DIR / "outputs"
 BY_COMMUNITY_DIR = OUTPUTS_DIR / "by_community"
 ZIP_OUTPUTS_DIR = OUTPUTS_DIR / "zip"
 CONFIG_FILE = BASE_DIR / "config" / "states.yaml"
+COMMUNITY_REGISTRY_DIR = BASE_DIR / "config" / "community_registry"
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = os.environ.get("SECRET_KEY")
@@ -213,6 +214,57 @@ def _load_states() -> dict:
         return yaml.safe_load(f)
 
 
+def _communities_from_registry(state_code: str) -> list[dict] | None:
+    """Read config/community_registry/{state_lower}.yaml and return [{slug, name}] or None if absent."""
+    registry_path = COMMUNITY_REGISTRY_DIR / f"{state_code.lower()}.yaml"
+    if not registry_path.exists():
+        return None
+    try:
+        with open(registry_path) as f:
+            registry = yaml.safe_load(f) or {}
+    except Exception:
+        return None
+
+    states_data = _load_states()
+    state_info = states_data.get(state_code.upper(), {})
+    excluded = set(state_info.get("excluded_communities", []))
+
+    result = []
+    for slug, entry in registry.items():
+        if slug in excluded or _is_junk_slug(slug):
+            continue
+        display = entry.get("display_name") or " ".join(slug.split("-")[1:]).title()
+        result.append({"slug": slug, "name": f"{display}, {state_code.upper()}"})
+
+    result.sort(key=lambda c: c["name"])
+    return result
+
+
+def _communities_from_district_map(state_code: str, state_data: dict) -> list[dict]:
+    """Fall back to nces_district_map in states.yaml for states without a registry YAML."""
+    state_lower = state_code.lower()
+    district_map: dict = (
+        state_data.get(f"{state_lower}_district_map")
+        or state_data.get("nces_district_map")
+        or {}
+    )
+    excluded = set(state_data.get("excluded_communities", []))
+
+    result = []
+    for slug, district_name in district_map.items():
+        if slug in excluded or _is_junk_slug(slug):
+            continue
+        city_name = (
+            str(district_name).title()
+            if district_name
+            else " ".join(slug.split("-")[1:]).title()
+        )
+        result.append({"slug": slug, "name": f"{city_name}, {state_code.upper()}"})
+
+    result.sort(key=lambda c: c["name"])
+    return result
+
+
 def _is_junk_slug(target: str) -> bool:
     """True if target is a numeric/address-fragment slug (mirrors app/app.py)."""
     try:
@@ -348,41 +400,41 @@ def states():
 @app.route("/api/cities")
 @require_login
 def cities():
-    """Return community list for a state, excluding junk/excluded slugs.
+    """Return community list for a state (or all active states), excluding junk/excluded slugs.
 
-    Query param: state=NM
-    Response: [{"slug": "nm-santa-fe", "name": "Santa Fe"}, ...]
+    Query param: state=NM  (omit or pass empty for all active states)
+    Response: [{"slug": "ms-oxford", "name": "Oxford, MS"}, ...]
+
+    Reads from config/community_registry/{state_lower}.yaml when present;
+    falls back to nces_district_map in states.yaml for states without a registry file.
     """
     state_code = request.args.get("state", "").upper()
-    data = _load_states()
-    state_data = data.get(state_code)
-    if not state_data or not isinstance(state_data, dict):
-        return jsonify([])
+    states_data = _load_states()
 
-    state_lower = state_code.lower()
-    # Prefer state-specific district map, fall back to NCES map
-    district_map: dict = (
-        state_data.get(f"{state_lower}_district_map")
-        or state_data.get("nces_district_map")
-        or {}
-    )
-    excluded = set(state_data.get("excluded_communities", []))
+    if state_code:
+        # Single-state request
+        state_data = states_data.get(state_code)
+        if not state_data or not isinstance(state_data, dict):
+            return jsonify([])
+        result = _communities_from_registry(state_code)
+        if result is None:
+            result = _communities_from_district_map(state_code, state_data)
+        return jsonify(result)
 
-    result = []
-    for slug, district_name in district_map.items():
-        if slug in excluded:
+    # No state filter: return communities for all active states combined
+    combined: list[dict] = []
+    for code, info in states_data.items():
+        if code.startswith("_") or code == "version":
             continue
-        if _is_junk_slug(slug):
+        if not isinstance(info, dict) or info.get("status") != "ACTIVE":
             continue
-        city_name = (
-            str(district_name).title()
-            if district_name
-            else " ".join(slug.split("-")[1:]).title()
-        )
-        result.append({"slug": slug, "name": city_name})
+        entries = _communities_from_registry(code)
+        if entries is None:
+            entries = _communities_from_district_map(code, info)
+        combined.extend(entries)
 
-    result.sort(key=lambda c: c["name"])
-    return jsonify(result)
+    combined.sort(key=lambda c: c["name"])
+    return jsonify(combined)
 
 
 @app.route("/api/runs")
