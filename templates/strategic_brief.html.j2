@@ -558,90 +558,92 @@
 
     /* ── Print ── */
     @media print {
-      /* Reset layout */
-      body { background: #ffffff !important; color: #000000 !important; font-size: 12px !important; }
-      .page-shell { flex-direction: column !important; max-width: 100% !important; background: #ffffff !important; }
+      @page { margin: 1.5cm; }
+
+      /* Preserve dark Van Gogh theme in PDF — force color rendering */
+      html {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      /* Remove sticky sidebar; reflow to full-width column for PDF */
+      .page-shell {
+        flex-direction: column !important;
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+
       .sidebar {
         position: static !important;
         width: 100% !important;
         height: auto !important;
         overflow: visible !important;
         border-right: none !important;
-        border-bottom: 2px solid #000 !important;
-        padding: 16px 0 !important;
-        display: flex !important;
-        flex-wrap: wrap !important;
-        gap: 24px !important;
-        align-items: baseline !important;
-        background: #ffffff !important;
-        page-break-after: avoid !important;
-      }
-      .main-content { padding: 16px 0 !important; background: #ffffff !important; }
-
-      /* Typography to black */
-      h1, h2, h3, h4, h5, h6 { color: #000000 !important; }
-      p, li, td, th, span, div { color: #111111 !important; }
-      .sb-state, .sb-through, .sb-score-label, .bar-weight, .bar-driver,
-      .txt-muted, .card-source, .card-warn, .muted-note,
-      .qr-label, .src-item { color: #444444 !important; }
-
-      /* Score: keep large but go dark */
-      .sb-score-num { color: #000000 !important; font-size: 3rem !important; }
-      .sb-score-max { color: #444444 !important; }
-      .sb-tier { color: #000000 !important; }
-      .pill { color: #000000 !important; border-color: #000 !important; background: transparent !important; }
-
-      /* Cards and surfaces: white with black border */
-      .card, .qr-card, .flag-card, .banner, .sb-score-block {
-        background: #ffffff !important;
-        border: 1px solid #cccccc !important;
-        box-shadow: none !important;
+        border-bottom: 1px solid var(--border-muted) !important;
+        padding-bottom: 20px !important;
+        break-after: avoid;
+        page-break-after: avoid;
       }
 
-      /* Scorecard rows */
-      .bar-row { background: #ffffff !important; border-bottom: 1px solid #e0e0e0 !important; }
-      .bar-score { color: #000000 !important; }
-      .nullweight-pill { background: #eeeeee !important; color: #444444 !important; }
-      .bar-track { background: rgba(0,0,0,0.1) !important; }
-      .bar-fill { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .main-content { padding: 16px 0 !important; }
 
-      /* Links */
-      a { color: #000000 !important; text-decoration: underline !important; }
+      /* Kill animations/transitions for clean PDF rendering */
+      * { animation: none !important; transition: none !important; }
 
-      /* Banners */
-      .banner-insufficient, .banner-gate, .banner-tribal, .banner-pci-legacy {
-        background: #f5f5f5 !important;
-        border-left-color: #000 !important;
-        color: #111111 !important;
-      }
+      /* Hide screen-only interactive elements */
+      .sb-nav,
+      .debug-section { display: none !important; }
 
-      /* Executive snapshot */
-      .exec-snapshot { color: #000000 !important; }
+      /* Suppress href URLs from printing after anchor text */
+      a[href]::after { content: "" !important; }
 
-      /* Section labels */
-      .section-label { color: #000000 !important; border-bottom-color: #cccccc !important; }
+      /* Bump --text-secondary (#8b949e) toward white for dark-bg readability */
+      .sb-state, .sb-tagline, .sb-tier, .composite-line,
+      .bar-driver, .driver-item, .flag-body,
+      .auth-item, .rec-item, .nv-item, .qr-body,
+      .card-sub { color: #b0bec9 !important; }
 
-      /* Hide non-print elements */
-      .debug-section, .sb-nav { display: none !important; }
+      /* Bump --text-muted (#6e7681) — too dark on dark background in print */
+      .sb-wordmark, .sb-through, .sb-score-label,
+      .bar-weight, .src-item, .qr-label,
+      .excluded-sep, .txt-muted, .awaiting-label, .awaiting-note,
+      .section-label, .muted-note, .nullweight-pill,
+      .card-source { color: #8b949e !important; }
 
-      /* Force expand all details elements */
-      details { display: block !important; }
-      details > summary { display: block !important; }
+      /* Card warning stays in score-yellow for legibility */
+      .card-warn { color: var(--score-yellow) !important; }
 
-      /* Page break rules */
-      .card, .flag-card, .driver-item {
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-      }
-      .section { page-break-inside: avoid !important; page-break-before: auto !important; }
+      /* Quick reads: single column for print layout */
       .qr-grid { grid-template-columns: 1fr !important; }
 
-      /* Footer */
-      .disclosure-footer {
-        color: #444444 !important;
-        border-top-color: #cccccc !important;
-        background: #ffffff !important;
+      /* Never split these blocks across a page boundary */
+      .bar-row,
+      .flag-card,
+      .driver-item,
+      .nv-item,
+      .rec-item,
+      .qr-card,
+      .banner,
+      .sb-score-block,
+      .card {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
       }
+
+      /* Keep each data-sources table row intact */
+      #datasources tr {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+
+      /* Sidebar and snapshot stay together on page 1 */
+      #snapshot {
+        break-after: avoid;
+        page-break-after: avoid;
+      }
+
+      /* Allow natural page breaks between major sections */
+      .section { break-before: auto; page-break-before: auto; }
     }
   </style>
 </head>

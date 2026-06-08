@@ -533,53 +533,97 @@
 
     /* ── Print ── */
     @media print {
-      body { background: #ffffff !important; color: #000000 !important; font-size: 12px !important; }
-      .page-shell { flex-direction: column !important; max-width: 100% !important; background: #ffffff !important; }
+      @page { margin: 1.5cm; }
+
+      /* Preserve dark Van Gogh theme in PDF — force color rendering */
+      html {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      /* Remove sticky sidebar; reflow to full-width column for PDF */
+      .page-shell {
+        flex-direction: column !important;
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+
       .sidebar {
         position: static !important;
         width: 100% !important;
         height: auto !important;
         overflow: visible !important;
         border-right: none !important;
-        border-bottom: 2px solid #000 !important;
-        padding: 16px 0 !important;
-        display: flex !important;
-        flex-wrap: wrap !important;
-        gap: 24px !important;
-        align-items: baseline !important;
-        background: #ffffff !important;
-        page-break-after: avoid !important;
+        border-bottom: 1px solid var(--border-muted) !important;
+        padding-bottom: 20px !important;
+        break-after: avoid;
+        page-break-after: avoid;
       }
-      .main-content { padding: 16px 0 !important; background: #ffffff !important; }
-      h1, h2, h3, h4, h5, h6 { color: #000000 !important; }
-      p, li, td, th, span, div { color: #111111 !important; }
-      .sb-state, .sb-through, .sb-score-label, .bar-weight, .bar-driver,
-      .txt-muted, .muted-note, .src-item { color: #444444 !important; }
-      .sb-score-num { color: #000000 !important; font-size: 3rem !important; }
-      .sb-score-max { color: #444444 !important; }
-      .sb-tier { color: #000000 !important; }
-      .ineligible-badge { color: #000000 !important; border-color: #000 !important; background: transparent !important; }
-      .flag-card, .banner, .sb-score-block, .ineligible-notice, .rec-suppressed, .condition-item {
-        background: #ffffff !important;
-        border: 1px solid #cccccc !important;
-        box-shadow: none !important;
+
+      .main-content { padding: 16px 0 !important; }
+
+      /* Kill animations/transitions for clean PDF rendering */
+      * { animation: none !important; transition: none !important; }
+
+      /* Hide screen-only interactive elements */
+      .sb-nav,
+      .debug-section { display: none !important; }
+
+      /* Suppress href URLs from printing after anchor text */
+      a[href]::after { content: "" !important; }
+
+      /* Bump --text-secondary (#8b949e) toward white for dark-bg readability */
+      .sb-state, .sb-tagline, .sb-tier, .composite-line,
+      .bar-driver, .driver-item, .flag-body,
+      .auth-item, .rec-item, .nv-item, .qr-body,
+      .verdict-banner-body, .condition-item { color: #b0bec9 !important; }
+
+      /* Bump --text-muted (#6e7681) — too dark on dark background in print */
+      .sb-wordmark, .sb-through, .sb-score-label,
+      .bar-weight, .src-item, .qr-label,
+      .excluded-sep, .txt-muted, .awaiting-label, .awaiting-note,
+      .section-label, .muted-note, .nullweight-pill,
+      .ineligible-notice-text, .rec-suppressed { color: #8b949e !important; }
+
+      /* Quick reads: single column for print layout */
+      .qr-grid { grid-template-columns: 1fr !important; }
+
+      /* Never split these blocks across a page boundary */
+      .bar-row,
+      .flag-card,
+      .driver-item,
+      .nv-item,
+      .banner,
+      .sb-score-block,
+      .condition-item,
+      .ineligible-notice,
+      .rec-suppressed {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
       }
-      .verdict-banner { background: #fff5f5 !important; border-color: #aaa !important; }
-      .bar-row { background: #ffffff !important; border-bottom: 1px solid #e0e0e0 !important; }
-      .bar-score { color: #000000 !important; }
-      .nullweight-pill { background: #eeeeee !important; color: #444444 !important; }
-      .bar-track { background: rgba(0,0,0,0.1) !important; }
-      .bar-fill { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-      a { color: #000000 !important; text-decoration: underline !important; }
-      .debug-section, .sb-nav { display: none !important; }
-      details { display: block !important; }
-      details > summary { display: block !important; }
-      .section { page-break-inside: avoid !important; page-break-before: auto !important; }
-      .disclosure-footer {
-        color: #444444 !important;
-        border-top-color: #cccccc !important;
-        background: #ffffff !important;
+
+      /* Keep each data-sources table row intact */
+      #datasources tr {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
       }
+
+      /* Verdict banner stays with scorecard on page 1 */
+      .verdict-banner {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+        break-after: avoid;
+        page-break-after: avoid;
+      }
+
+      /* Snapshot section flows into scorecard without a break */
+      #snapshot {
+        break-after: avoid;
+        page-break-after: avoid;
+      }
+
+      /* Allow natural page breaks between major sections */
+      .section { break-before: auto; page-break-before: auto; }
     }
   </style>
 </head>
