@@ -685,6 +685,32 @@
     </div>
     {% endif %}
 
+    {# ─── DATA SOURCES & CONFIDENCE ─── #}
+    {% if brief.data_sources %}
+    <div class="section" id="datasources">
+      <p class="section-label">Data Sources &amp; Confidence</p>
+      <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+        <thead>
+          <tr style="text-align:left; color:var(--text-secondary); border-bottom:1px solid var(--border-muted);">
+            <th style="padding:6px 8px;">Source</th><th style="padding:6px 8px;">Powers</th>
+            <th style="padding:6px 8px;">Vintage</th><th style="padding:6px 8px;">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in brief.data_sources %}
+          {% set _c = 'var(--accent-green)' if d.status_icon == '✓' else ('var(--accent-yellow)' if d.status_icon == '⚠' else 'var(--accent-red)') %}
+          <tr style="border-bottom:1px solid var(--border-subtle);">
+            <td style="padding:6px 8px; color:var(--text-primary);">{{ d.source | e }}</td>
+            <td style="padding:6px 8px; color:var(--text-secondary);">{{ d.powers | e }}</td>
+            <td style="padding:6px 8px; color:var(--text-secondary);">{{ d.vintage | e }}</td>
+            <td style="padding:6px 8px; color:{{ _c }}; white-space:nowrap;">{{ d.status_icon }} {{ d.status | e }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
     {# ─── 2. SCORECARD BARS ─── #}
     {# Suppressed under a statutory prohibition — a prohibited market needs no score breakdown. #}
     {% if sc and not _prohib %}

@@ -184,6 +184,9 @@ def run(
     # --- Market routing fields for S7 template selection ---
     brief_json = _inject_market_routing(brief_json, scorecard, state, community_id)
 
+    # --- Data Sources & Confidence summary (Session 10 Item 3) ---
+    brief_json["data_sources"] = _build_data_sources(brief_json, verified_bundle, state)
+
     # --- Cap over-length strings before schema validation ---
     brief_json, cap_notices = _truncate_to_schema_limits(brief_json)
     if cap_notices:
@@ -500,6 +503,90 @@ def _today() -> str:
 _EPHEMERAL_SOURCE_CLASSES = frozenset({
     "MEDIA", "WEB_SEARCH", "PRESS_RELEASE", "BLOG", "SCRAPED",
 })
+
+
+def _build_data_sources(brief_json: dict, verified_bundle: dict, state: str) -> list:
+    """Build the at-a-glance "Data Sources & Confidence" rows for the brief.
+
+    Each row: {source, powers, vintage, status, status_icon}. Vintages come from
+    each source's fact value_year when available (CRDC/BLS/MDE/proficiency set it
+    reliably) with a documented per-source fallback otherwise. State-aware:
+      - proficiency row names the state source and shows "Not yet available" for
+        states without proficiency data (has_proficiency_data=False, e.g. TN/WI);
+      - the MDE ratings row appears only for MS.
+    Status is computed from vintage age: current (<=2 yrs) / lagging / unavailable.
+    Purely additive; never raises.
+    """
+    import datetime
+
+    facts = verified_bundle.get("facts", []) if isinstance(verified_bundle, dict) else []
+    has_prof = verified_bundle.get("has_proficiency_data", False) if isinstance(verified_bundle, dict) else False
+    st = (state or "").upper()
+    current_year = datetime.date.today().year
+
+    # Most recent value_year present per fact_key.
+    year_by_key: dict = {}
+    for f in facts:
+        k = f.get("fact_key")
+        y = f.get("value_year")
+        if k and isinstance(y, (int, float)) and 1990 < y < 2100:
+            year_by_key[k] = max(year_by_key.get(k, 0), int(y))
+
+    def first_year(*keys):
+        yrs = [year_by_key[k] for k in keys if k in year_by_key]
+        return max(yrs) if yrs else None
+
+    def status_for(year):
+        if year is None:
+            return "Not available", "✗"          # ✗
+        age = current_year - year
+        if age <= 2:
+            return "Current", "✓"                 # ✓
+        return f"{age}-yr lag", "⚠"               # ⚠
+
+    _PROF_LABEL = {
+        "MS": "MS Proficiency (MSRC)", "NM": "NM Proficiency (NM PED)",
+        "TN": "TN Proficiency (TCAP)", "WI": "WI Proficiency (Forward Exam)",
+    }
+
+    rows = []
+
+    def add(source, powers, year, *, vintage_override=None, status_override=None):
+        if status_override:
+            label, icon = status_override
+        else:
+            label, icon = status_for(year)
+        vintage = vintage_override if vintage_override is not None else (str(year) if year else "—")
+        rows.append({"source": source, "powers": powers, "vintage": vintage,
+                     "status": label, "status_icon": icon})
+
+    # NCES CCD — enrollment + charter landscape (national parquet, FY2023 vintage).
+    add("NCES CCD", "Enrollment, charter share",
+        first_year("charter_enrollment_share_pct") or 2023)
+    # Census ACS — ELL / demographics (5-year estimates).
+    add("Census ACS", "ELL %, demographics", first_year("ell_pct"))
+    # Census SAIPE — child poverty.
+    saipe_year = first_year(*[k for k in year_by_key if "poverty" in k or k.startswith("saipe")])
+    add("Census SAIPE", "Child poverty", saipe_year)
+
+    # State proficiency — academic need (state-aware).
+    prof_label = _PROF_LABEL.get(st, f"{st} Proficiency")
+    if has_prof:
+        add(prof_label, "Academic need", first_year("district_proficiency_ela_pct"))
+    else:
+        add(prof_label, "Academic need", None,
+            vintage_override="—", status_override=("Not yet available", "✗"))
+
+    # CRDC — IEP% + chronic absenteeism.
+    add("CRDC", "IEP %, chronic absenteeism", first_year("iep_pct", "chronic_absenteeism_pct"))
+    # BLS OEWS — teacher wages.
+    add("BLS OEWS", "Teacher wages (context)", first_year("teacher_median_wage"))
+
+    # MDE ratings — charter-law gate (MS only).
+    if st == "MS":
+        add("MDE Ratings", "Charter-law gate", first_year("district_accountability_rating"))
+
+    return rows
 
 
 def _derive_data_through(brief_json: dict) -> str:

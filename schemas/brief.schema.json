@@ -283,6 +283,21 @@
         "applies": {"type": ["boolean", "string"]},
         "observed_rating": {"type": ["string", "null"]}
       }
+    },
+
+    "data_sources": {
+      "type": "array",
+      "description": "At-a-glance data freshness/completeness summary built by s6_synthesis._build_data_sources. One row per underlying data source.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "source": {"type": "string"},
+          "powers": {"type": "string"},
+          "vintage": {"type": "string"},
+          "status": {"type": "string"},
+          "status_icon": {"type": "string"}
+        }
+      }
     }
   },
 
