@@ -847,3 +847,45 @@ scoring uncalibrated. See `docs/` for session history and `DEPLOY.md` for deploy
 - [ ] Run full MS community batch (`--state MS --depth fast`) once `charter_law` is verified
 
 **Tests:** Test runner not detected — run manually before next session.
+
+---
+
+### Session — 2026-06-08 (pending)
+
+**Accomplished:**
+- Added dev-mode OAuth bypass in `app/ui/auth.py` — injected dummy session keys (`user_email: dev@themindtrust.org`, `user_name: Dev (local)`) when **both** `FLASK_ENV=development` **and** request from loopback IP (`127.0.0.1` or `::1`); structurally impossible to ship open since Railway never sets development env
+- Fixed PDF rendering in `app/ui/server.py` `/api/brief/pdf` route — removed `base_url=f"file://{BASE_DIR}/"` from `set_content()` call (eliminated stale file:// base path references); added explicit `page.set_viewport_size({"width": 816, "height": 1056})` before content load (Letter @ 96 DPI); zeroed Playwright `margin` dict (defer entirely to CSS `@page` rule)
+- Fixed scorecard right-side clipping in `templates/pdf_brief.html.j2` — added `flex-shrink: 0` to `.bar-score` to prevent score numbers from being squeezed by long dimension names; moved `@page { margin: 0.6in 0.7in }` to `@page { margin: 0 }` and `body { padding: 0.6in 0.7in }` (separated concerns); added explicit `html, body { width: 100%; min-height: 100%; background: #0d1117; }` to fill full Playwright viewport with dark background
+
+**Decisions:**
+- Two-condition bypass (`FLASK_ENV=development` AND loopback IP) — each condition is independently necessary and sufficient to disable the bypass, making accidental exposure structurally impossible
+- Removed CDN fallback assumption (`base_url=file://...`) — Playwright default relative-path resolution is sufficient now that fonts are system-only
+- All margin/padding control delegated to CSS (not Playwright parameters) — cleaner separation between rendering engine (Playwright) and layout (CSS)
+
+**Next Steps:**
+- [ ] Smoke-test PDF output against a live brief to confirm dark background fills edges and score numbers don't clip
+- [ ] Test dev-mode OAuth bypass locally: `FLASK_ENV=development python3 app/ui/server.py`, then navigate to `http://localhost:5001`
+
+---
+
+### Session — 2026-06-08 (ff38ac3)
+
+**Accomplished:**
+- Fixed MS Local Authorizers block generating false eligibility verdict — added `_patch_authorizer_descriptions()` to `s6_synthesis.py`; derives correct `reputation_note` from `statutory_barrier.severity`/`applies` rather than serving stale S3 LLM text; guard prevents application to non-MS states
+- Fixed three cached data artifacts for `ms-oxford-2803450`: corrected broken `reputation_note` ("Authorizes charter schools only in designated geographic areas…") in `s3_facts_raw.json` and `s6_brief_maturity_adjusted_mode2.json`
+- Fixed FRL/SAIPE CEP conflict in operational_complexity scoring — added `_score_operational_complexity_cep()` and `_saipe_to_complexity_index()` to `s5_scoring.py`; when FRL > 85, SAIPE < 40, and gap > 50 pts, SAIPE drives the complexity index instead of the FRL artifact
+- Fixed false "High poverty (X% FRL, Y% SAIPE)" narrative — added `_patch_cep_driver()` to `s6_synthesis.py`; deterministically overwrites the LLM-generated `dimension_table[operational_complexity].driver` string for CEP districts post-generation
+- Patched cached `s6_brief_maturity_adjusted_mode2.json` for Oxford with correct CEP driver string for immediate re-render
+
+**Decisions:**
+- `_patch_authorizer_descriptions` placed AFTER `_inject_market_routing` — ordering is load-bearing because it reads `brief_json["statutory_barrier"]` which is set by market routing
+- CEP gate follows the existing `competitive_opportunity`/`charter_saturation` pattern: special-case in `score_dimension`, returns `None` on no-match to fall through to standard path; no weight changes
+- SAIPE→index thresholds anchored to national SAIPE norms (~15% median); SAIPE=12.2% → index=3 (same as prior LLM-derived value for Oxford — no composite shift for this community)
+- `_patch_cep_driver` reads from `verified_bundle` (S4 facts) not scorecard — independent of S5 caching, fires even on cached S5 runs
+
+**Next Steps:**
+- [ ] Run full MS community batch (`--state MS --depth fast`) to verify authorizer and CEP patches fire correctly across all MS communities
+- [ ] Check ms-ackerman and ms-jackson authorizer `reputation_note` values in next batch run — `_patch_authorizer_descriptions` will overwrite their existing notes
+- [ ] Verify `cep_detected: True` appears in S5 scorecard output for Oxford on next forced re-score
+
+**Tests:** Test runner not detected — run manually before next session.

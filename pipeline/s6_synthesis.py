@@ -167,6 +167,9 @@ def run(
         brief_json, audit_warnings = _apply_audit(brief_json, audit_result)
         warnings.extend(audit_warnings)
 
+    # --- Patch CEP driver in dimension_table (deterministic; bypasses Haiku) ---
+    brief_json = _patch_cep_driver(brief_json, verified_bundle)
+
     # --- Inject charter intelligence from S3 (bypasses scoring / audit) ---
     brief_json = _inject_charter_intel(brief_json, state, community_id)
 
@@ -183,6 +186,7 @@ def run(
 
     # --- Market routing fields for S7 template selection ---
     brief_json = _inject_market_routing(brief_json, scorecard, state, community_id)
+    brief_json = _patch_authorizer_descriptions(brief_json, state)
 
     # --- Data Sources & Confidence summary (Session 10 Item 3) ---
     brief_json["data_sources"] = _build_data_sources(brief_json, verified_bundle, state)
@@ -997,6 +1001,91 @@ def _inject_teacher_supply_warning(brief_json: dict, state: str, community_id: s
     logging.getLogger(__name__).info(
         "[%s] Injected teacher_supply_warning into needs_verification", community_id
     )
+    return brief_json
+
+
+def _patch_cep_driver(brief_json: dict, verified_bundle: dict) -> dict:
+    """Overwrite the LLM-generated operational_complexity driver when a CEP
+    district is detected.
+
+    Haiku sees frl_pct and saipe_poverty_rate_pct together in the facts bundle
+    and frames them as corroborating poverty signals. When FRL% is a Community
+    Eligibility Provision artifact (FRL > 85, SAIPE < 40, gap > 50 pts), the
+    driver must describe SAIPE as the operative signal and flag FRL as a
+    meal-program artifact rather than a poverty measure.
+    Runs after _generate_brief so the patch replaces model text deterministically.
+    """
+    facts = (verified_bundle.get("facts") or []) if isinstance(verified_bundle, dict) else []
+
+    frl_pct = next(
+        (f.get("value") for f in facts if f.get("fact_key") == "frl_pct"), None
+    )
+    saipe_pct = next(
+        (f.get("value") for f in facts
+         if f.get("fact_key") == "saipe_poverty_rate_pct_operational_complexity"),
+        None,
+    )
+
+    if (frl_pct is None or saipe_pct is None
+            or not (frl_pct > 85 and saipe_pct < 40 and (frl_pct - saipe_pct) > 50)):
+        return brief_json
+
+    replacement = (
+        f"Child poverty {saipe_pct:.1f}% (SAIPE); FRL rate {frl_pct:.1f}% likely "
+        f"reflects Community Eligibility Provision universal enrollment — "
+        f"not an independent poverty signal."
+    )
+
+    dim_table = (brief_json.get("scorecard_summary") or {}).get("dimension_table") or []
+    for row in dim_table:
+        if row.get("dimension") == "operational_complexity":
+            row["driver"] = replacement
+            break
+
+    import logging
+    logging.getLogger(__name__).info(
+        "CEP driver patch applied: FRL=%.1f%% SAIPE=%.1f%%", frl_pct, saipe_pct
+    )
+    return brief_json
+
+
+def _patch_authorizer_descriptions(brief_json: dict, state: str) -> dict:
+    """
+    Override LLM-generated reputation_note for MS authorizers with a
+    deterministic description derived from the statutory_barrier gate state.
+    The S3 enrichment call produces incorrect geographic-restriction or
+    ineligibility language because it lacks gate-state context.
+    Runs after _inject_market_routing so brief_json["statutory_barrier"] is set.
+    """
+    authorizers = brief_json.get("local_authorizers")
+    if not authorizers or state.upper() != "MS":
+        return brief_json
+
+    barrier = brief_json.get("statutory_barrier") or {}
+    severity = barrier.get("severity")
+    applies  = barrier.get("applies")
+
+    if severity == "prohibition" and applies is True:
+        note = (
+            "Authorization in this district is currently prohibited under Mississippi "
+            "charter law. Verify current statute before any strategic engagement."
+        )
+    elif severity == "consent_required" and applies is not False:
+        note = (
+            "Authorizes charter schools statewide; authorization in this district requires "
+            "local school board endorsement or initiation under Miss. Code Ann. § 37-28-7. "
+            "This is a process gate, not a prohibition — authorization is possible with "
+            "board support."
+        )
+    else:
+        note = (
+            "Authorizes charter schools statewide under the Mississippi Charter Schools "
+            "Act of 2013."
+        )
+
+    for a in authorizers:
+        a["reputation_note"] = note
+
     return brief_json
 
 

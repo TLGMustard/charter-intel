@@ -521,6 +521,16 @@ def score_dimension(
     if dim_name == "replication_feasibility":
         return _score_replication_feasibility(relevant_facts, weight)
 
+    # Special case: operational_complexity — detect CEP (Community Eligibility
+    # Provision) districts where FRL% is a universal-enrollment artifact, not a
+    # poverty signal. When FRL% > 85, SAIPE% < 40, and the gap > 50 points,
+    # substitute SAIPE-derived complexity for the FRL-derived index so the score
+    # reflects true household poverty rather than a meal-program artifact.
+    if dim_name == "operational_complexity":
+        cep_result = _score_operational_complexity_cep(relevant_facts, dim_def, weight)
+        if cep_result is not None:
+            return cep_result
+
     # Special case: web-search-derived index dimensions (score_is_index: true in YAML).
     # The index value is already calibrated to the 1–9 reporting scale; passing it
     # through apply_scoring_rules would double-translate (e.g. index=6 → score=5).
@@ -1063,6 +1073,76 @@ def _score_replication_feasibility(facts: list[dict], weight: float) -> dict:
         "primary_driver": driver,
         "supporting_fact_ids": supporting_ids,
         "used_default": False,
+    }
+
+
+def _saipe_to_complexity_index(saipe_pct: float) -> int:
+    """Convert SAIPE child poverty % to operational_complexity_index (1–9 scale).
+
+    Thresholds anchor national SAIPE norms (median district ≈ 15%):
+        <  8%  → MINIMAL    → 2
+        < 14%  → LOW        → 3
+        < 20%  → MODERATE   → 5
+        < 28%  → HIGH       → 7
+        < 40%  → VERY_HIGH  → 8
+        >= 40% → EXTREME    → 9
+    """
+    if saipe_pct >= 40: return 9
+    if saipe_pct >= 28: return 8
+    if saipe_pct >= 20: return 7
+    if saipe_pct >= 14: return 5
+    if saipe_pct >= 8:  return 3
+    return 2
+
+
+def _score_operational_complexity_cep(
+    relevant_facts: list[dict],
+    dim_def: dict,
+    weight: float,
+) -> Optional[dict]:
+    """Detect CEP districts and score operational_complexity from SAIPE.
+
+    Returns a complete score dict when the CEP condition is met; returns None
+    to fall through to the standard FRL-index path when it is not.
+
+    CEP condition: FRL% > 85 AND SAIPE% < 40 AND (FRL% − SAIPE%) > 50.
+    When met, the FRL figure reflects Community Eligibility Provision universal
+    enrollment (whole-district free-meal qualification), not household poverty.
+    SAIPE child poverty rate is the operative signal in that case.
+    """
+    frl_pct   = _get_fact_value("frl_pct", relevant_facts)
+    saipe_pct = _get_fact_value(
+        "saipe_poverty_rate_pct_operational_complexity", relevant_facts
+    )
+
+    if (frl_pct is None or saipe_pct is None
+            or not (frl_pct > 85 and saipe_pct < 40 and (frl_pct - saipe_pct) > 50)):
+        return None
+
+    cep_index = _saipe_to_complexity_index(saipe_pct)
+    scoring_rules = dim_def.get("scoring_rules", {})
+    score, _ = apply_scoring_rules(
+        cep_index, "operational_complexity_index", scoring_rules, dim_def
+    )
+    score = apply_secondary_adjustments(score, relevant_facts, dim_def)
+    score = round(score, 2)
+    confidence = _aggregate_fact_confidence(relevant_facts)
+
+    driver = (
+        f"CEP district (FRL {frl_pct}% vs SAIPE {saipe_pct:.1f}%): "
+        f"FRL is a universal-enrollment artifact — SAIPE operative; "
+        f"complexity index {cep_index} → score {score:.1f}"
+    )
+
+    return {
+        "score": score,
+        "weight": weight,
+        "weighted_contribution": round(score * weight, 4),
+        "confidence": confidence,
+        "primary_driver": driver,
+        "supporting_fact_ids": [f["datapoint_id"] for f in relevant_facts],
+        "used_default": False,
+        "cep_detected": True,
     }
 
 
