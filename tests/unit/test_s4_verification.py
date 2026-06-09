@@ -249,3 +249,127 @@ def test_expanded_roster_unions_district_and_statewide(monkeypatch, tmp_path):
     assert names.count("EAST MOUNTAIN HIGH SCHOOL") == 1  # deduped by ncessch
     assert roster["lookup_modes"] == ["leaid", "statewide_city"]
     assert roster["state_fips"] == 35
+
+
+# ── _run_consistency_checks (Session 10) ─────────────────────────────────────
+
+def _consent_barrier():
+    return [{"id": "test_consent", "severity": "consent_required"}]
+
+
+def _prohibition_barrier():
+    return [{"id": "test_prohibition", "severity": "prohibition"}]
+
+
+def _ctx(barriers, community_id="ms-test", state="MS"):
+    return {"statutory_barriers": barriers, "community_id": community_id, "state": state, "s4_config": {}}
+
+
+# CHECK-001: num_accessible_authorizers=0 corrected to 1 when consent_required barrier exists
+def test_check_001_corrects_zero_authorizers():
+    facts = [{"fact_key": "num_accessible_authorizers", "value": 0, "in_main_analysis": True}]
+    out = s4._run_consistency_checks(facts, _ctx(_consent_barrier()))
+    assert out[0]["value"] == 1
+
+
+def test_check_001_passthrough_when_authorizers_nonzero():
+    facts = [{"fact_key": "num_accessible_authorizers", "value": 2, "in_main_analysis": True}]
+    out = s4._run_consistency_checks(facts, _ctx(_consent_barrier()))
+    assert out[0]["value"] == 2
+
+
+def test_check_001_no_fire_without_consent_barrier():
+    facts = [{"fact_key": "num_accessible_authorizers", "value": 0, "in_main_analysis": True}]
+    out = s4._run_consistency_checks(facts, _ctx([]))  # no barriers
+    assert out[0]["value"] == 0  # uncorrected — no barrier present
+
+
+# CHECK-002 primary: PCI claim contains ineligibility language + UNVERIFIED status
+def test_check_002_primary_demotes_pci_on_ineligibility_claim():
+    facts = [{"fact_key": "political_climate_index", "value": 3,
+              "claim": "District ineligible for charter authorization",
+              "verification_status": "UNVERIFIED", "in_main_analysis": True}]
+    out = s4._run_consistency_checks(facts, _ctx(_consent_barrier()))
+    assert out[0]["in_main_analysis"] is False
+    assert "CHECK-002" in (out[0].get("needs_verification_reason") or "")
+
+
+def test_check_002_primary_no_fire_when_verified():
+    # VERIFIED PCI with ineligibility language in claim — primary trigger requires UNVERIFIED
+    facts = [{"fact_key": "political_climate_index", "value": 3,
+              "claim": "District ineligible for charter authorization",
+              "verification_status": "VERIFIED", "in_main_analysis": True}]
+    out = s4._run_consistency_checks(facts, _ctx(_consent_barrier()))
+    assert out[0]["in_main_analysis"] is True  # VERIFIED PCI not demoted by primary path
+
+
+# CHECK-002 secondary: adjacent auth fact contains ineligibility + PCI is PROVISIONAL
+def test_check_002_secondary_demotes_pci_via_adjacent_claim():
+    facts = [
+        {"fact_key": "num_accessible_authorizers", "value": 0,
+         "claim": "Zero accessible authorizers (district ineligible)",
+         "verification_status": "VERIFIED", "in_main_analysis": True},
+        {"fact_key": "political_climate_index", "value": 4,
+         "claim": "Political climate: MIXED_LEAN_HOSTILE (4/9)",
+         "verification_status": "PROVISIONAL", "in_main_analysis": True},
+    ]
+    out = s4._run_consistency_checks(facts, _ctx(_consent_barrier()))
+    pci = next(f for f in out if f["fact_key"] == "political_climate_index")
+    assert pci["in_main_analysis"] is False
+    assert "CHECK-002" in (pci.get("needs_verification_reason") or "")
+
+
+def test_check_002_secondary_no_fire_when_no_adjacent_ineligibility():
+    # Adjacent claim has no ineligibility language → secondary trigger does not fire
+    facts = [
+        {"fact_key": "num_accessible_authorizers", "value": 1,
+         "claim": "One authorizer available (consent required)",
+         "verification_status": "VERIFIED", "in_main_analysis": True},
+        {"fact_key": "political_climate_index", "value": 4,
+         "claim": "Political climate: MIXED_LEAN_HOSTILE (4/9)",
+         "verification_status": "PROVISIONAL", "in_main_analysis": True},
+    ]
+    out = s4._run_consistency_checks(facts, _ctx(_consent_barrier()))
+    pci = next(f for f in out if f["fact_key"] == "political_climate_index")
+    assert pci["in_main_analysis"] is True  # no ineligibility signal, not demoted
+
+
+# CHECK-003: school_board_orientation claims restriction when not prohibited
+def test_check_003_demotes_orientation_when_not_prohibited():
+    facts = [{"fact_key": "school_board_charter_orientation",
+              "value": "District not D/F rated; charters legally restricted",
+              "in_main_analysis": True}]
+    out = s4._run_consistency_checks(facts, _ctx(_consent_barrier()))
+    assert out[0]["in_main_analysis"] is False
+    assert "CHECK-003" in (out[0].get("needs_verification_reason") or "")
+
+
+def test_check_003_passthrough_when_prohibited():
+    # When a prohibition barrier exists, the restriction claim is factually accurate — no demotion
+    facts = [{"fact_key": "school_board_charter_orientation",
+              "value": "District ineligible — charters prohibited",
+              "in_main_analysis": True}]
+    out = s4._run_consistency_checks(facts, _ctx(_prohibition_barrier()))
+    assert out[0]["in_main_analysis"] is True
+
+
+def test_check_003_passthrough_neutral_orientation():
+    facts = [{"fact_key": "school_board_charter_orientation",
+              "value": "Board generally supportive",
+              "in_main_analysis": True}]
+    out = s4._run_consistency_checks(facts, _ctx(_consent_barrier()))
+    assert out[0]["in_main_analysis"] is True
+
+
+# Option B no-op: trust hierarchy disabled by default
+def test_trust_hierarchy_is_noop_when_disabled():
+    facts = [{"fact_key": "some_fact", "value": "x", "in_main_analysis": True}]
+    out = s4._run_trust_hierarchy_check(facts, {}, {"s4_trust_hierarchy_enabled": False})
+    assert out == facts
+
+
+def test_trust_hierarchy_raises_when_enabled():
+    import pytest
+    facts = [{"fact_key": "some_fact", "value": "x"}]
+    with pytest.raises(NotImplementedError):
+        s4._run_trust_hierarchy_check(facts, {}, {"s4_trust_hierarchy_enabled": True})

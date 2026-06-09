@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 from pipeline import PipelineConfig, StageResult, StageStatus, today_str
 from pipeline.utils.api_client import call_claude, load_prompt
 from pipeline.utils.cache import CacheManager
+from pipeline.utils.charter_law import load_charter_law_barriers
 from pipeline.ccd_entity_verifier import (
     SOURCE_LABEL as CCD_SOURCE_LABEL,
     extract_named_entities,
@@ -150,6 +151,23 @@ def run(
     # Reads pec_renewal_stats.yaml and nmped_shortage_areas.yaml; no-ops
     # when configs have null values (placeholder state).
     facts = _pass_e_static_resolution(facts, community_id, state)
+
+    # Consistency checks (Option A always-on + Option B framework hook).
+    # Runs after all passes so it has the final verified fact set.
+    s4_config: dict = {}
+    try:
+        with open("config/pipeline.yaml") as _f:
+            _pipeline_cfg = yaml.safe_load(_f) or {}
+        s4_config = _pipeline_cfg.get("s4_consistency_checks", {}) or {}
+    except Exception as _exc:
+        logger.warning("[%s] S4 consistency: could not load pipeline.yaml — %s", community_id, _exc)
+
+    facts = _run_consistency_checks(facts, {
+        "statutory_barriers": load_charter_law_barriers(state),
+        "community_id": community_id,
+        "state": state,
+        "s4_config": s4_config,
+    })
 
     summary = _build_summary(facts)
     summary["entity_verification"] = entity_summary
@@ -488,3 +506,150 @@ def _pass_d_entity_verification(
         out.append(fact)
 
     return out, summary
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Consistency checks (Option A always-on + Option B framework hook)
+# ─────────────────────────────────────────────────────────────────────────────
+
+_INELIGIBILITY_PHRASES = ("ineligible", "not eligible", "only d/f", "only eligible")
+_ORIENTATION_RESTRICTION_PHRASES = ("restricted", "not eligible", "ineligible")
+
+
+def _run_consistency_checks(facts: list[dict], pipeline_context: dict) -> list[dict]:
+    """
+    Option A (always-on): targeted guards for known-dangerous contradictions between
+    S3/S4 LLM-extracted facts and upstream structured pipeline data loaded from
+    config/charter_law/{state}.yaml.
+
+    Each check corrects or demotes the affected fact and emits a WARNING with the
+    format: [S4-CONSISTENCY] {check_name}: {wrong_value} → {corrected_value}
+
+    Option B framework hook (_run_trust_hierarchy_check) is called at the end.
+    It is a no-op until s4_trust_hierarchy_enabled is set to true in pipeline.yaml.
+    Enabling Option B requires Lennon sign-off — it is a methodology change.
+    """
+    barriers: list[dict] = pipeline_context.get("statutory_barriers", [])
+    community_id: str = pipeline_context.get("community_id", "?")
+    state: str = pipeline_context.get("state", "?")
+    s4_config: dict = pipeline_context.get("s4_config", {})
+
+    facts = [dict(f) for f in facts]
+
+    # CHECK-001 — authorizer_accessibility_vs_statutory
+    # consent_required means one authorizer exists; consent adds a procedural
+    # step, not a prohibition. num_accessible_authorizers=0 contradicts this.
+    consent_barriers = [b for b in barriers if b.get("severity") == "consent_required"]
+    if consent_barriers:
+        for i, fact in enumerate(facts):
+            if fact.get("fact_key") == "num_accessible_authorizers":
+                val = fact.get("value")
+                try:
+                    numeric_val = int(val)
+                except (TypeError, ValueError):
+                    numeric_val = -1
+                if numeric_val == 0:
+                    facts[i]["value"] = 1
+                    logger.warning(
+                        "[%s] [S4-CONSISTENCY] CHECK-001 authorizer_accessibility_vs_statutory:"
+                        " %s → 1\nReason: %s has a consent_required statutory barrier"
+                        " (§ consent gate); consent_required means one authorizer exists —"
+                        " consent adds a procedural step, not a prohibition.",
+                        community_id, val, state,
+                    )
+
+    # CHECK-002 — political_climate_vs_ineligibility_hallucination
+    # Political climate derived from a false ineligibility premise is not credible.
+    # Demote to in_main_analysis=False so S5 falls back to the neutral default.
+    #
+    # Primary trigger: the PCI fact's own claim contains ineligibility language AND
+    # verification_status == "UNVERIFIED".
+    #
+    # Secondary trigger: an authorization-adjacent fact (num_accessible_authorizers
+    # or school_board_charter_orientation) contains ineligibility language in its
+    # claim — S3 sometimes puts the ineligibility reasoning there instead of in the
+    # PCI claim itself. In that case, any PROVISIONAL/UNVERIFIED PCI is demoted.
+    _AUTH_ADJACENT_KEYS = ("num_accessible_authorizers", "school_board_charter_orientation")
+    _authorization_ineligibility_found = any(
+        any(phrase in (f.get("claim") or "").lower() for phrase in _INELIGIBILITY_PHRASES)
+        for f in facts
+        if f.get("fact_key") in _AUTH_ADJACENT_KEYS
+    )
+    for i, fact in enumerate(facts):
+        if fact.get("fact_key") == "political_climate_index" and fact.get("value") is not None:
+            claim_text = (fact.get("claim") or "").lower()
+            vs = fact.get("verification_status")
+            primary_trigger = (
+                any(phrase in claim_text for phrase in _INELIGIBILITY_PHRASES)
+                and vs == "UNVERIFIED"
+            )
+            secondary_trigger = (
+                _authorization_ineligibility_found
+                and vs in ("UNVERIFIED", "PROVISIONAL")
+            )
+            if primary_trigger or secondary_trigger:
+                old_val = fact.get("value")
+                facts[i]["in_main_analysis"] = False
+                facts[i]["needs_verification_reason"] = (
+                    "CHECK-002: political climate index derived from an ineligibility "
+                    "premise — district statutory classification is consent_required, "
+                    "not prohibited. Reverted to neutral default."
+                )
+                trigger_label = "primary" if primary_trigger else "secondary (adjacent claim)"
+                logger.warning(
+                    "[%s] [S4-CONSISTENCY] CHECK-002"
+                    " political_climate_vs_ineligibility_hallucination"
+                    " [trigger=%s]: %s → in_main_analysis=False\nReason: political climate"
+                    " derived from an ineligibility premise is not credible — revert to"
+                    " neutral default.",
+                    community_id, trigger_label, old_val,
+                )
+
+    # CHECK-003 — school_board_orientation_vs_statutory
+    # A claim that charters are "restricted" or "ineligible" in this district
+    # contradicts the statutory record when severity is not "prohibition".
+    prohibition_barriers = [b for b in barriers if b.get("severity") == "prohibition"]
+    is_prohibited = bool(prohibition_barriers)
+    for i, fact in enumerate(facts):
+        if fact.get("fact_key") == "school_board_charter_orientation":
+            val_str = str(fact.get("value") or "").lower()
+            if any(phrase in val_str for phrase in _ORIENTATION_RESTRICTION_PHRASES) and not is_prohibited:
+                old_val = fact.get("value")
+                facts[i]["in_main_analysis"] = False
+                if not facts[i].get("needs_verification_reason"):
+                    facts[i]["needs_verification_reason"] = (
+                        "CHECK-003: orientation claims restriction/ineligibility but "
+                        "district statutory classification is not prohibited."
+                    )
+                logger.warning(
+                    "[%s] [S4-CONSISTENCY] CHECK-003 school_board_orientation_vs_statutory:"
+                    " %r → in_main_analysis=False\nReason: school board orientation claims"
+                    " restriction but statutory classification is not 'prohibited'.",
+                    community_id, old_val,
+                )
+
+    # Option B hook — runs after all Option A checks (currently a no-op)
+    facts = _run_trust_hierarchy_check(facts, structured_facts={}, config=s4_config)
+
+    return facts
+
+
+def _run_trust_hierarchy_check(
+    facts: list[dict], structured_facts: dict, config: dict
+) -> list[dict]:
+    """
+    Option B: General LLM-vs-structured-data trust hierarchy.
+    Status: FRAMEWORK ONLY — not implemented.
+    Enable via config/pipeline.yaml: s4_trust_hierarchy_enabled: true
+
+    When implemented, this will demote any LLM-extracted fact that directly
+    contradicts a structured pipeline fact (NCES, Census, MDE, SAIPE) to
+    in_main_analysis=False.
+
+    Requires Lennon sign-off before enabling — methodology change.
+    """
+    if not config.get("s4_trust_hierarchy_enabled", False):
+        return facts  # Option B is OFF — no-op
+
+    # TODO: implement trust hierarchy logic
+    raise NotImplementedError("Option B not yet implemented")

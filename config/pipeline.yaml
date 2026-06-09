@@ -178,6 +178,17 @@ quality_gates:
     on_insufficient: HALT_WITH_PARTIAL_FLAG
 
 # ─────────────────────────────────────────────
+# S4 CONSISTENCY CHECKS
+# ─────────────────────────────────────────────
+# Option A (always-on): targeted guards for known contradictions between
+# S3/S4 LLM-extracted facts and upstream structured pipeline data.
+# Option B (framework only, OFF by default): general LLM-vs-structured-data
+# trust hierarchy. Requires Lennon sign-off before enabling — methodology change.
+
+s4_consistency_checks:
+  s4_trust_hierarchy_enabled: false   # Option B — OFF. Do NOT enable without Lennon sign-off.
+
+# ─────────────────────────────────────────────
 # LOGGING
 # ─────────────────────────────────────────────
 

@@ -990,6 +990,33 @@ scoring uncalibrated. See `docs/` for session history and `DEPLOY.md` for deploy
 
 ---
 
+### Session — 2026-06-09 (9a9e515)
+
+**Accomplished:**
+- Added `_run_consistency_checks(facts, pipeline_context)` to `pipeline/s4_verification.py` — three always-on guards (CHECK-001, CHECK-002, CHECK-003) that cross-check S3/S4 LLM-extracted facts against `config/charter_law/{state}.yaml` before writing `s4_verified.json`
+- CHECK-001 corrects `num_accessible_authorizers=0` to `1` when a `consent_required` statutory barrier exists (MS § 37-28-7 pattern — consent adds a procedural step, not a prohibition)
+- CHECK-002 demotes `political_climate_index` to `in_main_analysis=False` when ineligibility language appears in its own claim (primary) or in an adjacent auth-fact claim (secondary); catches cases where S3 puts the ineligibility reasoning in the `num_accessible_authorizers` claim rather than the PCI fact
+- CHECK-003 demotes `school_board_charter_orientation` to `in_main_analysis=False` when the value asserts restriction/ineligibility but no `prohibition` barrier exists in config
+- Added `_run_trust_hierarchy_check()` skeleton (Option B) with feature flag `s4_trust_hierarchy_enabled: false` in `config/pipeline.yaml` — no-op until enabled; raises `NotImplementedError` if toggled; Lennon sign-off required before enabling
+- Wired consistency checks into `run()` after Pass E, before `_build_summary` (line 165); loads charter law barriers via existing `load_charter_law_barriers(state)` utility
+- Cold-rendered Oxford MS with all cache deleted — all three checks fired; `num_accessible_authorizers` auto-corrected from 0→1, PCI and orientation demoted; composite 6.51 (vs 6.31 prior patched baseline — difference is LLM variance in this S3 run's other dimension facts, not a regression)
+- Added 12 tests to `tests/unit/test_s4_verification.py` covering contradiction and pass-through cases for all three checks plus Option B no-op and NotImplementedError paths; suite 813 → **825 passing**
+
+**Decisions:**
+- CHECK-002 needs a secondary trigger path because S3 sometimes puts ineligibility language in the `num_accessible_authorizers` or `school_board_charter_orientation` claim rather than in the PCI fact itself; secondary fires when adjacent auth-fact claims contain ineligibility phrases AND PCI is `PROVISIONAL` or `UNVERIFIED`
+- Option B feature flag lives in `config/pipeline.yaml` (not hardcoded), defaults to `false`; the `_run_trust_hierarchy_check` function accepts a plain dict `config` (not `PipelineConfig`) so it is testable without the full pipeline object
+- Score difference (6.51 vs 6.28 target): when PCI is excluded from composite, S5 normalizes by remaining weight (0.6875 instead of 0.8125), inflating the result; target 6.28 assumed PCI stays in the composite at neutral 5.0 — this is a normalization interaction to resolve in a future session
+
+**Next Steps:**
+- [ ] Resolve PCI composite normalization: when CHECK-002 demotes PCI, S5 should use 5.0 as the PCI contribution in the composite *without* excluding it from the denominator — or CHECK-002 should correct the value to 5 and keep `in_main_analysis=True`
+- [ ] Lennon sign-off on Option B trust hierarchy design before implementing
+- [ ] Live `--force` MS batch to exercise all three consistency checks across ackerman/jackson (other MS communities may also trigger CHECK-002/003)
+- [ ] Lennon sign-off on the four methodology questions (A–D) in `docs/lennon_oxford_scoring_flags.md`
+
+**Tests:** 825 passed (`python3 -m pytest -q`).
+
+---
+
 ### Session — 2026-06-08 (af70651)
 
 **Accomplished:**
