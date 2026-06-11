@@ -190,10 +190,25 @@ def run(
     missing_dimensions = []
     warnings = []
 
+    if preset not in presets_cfg:
+        return StageResult(
+            stage_id=STAGE_ID, community_id=community_id, state=state,
+            status=StageStatus.ERROR,
+            errors=[f"Unknown scoring preset {preset!r} — not in scoring_presets.yaml "
+                    f"(available: {sorted(presets_cfg)})."]
+        )
     preset_weights = presets_cfg[preset]["dimensions"]
     dimension_defs = weights_cfg["dimensions"]
 
     for dim_name, dim_def in dimension_defs.items():
+        if dim_name not in preset_weights:
+            # A defined dimension absent from the preset gets weight 0 and drops
+            # out of the composite. Surface it — a typo/rename in the preset
+            # would otherwise silently zero a dimension. (Weight unchanged.)
+            logger.warning(
+                "[%s] dimension %r missing from preset %r — using weight 0.0",
+                community_id, dim_name, preset,
+            )
         weight = preset_weights.get(dim_name, 0.0)
         result = score_dimension(
             dim_name=dim_name,
@@ -243,10 +258,13 @@ def run(
         data_coverage_pct = round(real_weight_sum / total_weight_sum * 100, 1)
     else:
         data_coverage_pct = 0.0
-    cov_thresholds = weights_cfg.get("data_coverage_thresholds", {"reliable": 70, "provisional": 50})
-    if data_coverage_pct >= cov_thresholds["reliable"]:
+    cov_thresholds = weights_cfg.get("data_coverage_thresholds") or {}
+    # Per-key defaults so a partial/missing thresholds block can't KeyError.
+    cov_reliable = cov_thresholds.get("reliable", 70)
+    cov_provisional = cov_thresholds.get("provisional", 50)
+    if data_coverage_pct >= cov_reliable:
         data_coverage_tier = "reliable"
-    elif data_coverage_pct >= cov_thresholds["provisional"]:
+    elif data_coverage_pct >= cov_provisional:
         data_coverage_tier = "provisional"
     else:
         data_coverage_tier = "unreliable"
@@ -848,12 +866,22 @@ def check_override_flags(
         # Fallback: NCES parquet enrollment_by_year dict {year: count}
         by_year = fact_index.get("enrollment_by_year")
         if by_year and isinstance(by_year, dict) and len(by_year) > 0:
-            latest_year = str(max(int(y) for y in by_year.keys()))
-            # Keys may be int or str depending on fetcher — try both
-            enrollment = by_year.get(latest_year) or by_year.get(int(latest_year))
-            enrollment_source = f"NCES {latest_year}"
+            # Keys may be int or str depending on fetcher — ignore non-numeric.
+            numeric_years = [int(y) for y in by_year.keys()
+                             if str(y).lstrip("-").isdigit()]
+            if numeric_years:
+                latest_year = str(max(numeric_years))
+                enrollment = by_year.get(latest_year) or by_year.get(int(latest_year))
+                enrollment_source = f"NCES {latest_year}"
 
-    if enrollment is not None and float(enrollment) < 1500:
+    # Coerce defensively: an unparseable enrollment (e.g. "N/A", "1,200") must
+    # not crash scoring — treat it as missing so the flag simply doesn't fire.
+    try:
+        enrollment_num = float(enrollment) if enrollment is not None else None
+    except (TypeError, ValueError):
+        enrollment_num = None
+
+    if enrollment_num is not None and enrollment_num < 1500:
         flags.append({
             "flag": "SMALL_MARKET",
             "visual": "⚠️",

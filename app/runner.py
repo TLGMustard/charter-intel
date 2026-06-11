@@ -46,6 +46,11 @@ def build_command(form: dict) -> list[str]:
 
     state = (form.get("state") or "").strip()
     if state:
+        # --state has no argparse choices in main.py, so validate the free-text
+        # value here: a 2-letter code or a plain state name. shlex.join already
+        # blocks shell injection; this rejects control chars / junk early.
+        if not re.fullmatch(r"[A-Za-z][A-Za-z .\-]{0,40}", state):
+            raise ValueError(f"Invalid state value: {state!r}")
         argv += ["--state", state]
 
     depth = (form.get("depth") or "").strip()

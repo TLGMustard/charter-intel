@@ -448,14 +448,20 @@ def _load_inputs(
     if not os.path.exists(facts_path):
         errors.append(f"Verified facts not found at {facts_path}. Run S4 first.")
     else:
-        with open(facts_path) as f:
-            verified_bundle = json.load(f)
+        try:
+            with open(facts_path) as f:
+                verified_bundle = json.load(f)
+        except json.JSONDecodeError as e:
+            errors.append(f"Verified facts at {facts_path} are corrupt JSON ({e}). Re-run S4.")
 
     if not os.path.exists(scorecard_path):
         errors.append(f"Scorecard not found at {scorecard_path}. Run S5 first.")
     else:
-        with open(scorecard_path) as f:
-            scorecard = json.load(f)
+        try:
+            with open(scorecard_path) as f:
+                scorecard = json.load(f)
+        except json.JSONDecodeError as e:
+            errors.append(f"Scorecard at {scorecard_path} is corrupt JSON ({e}). Re-run S5.")
 
     return verified_bundle, scorecard, errors
 

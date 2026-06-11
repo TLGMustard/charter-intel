@@ -416,6 +416,28 @@ scoring uncalibrated. See `docs/` for session history and `DEPLOY.md` for deploy
 
 ## Session Log
 
+### Session — 2026-06-11 (3cc9824)
+
+**Accomplished:**
+- Red-team audit (audit-only first pass) of security, data-integrity, pipeline-logic, cost, and code-quality; verified every recon finding against source and discarded 6 false positives (e.g. `ValidationResult.__bool__` makes `if not validation:` correct; `acs_fetcher` already length-guards; `runner` shell-injection mitigated by `shlex.join`)
+- Security: removed OAuth `id_info` debug print (`app/ui/auth.py`); redacted full token-exchange response prints in `gmail.py` / `gmail_ingestor.py`; pinned deps with upper bounds in `requirements.txt` / `requirements_app.txt`; added free-text `--state` format check in `app/runner.py`; routed `CacheManager.invalidate` prefix through traversal guard; synced `.env.example` to all 11 vars (real `.env` untouched)
+- Data integrity: `_validate_parsed` now returns a structured error (no raise) so callers skip a bad city gracefully; `s3` guards non-dict `parsed_json`; `s5` SMALL_MARKET uses defensive `float()`/`int()` coercion; `s5` warns on preset-missing dimension and errors on unknown preset; `s5` per-key threshold defaults; `s4`/`s6` handle corrupt cache JSON; `api_client` filters text blocks instead of assuming `content[0]`
+- Pipeline/cost: fixed `${CLIP_UI:-}` unbound-var crash in `docker-entrypoint.sh`; added a global dry-run backstop inside `call_claude` (wired from `main.py`), keeping per-stage guards; documented mtime-TTL limitation; flagged C-1 (cache/spend-ceiling) as a deferred architecture decision via TODO
+- Code quality: replaced inline `__import__("os")` in `charter_schools_fetcher.py`; added Python 3.11+ runtime assert in `main()`
+- Test suite green after every individual fix: **859 passing**
+
+**Decisions:**
+- Honored standing rules: no architecture redesign and no scoring-weight changes — C-1 and P-4 documented/deferred rather than implemented; D-3/D-4 are defensive coercion + warnings only, no weight or score logic touched
+- Per explicit user constraints: schema-validation failures return structured errors (never abort the run); dry-run backstop added inside `call_claude` while per-stage `if config.dry_run` checks remain; only `.env.example` edited, real `.env` never read or written
+- Excluded a regenerated demo-brief HTML (timestamp-only churn) from the commit
+
+**Next Steps:**
+- [ ] Decide on C-1: add cache-aware wrapper and/or hard per-run token/$ ceiling in `call_claude` (needs architecture sign-off)
+- [ ] Decide on P-4: embed `fetched_at` in cached JSON vs. current mtime-based TTL (changes stored shape + tests)
+- [ ] Consider making LLM schema validation actively used (pass schemas at call sites) now that failures surface cleanly
+
+**Tests:** 859 passed (`python3 -m pytest -q`).
+
 ### Session — 2026-06-09 (ff943ce)
 
 **Accomplished:**

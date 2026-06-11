@@ -76,7 +76,7 @@ if [ ! -f "$_pq_dst" ]; then
   echo "[entrypoint] seeded processed: nm/nces_membership_nm.parquet"
 fi
 
-if [ "${CLIP_UI}" = "flask" ]; then
+if [ "${CLIP_UI:-}" = "flask" ]; then
     echo "[entrypoint] persistence wired under ${DATA_DIR}; launching Flask UI on port ${PORT:-8080}"
     exec bash "${APP_DIR}/app/ui/run.sh"
 else

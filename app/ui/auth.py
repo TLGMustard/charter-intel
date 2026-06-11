@@ -78,7 +78,6 @@ def oauth2callback():
             google_requests.Request(),
             _CLIENT_ID,
         )
-        print("DEBUG id_info:", id_info, file=sys.stderr, flush=True)
         if id_info.get("hd") != _ALLOWED_DOMAIN:
             raise ValueError(
                 f"hd claim {id_info.get('hd')!r} != {_ALLOWED_DOMAIN!r}"

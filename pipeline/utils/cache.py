@@ -82,6 +82,13 @@ class CacheManager:
         if not os.path.exists(path):
             return None
         if ttl_days is not None:
+            # NOTE (P-4, known limitation): freshness is derived from the file's
+            # mtime, not from when the data was actually fetched. A `git checkout`,
+            # `cp`, or the Docker volume-seed step resets mtime, so a stale file
+            # can look fresh (or vice-versa). Switching to an embedded `fetched_at`
+            # timestamp would change the stored JSON shape and the mtime-based
+            # contract these tests/fetchers rely on — deferred as an architectural
+            # decision rather than changed unilaterally.
             age_days = (time.time() - os.path.getmtime(path)) / 86400
             if age_days > ttl_days:
                 return None   # expired — treat as miss; caller overwrites on fresh fetch
@@ -102,6 +109,8 @@ class CacheManager:
 
     def invalidate(self, prefix: str) -> int:
         """Delete all cache files matching prefix. Returns count deleted."""
+        if '..' in prefix or prefix.startswith('/') or prefix.startswith(os.sep):
+            raise ValueError(f"Unsafe cache prefix: {prefix!r}")
         pattern = os.path.join(self.base, prefix, "**", "*.json")
         files = glob.glob(pattern, recursive=True)
         for f in files:

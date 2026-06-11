@@ -655,6 +655,14 @@ def run(
         )
 
     facts_output = result.parsed_json
+    # A literal `null` / non-object top-level parses cleanly (no parse_error) but
+    # is unusable downstream. Skip this community gracefully rather than crash.
+    if not isinstance(facts_output, dict):
+        return StageResult(
+            stage_id=STAGE_ID, community_id=community_id, state=state,
+            status=StageStatus.ERROR,
+            errors=[f"S3 returned non-object JSON: {type(facts_output).__name__}"]
+        )
 
     # ── Web search supplemental calls — gated by --depth + Haiku pre-filter ──
     # fast: none  |  standard: political_climate only  |  deep: all 5 + 8s sleeps

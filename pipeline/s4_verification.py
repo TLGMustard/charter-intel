@@ -93,8 +93,15 @@ def run(
                 status=StageStatus.ERROR,
                 errors=[f"S3 output not found at {raw_path}. Run S3 first."]
             )
-        with open(raw_path) as f:
-            raw_bundle = json.load(f)
+        try:
+            with open(raw_path) as f:
+                raw_bundle = json.load(f)
+        except json.JSONDecodeError as e:
+            return StageResult(
+                stage_id=STAGE_ID, community_id=community_id, state=state,
+                status=StageStatus.ERROR,
+                errors=[f"S3 output at {raw_path} is corrupt JSON ({e}). Re-run S3."]
+            )
 
     # Load source patterns from config
     with open("config/sources.yaml") as f:

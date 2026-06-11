@@ -548,6 +548,16 @@ def _run_ingest(source: str, ingest_path=None) -> None:
 
 
 def main():
+    # The pipeline requires 3.11+ (uses 3.10/3.11 syntax + deps). Fail fast with
+    # a clear message rather than a confusing downstream error on an old runtime.
+    if sys.version_info < (3, 11):
+        logger.error(
+            "Python 3.11+ required; running %d.%d. "
+            "Point CLIP_PYTHON at a 3.11+ interpreter with pipeline deps installed.",
+            sys.version_info.major, sys.version_info.minor,
+        )
+        sys.exit(1)
+
     args = parse_args()
 
     # ── Interactive mode ────────────────────────────────────────────────────
@@ -606,6 +616,11 @@ def main():
         sys.exit(1)
 
     config = build_config(args)
+
+    # Backstop: refuse billable API calls in dry-run even if a stage forgets its
+    # own guard. Per-stage `if config.dry_run` checks remain the primary control.
+    import pipeline.utils.api_client as _api_module
+    _api_module.set_dry_run(config.dry_run)
 
     # ── Mock / record injection ────────────────────────────────────────────────
     if args.mock and args.record:

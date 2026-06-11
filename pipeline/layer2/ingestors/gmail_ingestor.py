@@ -304,7 +304,11 @@ def _exchange_refresh_token(client_id: str, client_secret: str, refresh_token: s
         raise SystemExit(1)
     token = data.get("access_token")
     if not token:
-        print(f"[gmail-ext] STOP — no access_token in response: {data}", file=sys.stderr)
+        print(
+            f"[gmail-ext] STOP — no access_token in response "
+            f"(error={data.get('error')!r}: {data.get('error_description')!r}).",
+            file=sys.stderr,
+        )
         raise SystemExit(1)
     return token
 

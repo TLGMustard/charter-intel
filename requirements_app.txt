@@ -5,10 +5,10 @@
 # streamlit plus the Python standard library — it never imports pipeline modules,
 # so the heavy pipeline deps (anthropic, geopandas, shapely, ...) are intentionally
 # excluded to stay within Community Cloud's memory limits.
-streamlit
+streamlit>=1.30.0,<2.0.0
 
 # CLIP Flask UI (app/ui/server.py)
-flask
-pyyaml
-google-auth>=2.0.0
-google-auth-oauthlib>=1.0.0
+flask>=3.0.0,<4.0.0
+pyyaml>=6.0.1,<7.0.0
+google-auth>=2.0.0,<3.0.0
+google-auth-oauthlib>=1.0.0,<2.0.0

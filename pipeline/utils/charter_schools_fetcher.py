@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import csv
 import logging
+import os
 import re
 from typing import Optional
 
@@ -47,7 +48,7 @@ def _load_proficiency_map(csv_path: str) -> dict[str, float]:
     (LocationCode != '0', Demographic == 'All') in a PED proficiency CSV.
     """
     result: dict[str, float] = {}
-    if not __import__("os").path.exists(csv_path):
+    if not os.path.exists(csv_path):
         return result
 
     try:

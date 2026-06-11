@@ -42,6 +42,19 @@ from pipeline.utils.token_logger import token_logger
 logger = logging.getLogger(__name__)
 
 
+# Module-level dry-run backstop. main.py sets this from config.dry_run at
+# startup so call_claude refuses a billable call even if a stage forgets its own
+# `if config.dry_run` guard. The per-stage guards remain the primary mechanism;
+# this is redundant safety, not a replacement for them.
+_DRY_RUN = False
+
+
+def set_dry_run(enabled: bool) -> None:
+    """Enable/disable the global dry-run backstop for call_claude."""
+    global _DRY_RUN
+    _DRY_RUN = bool(enabled)
+
+
 # ─────────────────────────────────────────────
 # RESULT OBJECT
 # ─────────────────────────────────────────────
@@ -71,6 +84,14 @@ class APIResult:
 # ─────────────────────────────────────────────
 # MAIN API CALL FUNCTION
 # ─────────────────────────────────────────────
+
+# TODO(C-1, deferred — needs architectural sign-off): call_claude has no cache
+# integration and there is no per-run token/$ spend ceiling. Caching is currently
+# the caller's responsibility, so a caller that skips the cache (or a runaway
+# loop) can incur unbounded cost. Adding a cache-aware wrapper and/or a hard
+# per-run budget that aborts on exceedance touches the API-client architecture;
+# per the project's standing "do not redesign architecture" rule this is left as
+# a flagged decision rather than an unilateral change.
 
 def call_claude(
     model: str,
@@ -115,6 +136,21 @@ def call_claude(
     Returns:
         APIResult. Check result.ok before using output.
     """
+    if _DRY_RUN:
+        logger.warning(
+            "[%s] call_claude reached in dry-run mode — returning empty result, "
+            "no API call made (a stage guard was expected to prevent this).",
+            stage,
+        )
+        return APIResult(
+            text="",
+            parsed_json=None,
+            model=model,
+            stage=stage,
+            community_id=community_id,
+            parse_error="dry-run: no API call made" if expect_json else None,
+        )
+
     client = anthropic.Anthropic(timeout=timeout_seconds)  # hard per-call ceiling
 
     last_error = None
@@ -147,7 +183,13 @@ def call_claude(
                     if block.type == "text"
                 ).strip()
             else:
-                text = response.content[0].text if response.content else ""
+                # Don't assume the first block is text — filter by type so a
+                # leading non-text block can't raise AttributeError.
+                text = "\n".join(
+                    block.text
+                    for block in (response.content or [])
+                    if getattr(block, "type", None) == "text"
+                ).strip()
 
             tokens_in = response.usage.input_tokens
             tokens_out = response.usage.output_tokens
@@ -248,13 +290,13 @@ def _parse_json_response(
             cleaned = cleaned[:-3].rstrip()
 
     try:
-        return _validate_parsed(json.loads(cleaned), schema), None
+        return _validate_parsed(json.loads(cleaned), schema)
     except json.JSONDecodeError as e:
         # Attempt to extract JSON object if there's surrounding text
         try:
             start = cleaned.index("{")
             end = cleaned.rindex("}") + 1
-            return _validate_parsed(json.loads(cleaned[start:end]), schema), None
+            return _validate_parsed(json.loads(cleaned[start:end]), schema)
         except (ValueError, json.JSONDecodeError):
             position = f"line {e.lineno} col {e.colno} (char {e.pos})"
             preview = cleaned[:500]
@@ -264,17 +306,25 @@ def _parse_json_response(
             )
 
 
-def _validate_parsed(parsed: dict, schema: Optional[dict]) -> dict:
-    """Validate `parsed` against `schema` if given. Non-blocking: logs and returns."""
+def _validate_parsed(
+    parsed: dict, schema: Optional[dict]
+) -> tuple[Optional[dict], Optional[str]]:
+    """Validate `parsed` against `schema` if given. Returns (parsed, error).
+
+    On schema validation failure the failure is surfaced as a structured error
+    string (and parsed is returned as None) so the caller sees it via
+    APIResult.parse_error and can skip that item gracefully. We never raise —
+    a malformed response must not kill the whole run.
+    """
     if schema is not None:
         import jsonschema
         try:
             jsonschema.validate(parsed, schema)
         except jsonschema.ValidationError as e:
-            logger.warning(f"LLM response failed schema validation: {e.message}")
-            # Do not raise — log and continue (non-blocking for now)
-            # TODO: make blocking after schema coverage is confirmed complete
-    return parsed
+            msg = f"LLM response failed schema validation: {e.message}"
+            logger.warning(msg)
+            return None, msg
+    return parsed, None
 
 
 # ─────────────────────────────────────────────
