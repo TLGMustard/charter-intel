@@ -646,7 +646,11 @@ MS:
     ms-woodville: '2804710'
     ms-yazoo-city-2804770: '2804770'
     ms-yazoo-city-2804800: '2804800'
-  per_pupil_revenue_avg: 12500.0  # NEEDS_VERIFICATION -- approx NCES FY2022 state average
+  per_pupil_revenue_avg: null
+  # Removed stale FY2022 hardcode ($12,500). Dynamic parquet fallback
+  # now computes state average from national finance parquet
+  # (~$16,278 total revenue per pupil, SY2022-23, 147 MS districts).
+  # To override: set a verified value with vintage annotation.
   pilot: false
   state_fips: 28
   scoring_adjustments: {}
@@ -1003,7 +1007,10 @@ TN:
     tn-waynesboro: '4704440'
     tn-winchester: '4701290'
     tn-woodbury: '4700450'
-  per_pupil_revenue_avg: 11800.0  # NEEDS_VERIFICATION -- approx NCES FY2022 state average
+  per_pupil_revenue_avg: null
+  # Removed stale FY2022 hardcode ($11,800). Dynamic parquet fallback
+  # now computes state average from national finance parquet.
+  # To override: set a verified value with vintage annotation.
   pilot: false
   state_fips: 47
   scoring_adjustments: {}
@@ -1706,7 +1713,10 @@ WI:
     wi-wisconsin-rapids: '5517070'
     wi-wittenberg: '5517100'
     wi-wrightstown: '5517190'
-  per_pupil_revenue_avg: 13200.0  # NEEDS_VERIFICATION -- approx NCES FY2022 state average
+  per_pupil_revenue_avg: null
+  # Removed stale FY2022 hardcode ($13,200). Dynamic parquet fallback
+  # now computes state average from national finance parquet.
+  # To override: set a verified value with vintage annotation.
   pilot: false
   state_fips: 55
   scoring_adjustments: {}

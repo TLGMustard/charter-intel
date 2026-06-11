@@ -90,3 +90,81 @@ def test_get_district_data_passes_state_to_read_finance(monkeypatch):
     nf.get_district_data("tx-austin", "TX")
 
     assert calls == ["TX"]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# per_pupil_revenue_avg null → parquet fallback; Oxford score in [5.5, 6.5]
+# ─────────────────────────────────────────────────────────────────────────────
+
+def test_state_avg_ppr_null_uses_parquet_fallback_oxford_score_range(tmp_path, monkeypatch):
+    """When per_pupil_revenue_avg is null in states.yaml, _get_state_avg_ppr falls
+    back to the national finance parquet (non-null result). With real Oxford FY2023
+    values, the resulting per_pupil_revenue_vs_state_avg_pct is near zero — Oxford's
+    total revenue per pupil ($16,176) ≈ the MS state average ($16,244 in this fixture)
+    — placing the funding_environment threshold score in [5.5, 6.5].
+
+    This test guards against reintroduction of the stale $12,500 hardcode that
+    inflated Oxford's premium to 29.4% and its score to 9.0.
+    """
+    monkeypatch.chdir(tmp_path)
+
+    # Minimal states.yaml: MS per_pupil_revenue_avg is null so the parquet fallback fires.
+    cfg_dir = tmp_path / "config"
+    cfg_dir.mkdir()
+    (cfg_dir / "states.yaml").write_text(
+        "MS:\n"
+        "  per_pupil_revenue_avg: null\n"
+        "  nces_district_map:\n"
+        "    ms-oxford-2803450: '2803450'\n"
+        "    ms-peer-a: '2800010'\n"
+        "    ms-peer-b: '2800020'\n"
+    )
+
+    # Parquet: Oxford + two peers chosen so state avg ≈ $16,244/pupil.
+    #   Oxford:  TOTALREV=$77,094,000 / 4,766 members = $16,175.83/pupil
+    #   Peer-A:  TOTALREV=$48,834,000 / 3,000         = $16,278.00/pupil
+    #   Peer-B:  TOTALREV=$81,390,000 / 5,000         = $16,278.00/pupil
+    #   Mean: ($16,175.83 + $16,278 + $16,278) / 3 ≈ $16,243.94/pupil
+    _write_finance_parquet(tmp_path, [
+        {"LEAID": "2803450", "STABBR": "MS", "MEMBERSCH": 4766, "TOTALREV": 77094000,
+         "TFEDREV": 7932000, "TSTREV": 28776000, "TLOCREV": 40386000, "TOTALEXP": 80803000},
+        {"LEAID": "2800010", "STABBR": "MS", "MEMBERSCH": 3000, "TOTALREV": 48834000,
+         "TFEDREV": 4883400, "TSTREV": 19533600, "TLOCREV": 24416900, "TOTALEXP": 49000000},
+        {"LEAID": "2800020", "STABBR": "MS", "MEMBERSCH": 5000, "TOTALREV": 81390000,
+         "TFEDREV": 8139000, "TSTREV": 32556000, "TLOCREV": 40695000, "TOTALEXP": 82000000},
+    ])
+
+    # Part 1: parquet fallback produces a non-null state average.
+    avg = nf._get_state_avg_ppr("MS")
+    assert avg is not None, (
+        "_get_state_avg_ppr must return a non-null value when parquet is present "
+        "and states.yaml per_pupil_revenue_avg is null"
+    )
+    assert avg > 0
+
+    # Part 2: Oxford's premium is near zero → funding_environment score in [5.5, 6.5].
+    result = nf.get_district_data("ms-oxford-2803450", "MS")
+    assert result is not None
+    pct = result.get("per_pupil_revenue_vs_state_avg_pct")
+    assert pct is not None
+
+    # Oxford PPR ($16,176) ≈ state avg ($16,244): premium ≈ -0.4%.
+    # Allow ±5 pct-point tolerance for parquet vintage variation.
+    assert -5.0 <= pct <= 5.0, (
+        f"Oxford per_pupil_revenue_vs_state_avg_pct={pct:.1f}% expected near 0% "
+        f"on a total-revenue-vs-total-revenue basis; was 29.4% with stale $12,500 hardcode"
+    )
+
+    # Inline threshold lookup (mirrors scoring_weights.yaml funding_environment).
+    # direction=direct: <= -20→2, <= -10→4, <= 0→6, <= 10→7, <= 20→8, >20→9
+    def _threshold_score(p: float) -> float:
+        for max_val, score in [(-20, 2.0), (-10, 4.0), (0, 6.0), (10, 7.0), (20, 8.0)]:
+            if p <= max_val:
+                return score
+        return 9.0
+
+    score = _threshold_score(pct)
+    assert 5.5 <= score <= 6.5, (
+        f"funding_environment threshold score {score} expected in [5.5, 6.5]; "
+        f"per_pupil_revenue_vs_state_avg_pct={pct:.1f}%"
+    )

@@ -244,6 +244,13 @@ def _get_state_avg_ppr(state: str) -> Optional[float]:
       2. Compute from national finance parquet (mean TOTALREV/MEMBERSCH for
          the state's NCES districts — requires the parquet to be present)
       3. None with a warning if both sources are unavailable
+
+    The dynamic parquet path (2) is the preferred source of truth — it uses
+    the same TOTALREV/MEMBERSCH basis as the district value, ensuring a
+    like-for-like total-revenue comparison. States.yaml overrides should only
+    be used when a verified, vintage-annotated value is available (e.g.
+    "per_pupil_revenue_avg: 24356.0  # NCES F-33 SY2022-23, 143 NM LEAs").
+    A null or absent entry activates the parquet fallback automatically.
     """
     # 1. states.yaml static value
     try:
