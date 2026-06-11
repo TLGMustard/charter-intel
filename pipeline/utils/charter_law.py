@@ -26,6 +26,24 @@ log = logging.getLogger(__name__)
 _CONFIG_DIR = "config/charter_law"
 
 
+def is_charter_law_stub(state: str, config_dir: str = _CONFIG_DIR) -> bool:
+    """Return True when the charter law config explicitly marks verified=False.
+
+    Distinguishes unverified expansion stubs from:
+    - Missing configs (no barriers, but not a stub → False)
+    - Legacy verified configs that predate the verified field (→ False, run normally)
+    """
+    path = os.path.join(config_dir, f"{state.lower()}.yaml")
+    if not os.path.exists(path):
+        return False
+    try:
+        with open(path) as f:
+            data = yaml.safe_load(f) or {}
+    except Exception:
+        return False
+    return data.get("verified") is False
+
+
 def load_charter_law_barriers(state: str, config_dir: str = _CONFIG_DIR) -> List[dict]:
     """Return the list of statutory barriers for *state*.
 

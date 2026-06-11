@@ -206,6 +206,7 @@ def run(
     brief_json = _inject_consistency_check_banner(brief_json, scorecard)
     brief_json = _inject_tribal_jurisdiction_flag(brief_json, state, community_id)
     brief_json = _inject_teacher_supply_warning(brief_json, state, community_id)
+    brief_json = _inject_charter_law_stub_notice(brief_json, state, community_id)
 
     # --- Guard: no needs_verification item may render an empty reason ("None") ---
     brief_json = _sanitize_needs_verification(brief_json, community_id)
@@ -1071,6 +1072,35 @@ def _inject_teacher_supply_warning(brief_json: dict, state: str, community_id: s
     import logging
     logging.getLogger(__name__).info(
         "[%s] Injected teacher_supply_warning into needs_verification", community_id
+    )
+    return brief_json
+
+
+def _inject_charter_law_stub_notice(brief_json: dict, state: str, community_id: str) -> dict:
+    """Append a needs_verification item when the state's charter law config is
+    an unverified stub (verified: false in config/charter_law/{state}.yaml).
+
+    Fires only for expansion states. Legacy verified configs (NM, MS, TN, WI)
+    lack the verified field entirely and are unaffected.
+    """
+    from pipeline.utils.charter_law import is_charter_law_stub
+    if not is_charter_law_stub(state):
+        return brief_json
+    if not isinstance(brief_json.get("needs_verification"), list):
+        brief_json["needs_verification"] = []
+    brief_json["needs_verification"].append({
+        "claim": "Charter law analysis unavailable for this state.",
+        "reason": "Charter law not yet verified for this state — statutory analysis unavailable.",
+        "source_class_attempted": None,
+        "resolution_path": (
+            f"Verify config/charter_law/{state.lower()}.yaml against NACSA state profile "
+            "before relying on charter law analysis for this state."
+        ),
+        "impact_if_wrong": "HIGH",
+    })
+    import logging
+    logging.getLogger(__name__).info(
+        "[%s] Injected charter_law_stub_notice into needs_verification", community_id
     )
     return brief_json
 

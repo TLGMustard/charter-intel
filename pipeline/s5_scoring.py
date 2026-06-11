@@ -37,7 +37,7 @@ from pipeline import (
     StageResult, StageStatus, ValidationResult, timestamp_now
 )
 from pipeline.utils.cache import CacheManager
-from pipeline.utils.charter_law import load_charter_law_barriers
+from pipeline.utils.charter_law import load_charter_law_barriers, is_charter_law_stub
 from pipeline.utils.schema_validator import validate_against_schema
 
 
@@ -458,6 +458,17 @@ def statutory_barrier_check(state: str, community_id: str, verified_bundle: dict
     barrier applies. Never raises; unrecognized barrier types are logged and
     skipped. The caller decides consequences based on `severity`/`applies`.
     """
+    # Unverified stub configs skip all barrier scoring to prevent fabricated
+    # constraints. Returns None (same as "no barriers") so the scorecard schema
+    # is satisfied. The S6 brief notice is injected independently via
+    # _inject_charter_law_stub_notice.
+    if is_charter_law_stub(state):
+        logger.warning(
+            "statutory_barrier_check: %s/%s — charter law config is unverified stub, "
+            "statutory_barrier checks disabled",
+            state, community_id,
+        )
+        return None
     barriers = load_charter_law_barriers(state)
     if not barriers:
         return None
