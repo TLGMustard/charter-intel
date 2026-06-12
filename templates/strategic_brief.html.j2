@@ -671,6 +671,9 @@
 {# ─── 1. VERDICT HEADER ─── #}
 {% set comp = brief.composite_score if brief.composite_score is not none else 0 %}
 {% set comp_tone = 'green' if comp >= 7.0 else ('yellow' if comp >= 4.0 else 'red') %}
+{# FIX 2: Composite score precision based on confidence #}
+{% set confidence_overall = (brief.confidence_overall or '') | upper %}
+{% set comp_display = '%.2f' | format(comp) if confidence_overall == 'HIGH' else '%.1f' | format(comp) %}
 
 <div class="page-shell">
 
@@ -689,7 +692,7 @@
     <div class="sb-score-block">
       <div class="sb-score-label">Composite Score</div>
       <div>
-        <span class="sb-score-num sb-score-{{ comp_tone }}">{{ comp }}</span><span class="sb-score-max">/10</span>
+        <span class="sb-score-num sb-score-{{ comp_tone }}">{{ comp_display }}</span><span class="sb-score-max">/10</span>
       </div>
       <div class="sb-tier">{{ brief.scorecard_summary.tier_display_label | e }}</div>
     </div>
@@ -818,7 +821,7 @@
     {% if not _prohib %}
     <div class="section" id="scorecard">
       <p class="section-label">Scorecard</p>
-      <p class="composite-line">Composite: {{ sc.composite_score }}/10 — {{ sc.tier_display_label | e }}</p>
+      <p class="composite-line">Composite: {{ comp_display }}/10 — {{ sc.tier_display_label | e }}</p>
 
       {% for row in sc.dimension_table if not row.used_default %}
       {% set tone = 'green' if row.score >= 7.0 else ('yellow' if row.score >= 4.0 else 'red') %}

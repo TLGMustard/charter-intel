@@ -1444,3 +1444,23 @@ scoring uncalibrated. See `docs/` for session history and `DEPLOY.md` for deploy
 - [ ] Verify 49 charter law stubs against primary sources; set `verified: true` per state as verification completes
 
 **Tests:** 954 passed.
+
+---
+
+**Session 10 — Confidence Communication Fixes (2026-06-12)**
+
+**Accomplished:**
+- Fixed Academic Need dimension language: replaced "demand for alternative school models" with "documented educational need; parent demand requires separate verification" to prevent conflating educational need with parent demand
+- Implemented conditional composite score precision display: 2 decimals for HIGH confidence, 1 decimal for MODERATE/LOW confidence
+- Added Authorizer Friendliness caveat label and auto-inserted Needs Verification entry when local authorizer data is absent and score > 6.0
+- All fixes applied as render-layer post-processing in `scripts/render_s7.py` and template modifications to `templates/strategic_brief.html.j2`
+
+**Decisions:**
+- Render/template layer exclusively — no changes to pipeline logic, S6 synthesis, or scoring weights
+- Post-processing in `render_s7.py` preserves S6 cache integrity while applying per-render corrections
+- Conditional formatting via Jinja variable ensures consistency across sidebar and scorecard composite score displays
+
+**Next Steps:**
+- None identified — all fixes complete and tested
+
+**Tests:** 954 passed.
