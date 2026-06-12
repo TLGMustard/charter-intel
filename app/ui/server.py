@@ -337,6 +337,44 @@ def _city_name_from_slug(community_id: str) -> str:
     return " ".join(parts[1:]).title() if len(parts) >= 2 else community_id.title()
 
 
+def _resolve_community_id(community_id: str, state: str) -> str:
+    """Re-resolve community_id to the enrollment-preferred registry entry.
+
+    When the registry contains multiple entries sharing the same base slug
+    (e.g. in-new-albany-1800011 and in-new-albany-1807410), the dropdown may
+    surface the alphabetically-first entry even though main.py's
+    _registry_prefix_lookup selects by highest enrollment.  This mirrors that
+    enrollment-based selection so the Flask UI and CLI produce identical IDs.
+
+    Returns community_id unchanged when:
+    - the slug has no 7-digit LEAID suffix (bare slug; main.py resolves it)
+    - the registry is absent or unreadable
+    - no prefix matches are found in the registry
+    """
+    bare = re.sub(r'-\d{7}$', '', community_id)
+    if bare == community_id:
+        return community_id  # no LEAID suffix; defer to main.py's resolver
+
+    m = re.match(r'^([a-z]{2})-', community_id)
+    state_code = m.group(1) if m else state.lower()
+    registry_path = COMMUNITY_REGISTRY_DIR / f"{state_code}.yaml"
+    if not registry_path.exists():
+        return community_id
+    try:
+        with open(registry_path) as f:
+            registry = yaml.safe_load(f) or {}
+    except Exception:
+        return community_id
+
+    prefix = bare + "-"
+    matches = {k: v for k, v in registry.items() if k.startswith(prefix)}
+    if not matches:
+        return community_id
+
+    best = max(matches.items(), key=lambda kv: kv[1].get("enrollment", 0))
+    return best[0]
+
+
 def _write_zip_run(community_id: str, city_name: str, state: str, use_v2: bool) -> None:
     """Persist a minimal run record so the brief sidebar can load zip drill results."""
     run_id = f"zip-{community_id}"
@@ -765,6 +803,13 @@ def scan():
             return jsonify({"error": msg}), 429
 
     state  = (body.get("state") or "NM").strip().upper()
+
+    # Route community_id through registry enrollment ranking, matching
+    # resolve_community/_registry_prefix_lookup in main.py.  Replaces a
+    # LEAID-suffixed slug (e.g. in-new-albany-1800011) with the
+    # highest-enrollment entry for that base slug (e.g. in-new-albany-1807410).
+    community_id = _resolve_community_id(community_id, state)
+
     preset = (body.get("preset") or "growth").strip()
     mode   = (body.get("mode_num") or "2").strip()
     extra_flags = {k: bool(body.get(k)) for k in app_config.BOOLEAN_FLAGS}

@@ -332,6 +332,15 @@ def _registry_prefix_lookup(community_id: str, state: str) -> str:
         return community_id
 
     if community_id in registry:
+        entry = registry[community_id]
+        leaid = str(entry.get("district_nces_id") or "").strip()
+        if leaid and not re.search(r'-\d+$', community_id):
+            full_id = f"{community_id}-{leaid}"
+            logger.info(
+                "resolve_community: %r → %r (LEAID appended from registry)",
+                community_id, full_id,
+            )
+            return full_id
         return community_id
 
     prefix = community_id + "-"

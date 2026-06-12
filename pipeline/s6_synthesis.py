@@ -51,7 +51,7 @@ logger = logging.getLogger(__name__)
 # pollute the synthesis cache and mislead future red-teams.
 # All four active states (NM, MS, TN, WI) use 7-digit LEAIDs.
 
-_VALID_COMMUNITY_ID = re.compile(r'^[a-z]{2}-[a-z0-9]+-\d{7}$')
+_VALID_COMMUNITY_ID = re.compile(r'^[a-z]{2}-[a-z0-9-]+-\d{7}$')
 
 
 def _validate_community_id(community_id: str) -> None:

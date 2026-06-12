@@ -42,10 +42,11 @@ class TestRegistryPrefixLookup:
         assert "ms-oxford-2803450" not in nm_registry
 
     def test_nm_community_id_still_routes_to_nm_registry(self):
-        """nm-santa-fe must still resolve against nm.yaml when state='NM'."""
+        """nm-santa-fe must resolve to its LEAID-suffixed form using nm.yaml."""
         from main import _registry_prefix_lookup
         result = _registry_prefix_lookup("nm-santa-fe", "NM")
-        assert result == "nm-santa-fe"
+        # LEAID appended from district_nces_id in nm.yaml (3502370)
+        assert result == "nm-santa-fe-3502370"
 
     def test_ms_plain_slug_prefix_match_returns_disambiguated_id(self):
         """ms-oxford (no NCES suffix) must expand to the highest-enrollment entry in ms.yaml."""

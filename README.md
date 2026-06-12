@@ -1281,3 +1281,27 @@ scoring uncalibrated. See `docs/` for session history and `DEPLOY.md` for deploy
 - [ ] Refresh MT record after HB 562 litigation resolves
 
 **Tests:** Not run this session (gather-and-store only; no code changed).
+
+---
+
+### Session — 2026-06-12 (0f152be)
+
+**Accomplished:**
+- Fixed Railway Flask UI community ID routing bug: `_resolve_community_id` helper added to `app/ui/server.py`; strips 7-digit LEAID suffix and re-resolves via enrollment-ranked registry lookup, mirroring `_registry_prefix_lookup` in `main.py`
+- Called `_resolve_community_id` in `/api/scan` community branch (after `state` is extracted, before job dict creation) — `in-new-albany-1800011` → `in-new-albany-1807410` at the Flask layer before subprocess launch
+- Patched `main.py` `_registry_prefix_lookup` exact-match branch to append LEAID from registry when bare slug is found (e.g. `nm-santa-fe` → `nm-santa-fe-3502370`)
+- Updated `pipeline/s6_synthesis.py` `_VALID_COMMUNITY_ID` regex from `[a-z0-9]+` to `[a-z0-9-]+` to allow hyphens in multi-word city slugs (e.g. `in-new-albany-1807410`)
+- Verified fix end-to-end: Flask server started locally, wrong-LEAID slug submitted to `/api/scan`, job dict confirmed `community_id: in-new-albany-1807410`
+
+**Decisions:**
+- `resolve_community` in `main.py` intentionally NOT imported in Flask layer — module-level pipeline stage imports (`from pipeline import s1_discovery ...`) make it unsafe; helper is self-contained on `re`, `yaml`, and filesystem I/O
+- Fix scoped to `/api/scan` community branch only; ZIP drill branch left unchanged (uses city name extraction via a different path)
+- Helper returns unchanged when no LEAID suffix detected (bare slugs defer to `main.py`'s `_registry_prefix_lookup`)
+- Canonical test case: IN registry dual-entry (`in-new-albany-1800011` = Community Montessori 506 enrollment, `in-new-albany-1807410` = New Albany-Floyd Co 11,270 enrollment); any future state registry with duplicate-display-name entries will resolve correctly by enrollment
+
+**Next Steps:**
+- [ ] Deploy to Railway and smoke-test New Albany + IN through the production UI to confirm `in-new-albany-1807410` appears in server logs
+- [ ] Existing run records with `target: in-new-albany-1800011` in `app/runs/*/meta.json` will persist with the wrong ID — no backfill needed but worth noting in ops
+- [ ] Operator-profile conversation with The Mind Trust: decide FIX D gate reversal + FIX F penalty calibration
+
+**Tests:** 934 passed.
